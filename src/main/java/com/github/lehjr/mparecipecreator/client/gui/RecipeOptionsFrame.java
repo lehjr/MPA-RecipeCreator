@@ -1,0 +1,187 @@
+package com.github.lehjr.mparecipecreator.client.gui;
+
+import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
+import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
+import com.github.lehjr.mpalib.client.gui.clickable.LabledButton;
+import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
+import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
+import com.github.lehjr.mpalib.client.sound.Musique;
+import com.github.lehjr.mpalib.math.Colour;
+import net.minecraft.client.Minecraft;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.SoundCategory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author lehjr
+ */
+public class RecipeOptionsFrame extends ScrollableFrame {
+    protected List<CheckBox> checkBoxes = new ArrayList<>();
+    protected List<LabledButton> buttons = new ArrayList<>();
+
+    final int spacer = 4;
+    private CheckBox
+            shapeless,
+            mirrored,
+            conditions;
+    private LabledButton save;
+    private LabledButton reset;
+    private ClickableLabel title;
+
+    ConditionsFrame conditionsFrame;
+
+    public RecipeOptionsFrame(
+            Point2D topleft,
+            Point2D bottomright,
+            Colour backgroundColour,
+            Colour borderColour,
+            Colour conditionsBorder,
+            MPARCGui mtrmGuiIn) {
+        super(topleft, bottomright, backgroundColour, borderColour);
+
+        Point2D starterPoint = new Point2D(getULFinal());
+        this.title = new ClickableLabel("Recipe Options", starterPoint);
+        title.setMode(0);
+
+        int id = 0;
+        shapeless = addCheckBox(new CheckBox(id++, starterPoint, "Shapeless", false));//ID_SHAPELESS
+        mirrored = addCheckBox(new CheckBox(id++, starterPoint, "Mirrored", true));//ID_MIRRORED
+        conditions = addCheckBox(new CheckBox(id++, starterPoint, "Conditions", false));//ID_CONDITIONS // fixme... not tied to anything yet
+
+        shapeless.setOnPressed(press->{
+            mirrored.setEnabled(!(shapeless.isChecked()));
+            if (!mirrored.isEnabled()){
+                mirrored.setChecked(false);
+            }
+        });
+
+        conditions.setOnPressed(press->{
+            if (conditions.isChecked()) {
+                conditionsFrame.loadConditions();
+                conditionsFrame.show();
+                conditionsFrame.enable();
+            } else {
+                conditionsFrame.disable();
+                conditionsFrame.hide();
+            }
+        });
+
+        conditionsFrame = new ConditionsFrame(
+                new Point2D(0,0), new Point2D(0, 0),
+                Colour.DARKBLUE,
+                conditionsBorder
+        );
+        conditionsFrame.disable();
+        conditionsFrame.hide();
+
+        save = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Save"));
+        save.setOnPressed(pressed->{
+            Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
+
+            System.out.println("Save button pressed");
+
+//            messageSend.shapeless = shapeless.isChecked();
+//            messageSend.mirrored = mirrored.isChecked();
+//            MPA_RecipeCreator.getInstance().getSnw().sendToServer(messageSend);
+        });
+
+        reset = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Reset Recipe"));
+        reset.setOnPressed(pressed-> {
+            Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
+            mtrmGuiIn.resetRecipes();
+        });
+    }
+
+    @Override
+    public void init(double left, double top, double right, double bottom) {
+        super.init(left, top, right, bottom);
+
+        double nextLineRC = 0;
+        Point2D genericRecipeCol = new Point2D(left + 4, top + 8);
+        title.setPosition(genericRecipeCol);
+        shapeless.setPosition(genericRecipeCol.plus(0, nextLineRC+=10));
+        mirrored.setPosition(genericRecipeCol.plus(0, nextLineRC+=10));
+        conditions.setPosition(genericRecipeCol.plus(0, nextLineRC+=10));
+
+        conditionsFrame.init(
+                left + 3,
+                conditions.getPosition().getY() + spacer * 2,
+                right - 3,
+                conditions.getPosition().getY() + spacer + 80
+        );
+
+        save.setPosition(genericRecipeCol.plus(save.finalWidth() * 0.5 + spacer + 45, nextLineRC+=162));
+        reset.setPosition(genericRecipeCol.plus(reset.finalWidth() * 0.5 + spacer + 45, nextLineRC+=22));
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        if (isVisible()) {
+            super.render(mouseX, mouseY, partialTicks);
+            title.render(mouseX, mouseY, partialTicks);
+
+            for (CheckBox checkBox : checkBoxes) {
+                checkBox.render(mouseX, mouseY, partialTicks);
+            }
+
+            for (LabledButton button : buttons) {
+                button.render(mouseX, mouseY, partialTicks);
+            }
+
+            conditionsFrame.render(mouseX, mouseY, partialTicks);
+        }
+    }
+
+    @Override
+    public void update(double x, double y) {
+        super.update(x, y);
+
+        if (conditionsFrame.isEnabled() && conditionsFrame.isVisible()) {
+            conditionsFrame.update(x, y);
+        }
+    }
+
+    @Override
+    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+        if (isVisible() && isEnabled()) {
+            super.onMouseDown(mouseX, mouseY, button);
+
+            for (CheckBox checkBox : checkBoxes) {
+                if (checkBox.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+            }
+
+            for (LabledButton lbutton : buttons) {
+                if (lbutton.mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
+            }
+            conditionsFrame.onMouseDown(mouseX, mouseY, button);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+        if (isVisible() && isEnabled()) {
+            super.onMouseUp(mouseX, mouseY, button);
+            if (conditionsFrame.onMouseUp(mouseX, mouseY, button)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    LabledButton addButton(LabledButton button) {
+        this.buttons.add(button);
+        return button;
+    }
+
+    CheckBox addCheckBox(CheckBox checkBox) {
+        checkBoxes.add(checkBox);
+        return checkBox;
+    }
+}

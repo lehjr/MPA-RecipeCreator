@@ -1,0 +1,19 @@
+[
+    {
+        "modid": "mparecipecreator",
+        "name": "MPA Recipe Creator",
+        "description": "A small mod for creating recipes for Modular Power Armor",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "https://github.com/lehjr/MPA-RecipeCreator",
+        "updateUrl": "",
+        "authors": [ "Lehjr" ],
+        "credits": "Code by Lehjr",
+        "screenshots": [ ],
+        "parent": "",
+        "requiredMods": [ "forge", "mpalib", "modularpowerarmor" ],
+        "dependencies": [
+        ],
+        "useDependencyInformation": true
+    }
+]

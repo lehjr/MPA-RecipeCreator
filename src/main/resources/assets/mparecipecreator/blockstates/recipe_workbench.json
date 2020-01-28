@@ -1,0 +1,20 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "textures": {
+      "particle": "mparecipecreator:block/recipe_workbench",
+      "down": "minecraft:blocks/coal_block",
+      "up": "mparecipecreator:block/recipe_workbench",
+      "north": "mparecipecreator:block/recipe_workbench",
+      "east": "mparecipecreator:block/recipe_workbench",
+      "south": "mparecipecreator:block/recipe_workbench",
+      "west": "mparecipecreator:block/recipe_workbench"
+    },
+    "model": "cube_all",
+    "uvlock": true
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}]
+  }
+}
