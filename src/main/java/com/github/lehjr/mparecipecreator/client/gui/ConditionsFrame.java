@@ -39,19 +39,26 @@ public class ConditionsFrame extends ScrollableFrame {
         Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
 
         try {
-            checkBoxList = new HashMap<>();
+            if (checkBoxList.isEmpty()) {
+                IResource iresource = Minecraft.getMinecraft().getResourceManager()
+                        .getResource(new ResourceLocation("modularpowerarmor", "recipes/_factories.json"));
 
-            IResource iresource = Minecraft.getMinecraft().getResourceManager()
-                    .getResource(new ResourceLocation("modularpowerarmor", "recipes/_factories.json"));
+                Reader reader = new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8);
+                JSONObject jsonObject = new JSONObject(IOUtils.toString(reader));
+                JSONObject jobject = jsonObject.getJSONObject("conditions");
 
-            Reader reader = new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8);
-            JSONObject jsonObject = new JSONObject(IOUtils.toString(reader));
-            JSONObject jobject = jsonObject.getJSONObject("conditions");
-
-            for (String key : jobject.keySet()) {
-                CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
-                checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.id()));
-                checkBoxList.put(key, checkbox);
+                for (String key : jobject.keySet()) {
+                    CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
+                    checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.id()));
+                    checkBoxList.put(key, checkbox);
+                }
+                // moves the checkboxes without recreating them so their state is preserved
+            } else {
+                int i =0;
+                for (CheckBox checkBox : checkBoxList.values()) {
+                    checkBox.setPosition(starterPoint.plus(0, i * 10));
+                    i++;
+                }
             }
 
             this.totalsize = checkBoxList.size() * 15;

@@ -109,7 +109,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
                 left + 3,
                 conditions.getPosition().getY() + spacer * 2,
                 right - 3,
-                conditions.getPosition().getY() + spacer + 80
+                conditions.getPosition().getY() + spacer + 60
         );
 
         save.setPosition(genericRecipeCol.plus(save.finalWidth() * 0.5 + spacer + 45, nextLineRC+=162));
