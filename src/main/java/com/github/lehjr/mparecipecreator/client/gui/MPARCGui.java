@@ -130,10 +130,11 @@ public class MPARCGui extends ContainerGui {
     }
 
     public void resetRecipes() {
+        // left side of inventory slots
+        double inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
+
         for (int i = 0; i < 10; i++) {
             this.inventorySlots.getSlot(i).putStack(ItemStack.EMPTY);
-            this.inventorySlots.getSlot(((MTRMContainer) inventorySlots).getReturnSlotId(i)).putStack(ItemStack.EMPTY);
-
             slotOptions[i] = new SlotOptionsFrame(
                     new Point2D(0, 0),
                     new Point2D(0, 0),
@@ -149,20 +150,6 @@ public class MPARCGui extends ContainerGui {
 
             slotOptions[i].extInit(
                     backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer,
-                    backgroundRect.finalLeft() + 139,
-                    backgroundRect.finalTop() + spacer + 236,
-
-                    backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer + 236 + spacer,
-                    backgroundRect.finalRight() - spacer,
-                    backgroundRect.finalBottom() - spacer);
-
-
-            // left side of inventory slots
-            double inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
-
-            backgroundRect.finalLeft() + spacer,
                     backgroundRect.finalTop() + spacer * 2 + 120,
                     inventoryLeft - spacer * 2,
                     backgroundRect.finalTop() + spacer + 188,
@@ -171,7 +158,6 @@ public class MPARCGui extends ContainerGui {
                     backgroundRect.finalTop() + spacer * 2 + 188,
                     backgroundRect.finalRight() - spacer,
                     backgroundRect.finalBottom() - spacer);
-
         }
     }
 

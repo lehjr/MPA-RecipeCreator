@@ -94,6 +94,19 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
     }
 
+
+    /**
+     TODO: move text field up and use a single instance, always visible. Move frame down, make scrollable and use for showing prettified recipe
+     */
+
+
+
+
+
+
+
+
+
     /**
      * Call this instead of the normal frame init since this sets up the stuff in the extra frame on the bottom
      *
@@ -189,10 +202,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
         useOreDict.setVisible(visible);
 
         tokenTxt.setVisible(visible);
-
-        if (!visible) {
-            this.container.getSlot(this.container.getReturnSlotId(slotID)).putStack(ItemStack.EMPTY);
-        }
     }
 
     @Override

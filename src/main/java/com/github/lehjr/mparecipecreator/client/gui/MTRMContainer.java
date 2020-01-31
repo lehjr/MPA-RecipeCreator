@@ -18,8 +18,6 @@ public class MTRMContainer extends Container {
     public IInventory craftResult = new InventoryCraftResult();
     public IInventory returnSlot = new InventoryCraftResult();
 
-    public IInventory[] returnSlots = new InventoryCraftResult[10];
-
     public MTRMContainer(InventoryPlayer playerInventory) {
         playerInventory.player.openContainer = this;
 
@@ -48,10 +46,6 @@ public class MTRMContainer extends Container {
         // return slot ??
         this.addSlotToContainer(new Slot(returnSlot, 0, -109, 143));
 
-        for (int i = 0; i < 10; i++) {
-            returnSlots[i] = new  InventoryCraftResult();
-            this.addSlotToContainer(new Slot(returnSlots[i], 0, -109, 143));
-        }
         this.onCraftMatrixChanged(this.craftMatrix);
     }
 
@@ -66,13 +60,6 @@ public class MTRMContainer extends Container {
         return true;
     }
 
-    public int getReturnSlotId(int index) {
-        return RETURN_SLOT_ID + index;
-    }
-
-    boolean isReturnSlot(int i) {
-        return i > RETURN_SLOT_ID - 1 && i < RETURN_SLOT_ID - 9;
-    }
 
     protected void retrySlotClick(int p_75133_1_, int p_75133_2_, boolean p_75133_3_, EntityPlayer player) {
 
@@ -81,7 +68,7 @@ public class MTRMContainer extends Container {
     @Override
     public ItemStack slotClick(int i, int mousebtn, ClickType clickTypeIn, EntityPlayer player) {
         ItemStack stack = ItemStack.EMPTY;
-        if ((i >= 0 && i <= 9) || isReturnSlot(i))// Fake slots
+        if ((i >= 0 && i <= 9))
         {
             if (mousebtn == 2) {
                 getSlot(i).putStack(ItemStack.EMPTY);
@@ -97,7 +84,7 @@ public class MTRMContainer extends Container {
 
                 if (!stackHeld.isEmpty()) {
                     ItemStack newStack = stackHeld.copy();
-                    if (!(i == 0 || (isReturnSlot(i)))) {
+                    if (!(i == 0)) {
                         newStack.setCount(1);
                     }
                     getSlot(i).putStack(newStack);
@@ -114,7 +101,7 @@ public class MTRMContainer extends Container {
 
                 if (!stackHeld.isEmpty()) {
                     stackHeld = stackHeld.copy();
-                    if (!stackSlot.isEmpty() && stackHeld.isItemEqual(stackSlot) && (i == 0 || (isReturnSlot(i)))) {
+                    if (!stackSlot.isEmpty() && stackHeld.isItemEqual(stackSlot) && (i == 0)) {
                         if (stackSlot.getCount() < stackSlot.getMaxStackSize()) stackSlot.grow(1);
                     } else {
                         stackSlot.setCount(1);
@@ -140,7 +127,7 @@ public class MTRMContainer extends Container {
      */
     @Override
     public ItemStack transferStackInSlot(EntityPlayer player, int slots) {
-        if (slots < 10 || (isReturnSlot(slots))) {
+        if (slots < 10) {
             inventorySlots.get(slots).putStack(ItemStack.EMPTY);
         }
         return ItemStack.EMPTY;
