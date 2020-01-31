@@ -26,7 +26,6 @@ public class MPARCGui extends ContainerGui {
     final int spacer = 4;
 
     private ExtInventoryFrame inventoryFrame;
-
     private RecipeOptionsFrame recipeOptions;
 
     // separate frame for each slot
@@ -35,18 +34,6 @@ public class MPARCGui extends ContainerGui {
     protected final Colour gridColour = new Colour(0.1F, 0.3F, 0.4F, 0.7F);
     protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8);
     protected final Colour gridBackGound = new Colour(0.545D, 0.545D, 0.545D, 1);
-
-    /**
-
-     TODO:
-      for slot options, keep "use ore dictionary" and "match any metadata"
-
-
-
-
-     */
-
-
 
     public MPARCGui(MTRMContainer container) {
         super(container);
@@ -90,10 +77,7 @@ public class MPARCGui extends ContainerGui {
                     gridBorderColour,
                     Colour.DARKGREY,
                     Colour.LIGHTGREY,
-                    Colour.BLACK,
-                    gridBackGound,
-                    gridBorderColour,
-                    gridColour);
+                    Colour.BLACK);
             slotOptions[i].hide();
             slotOptions[i].setEnabled(true);
         }
@@ -122,27 +106,26 @@ public class MPARCGui extends ContainerGui {
                 inventoryLeft - spacer,
                 backgroundRect.finalTop() + spacer,
                 backgroundRect.finalRight() - spacer,
-                backgroundRect.finalTop() + spacer + 236);
+                backgroundRect.finalTop() + spacer + 188);
 
         for (SlotOptionsFrame slotOptionsFrame : slotOptions) {
             slotOptionsFrame.extInit(
                     backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer,
-                    backgroundRect.finalLeft() + 139,
-                    backgroundRect.finalTop() + spacer + 236,
+                    backgroundRect.finalTop() + spacer * 2 + 120,
+                    inventoryLeft - spacer * 2,
+                    backgroundRect.finalTop() + spacer + 188,
 
                     backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer + 236 + spacer,
+                    backgroundRect.finalTop() + spacer * 2 + 188,
                     backgroundRect.finalRight() - spacer,
                     backgroundRect.finalBottom() - spacer);
-            slotOptionsFrame.setULShift(getULShift());
         }
 
         recipeOptions.init(
-                backgroundRect.finalLeft() + 139 + spacer,
+                backgroundRect.finalLeft() + spacer,
                 backgroundRect.finalTop() + spacer,
                 inventoryLeft - spacer * 2,
-                backgroundRect.finalTop() + spacer + 236
+                backgroundRect.finalTop() + spacer + 120
         );
     }
 
@@ -160,179 +143,37 @@ public class MPARCGui extends ContainerGui {
                     gridBorderColour,
                     Colour.DARKGREY,
                     Colour.LIGHTGREY,
-                    Colour.BLACK,
-                    gridBackGound,
-                    gridBorderColour,
-                    gridColour);
+                    Colour.BLACK);
             slotOptions[i].hide();
             slotOptions[i].setEnabled(true);
 
             slotOptions[i].extInit(
-                            backgroundRect.finalLeft() + spacer,
-                            backgroundRect.finalTop() + spacer,
-                            backgroundRect.finalLeft() + 139,
-                            backgroundRect.finalTop() + spacer + 236,
+                    backgroundRect.finalLeft() + spacer,
+                    backgroundRect.finalTop() + spacer,
+                    backgroundRect.finalLeft() + 139,
+                    backgroundRect.finalTop() + spacer + 236,
 
-                            backgroundRect.finalLeft() + spacer,
-                            backgroundRect.finalTop() + spacer + 236 + spacer,
-                            backgroundRect.finalRight() - spacer,
-                            backgroundRect.finalBottom() - spacer);
-            slotOptions[i].setULShift(getULShift());
+                    backgroundRect.finalLeft() + spacer,
+                    backgroundRect.finalTop() + spacer + 236 + spacer,
+                    backgroundRect.finalRight() - spacer,
+                    backgroundRect.finalBottom() - spacer);
+
+
+            // left side of inventory slots
+            double inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
+
+            backgroundRect.finalLeft() + spacer,
+                    backgroundRect.finalTop() + spacer * 2 + 120,
+                    inventoryLeft - spacer * 2,
+                    backgroundRect.finalTop() + spacer + 188,
+
+                    backgroundRect.finalLeft() + spacer,
+                    backgroundRect.finalTop() + spacer * 2 + 188,
+                    backgroundRect.finalRight() - spacer,
+                    backgroundRect.finalBottom() - spacer);
+
         }
     }
-
-
-
-
-
-    /**
-     TODO:
-
-     Slot options:
-
-     next oredict/previous oredict
-
-
-     Extended SlotOptions
-
-     slot reset button (clears settings for slot and clear slot)
-
-     validate checkboxes + disable as needed (damage checkboxes should be disabled if stack in slot cannot be damaged)
-     disable sliders and set ranges as needed
-
-     ------------------------
-
-     recipe options:
-     save button (disable if invalid)
-     clear button (clear all slots and slot options)
-
-     -------------------------
-
-
-
-     return items must be handled in the recipe implimentation....
-
-     so shaped/shapeless has to
-
-
-
-     "OreDictionary.WILDCARD_VALUE"
-
-     https://www.minecraftforge.net/forum/topic/60753-1121-crafting-with-water-bottle-return-empty-bottle/
-
-
-     You'll need a custom recipe type that implements IRecipe#getRemainingItems﻿ to return a list of remaining items, using the container item (ForgeHooks.getContainerItem) for every slot except the one with the potion in it, which you'll use an empty bottle for instead.
-
-
-
-     I recommend extending ShapedRecipes or ShapedOreRecipes so you don't have to re-implement everything yourself.
-
-
-     */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-
-
-//    @Override
-//    public void update(double x, double y) {
-//        super.update(x, y);
-//
-//    }
-//
-//    @Override
-//    public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-//        super.mouseClicked(mouseX, mouseY, mouseButton);
-//
-//        for (CheckBox checkbox : sliders.keySet()) {
-//            for (RangedSliderExt slider : sliders.get(checkbox)) {
-//                slider.mouseClicked(mouseX, mouseY, mouseButton);
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public void mouseReleased(int mouseX, int mouseY, int state) {
-//        super.mouseReleased(mouseX, mouseY, state);
-//
-//        for (CheckBox checkbox : sliders.keySet()) {
-//            for (RangedSliderExt slider : sliders.get(checkbox)) {
-//                slider.mouseReleased(mouseX, mouseY);
-//            }
-//        }
-//    }
-
-
-
-
-//    private void addLabels(CheckBox key, GuiCustomLabel... values) {
-//        labels.put(key, values);
-//    }
-
-//    @Override
-//    public void handleMouseClick(Slot slot, int slotNumber, int mouseBtn, ClickType modifier) {
-//        super.handleMouseClick(slot, slotNumber, mouseBtn, modifier);
-//        if (slot != null && slotNumber >= 0 && slotNumber <= 9) {
-//            showOptionsFor(slotNumber);
-//            messageSend.data[slotNumber] = getStackToken(false, slot.getStack());
-//            showOptionsFor(slotNumber);
-//        }
-//
-//
-//        if (slotNumber == RETURN_SLOT_ID && editing != -1) {
-//            tokenTxt.setText(getStackToken(true, inventorySlots.getSlot(editing).getStack()));
-//        }
-//    }
-
-//    @Override
-//    protected void actionPerformed(GuiButton btn) {
-////        System.out.println("button ID: " + btn.id);
-//
-//
-//        switch (btn.id) {
-//            // button for slot
-//            default:
-//                if (btn.id >= 0 && btn.id <= 10) {
-//                    showOptionsFor(btn.id);
-//                }
-//        }
-//    }
-
-
-
-//    private void saveOptions() {
-//        messageSend.data[editing] = tokenTxt.getText();
-//        if (messageSend.data[editing].equalsIgnoreCase("empty")) {
-//            messageSend.data[editing] = null;
-//        }
-//        editing = -1;
-//        setOptionsVisible(false);
-//    }
-
 
     /**
      * Toggles the weird collection of checkboxes and buttons.
@@ -436,28 +277,6 @@ public class MPARCGui extends ContainerGui {
 //
 //        setOptionsVisible(true);
     }
-
-
-
-//    protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_) {
-//
-//        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-////        this.mc.getTextureManager().bindTexture(craftingTableGuiTextures);
-//        int k = (int) backgroundRect.centerx();//(this.width - this.xSize) / 2;
-//        int l = (int) backgroundRect.centery();//(this.height - this.ySize) / 2;
-////        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
-//        for (GuiCustomLabel[] labela : labels.values()) {
-//            for (GuiCustomLabel label : labela) {
-//                if (label.draw) {
-//                    label.draw(false);
-//                }
-//            }
-//        }
-//
-//        tokenTxt.drawTextBox();
-//    }
-
-
 
     @Override
     public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
@@ -601,8 +420,11 @@ public class MPARCGui extends ContainerGui {
     }
 
     public void rescale() {
-        this.xSize = 560;
-        this.ySize = 350;
+//        this.xSize = 560;
+
+        this.xSize = 400;
+
+        this.ySize = 330;
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
     }
