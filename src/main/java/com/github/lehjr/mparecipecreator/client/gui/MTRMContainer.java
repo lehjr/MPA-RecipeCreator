@@ -4,49 +4,51 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * @author Dries007
  */
 public class MTRMContainer extends Container {
-    private static final int RETURN_SLOT_ID = 1 + (3 * 3) + (3 * 9) + 9;
-
     /**
      * The crafting matrix inventory (3x3).
      */
     public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
-    public IInventory craftResult = new InventoryCraftResult();
-    public IInventory returnSlot = new InventoryCraftResult();
+    public InventoryCraftResult craftResult = new InventoryCraftResult();
+    private final World world;
+    /** Position of the workbench */
+    private final BlockPos pos;
+    private final EntityPlayer player;
+
 
     public MTRMContainer(InventoryPlayer playerInventory) {
         playerInventory.player.openContainer = this;
+        this.player = playerInventory.player;
+        this.world = player.world;
+        this.pos = player.getPosition();
 
         // crafting result
-        this.addSlotToContainer(new Slot(this.craftResult, 0, 138, 48));
+        this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35));
 
         // crafting grid
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 3; ++col) {
-                this.addSlotToContainer(new Slot(this.craftMatrix, col + row * 3, 22 + col * 26, 21 + row * 26));
+                this.addSlotToContainer(new Slot(this.craftMatrix, col + row * 3, 30 + col * 18, 17 + row * 18));
             }
         }
 
-        // main inventory
+        // player inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                this.addSlotToContainer(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 99 + row * 18));
+                this.addSlotToContainer(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
-        // hotbar
-        for (int x = 0; x < 9; ++x) {
-            this.addSlotToContainer(new Slot(playerInventory, x, 8 + x * 18, 157));
+        // player hotbar
+        for (int col = 0; col < 9; ++col) {
+            this.addSlotToContainer(new Slot(playerInventory, col, 8 + col * 18, 142));
         }
-
-        // return slot ??
-        this.addSlotToContainer(new Slot(returnSlot, 0, -109, 143));
-
-        this.onCraftMatrixChanged(this.craftMatrix);
     }
 
     /**
@@ -68,8 +70,7 @@ public class MTRMContainer extends Container {
     @Override
     public ItemStack slotClick(int i, int mousebtn, ClickType clickTypeIn, EntityPlayer player) {
         ItemStack stack = ItemStack.EMPTY;
-        if ((i >= 0 && i <= 9))
-        {
+        if ((i >= 0 && i <= 9)) {
             if (mousebtn == 2) {
                 getSlot(i).putStack(ItemStack.EMPTY);
             } else if (mousebtn == 0) {

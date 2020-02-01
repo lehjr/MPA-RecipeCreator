@@ -101,6 +101,11 @@ public class SlotOptionsFrame extends ScrollableFrame {
         for (int id = 0; id < 10; id ++) {
             useOreDict[id].setVisible(id==slot);
         }
+        setLabel();
+    }
+
+    void setLabel() {
+        this.title .setLabel("Slot " + (activeSlotID >=0 && activeSlotID <=10 ? activeSlotID + " " : "") + "Options");
     }
 
     public void reset() {
@@ -113,6 +118,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
             useOreDict[id].setChecked(false);
         }
         activeSlotID = -1;
+        setLabel();
     }
 
     /**
@@ -124,14 +130,8 @@ public class SlotOptionsFrame extends ScrollableFrame {
      */
     public String getStackToken(boolean nextOreDict, boolean prevOreDict, ItemStack stack) {
         if (stack.isEmpty()) {
-            System.out.println("returning empty");
-
             return "empty";
         }
-
-        System.out.println("made it here");
-
-
         if (stack.getItem().getRegistryName() == null) {
             throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
         }

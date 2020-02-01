@@ -163,13 +163,7 @@ public class MPARCGui extends ContainerGui {
      * @param id
      */
     public void showOptionsFor(int id) {
-//            slotOptions[i].setVisible(i==id);
-//            slotOptions[i].setOptionsVisible(i==id);
-
-
-        System.out.println("FIXME!!! not yet implemented");
-
-    slotOptions.selectSlot(id);
+        slotOptions.selectSlot(id);
 
 
 

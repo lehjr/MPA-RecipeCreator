@@ -1,8 +1,6 @@
 package com.github.lehjr.mparecipecreator.basemod;
 
 import com.github.lehjr.mparecipecreator.block.RecipeWorkbench;
-import com.github.lehjr.mparecipecreator.network.MessageResponse;
-import com.github.lehjr.mparecipecreator.network.MessageSend;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -40,21 +38,9 @@ public enum MPA_RecipeCreator {
         return INSTANCE;
     }
 
-    private SimpleNetworkWrapper snw;
-    public static SimpleNetworkWrapper getSnw() {
-        return getInstance().snw;
-    }
-
-
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         NetworkRegistry.INSTANCE.registerGuiHandler(INSTANCE, new GuiIhandler());
-
-        int id = 0;
-        snw = NetworkRegistry.INSTANCE.newSimpleChannel(Constants.MODID);
-        snw.registerMessage(MessageSend.Handler.class, MessageSend.class, id++, Side.SERVER);
-        snw.registerMessage(MessageResponse.Handler.class, MessageResponse.class, id++, Side.CLIENT);
-
         MinecraftForge.EVENT_BUS.register(new RegisterModel());
     }
 
