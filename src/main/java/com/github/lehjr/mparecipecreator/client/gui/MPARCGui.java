@@ -6,6 +6,8 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -27,9 +29,13 @@ public class MPARCGui extends ContainerGui {
 
     private ExtInventoryFrame inventoryFrame;
     private RecipeOptionsFrame recipeOptions;
+    private RecipeDisplayFrame recipeDisplayFrame;
+
+    // text box
+    public GuiTextField tokenTxt;
 
     // separate frame for each slot
-    private SlotOptionsFrame[] slotOptions = new SlotOptionsFrame[10];
+    private SlotOptionsFrame slotOptions;
 
     protected final Colour gridColour = new Colour(0.1F, 0.3F, 0.4F, 0.7F);
     protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8);
@@ -67,20 +73,31 @@ public class MPARCGui extends ContainerGui {
         );
         frames.add(recipeOptions);
 
-        for (int i = 0; i < 10; i++) {
-            slotOptions[i] = new SlotOptionsFrame(
-                    new Point2D(0,0),
-                    new Point2D(0, 0),
-                    i,
-                    (MTRMContainer) inventorySlots,
-                    Colour.DARKBLUE,
-                    gridBorderColour,
-                    Colour.DARKGREY,
-                    Colour.LIGHTGREY,
-                    Colour.BLACK);
-            slotOptions[i].hide();
-            slotOptions[i].setEnabled(true);
-        }
+        slotOptions = new SlotOptionsFrame(
+                new Point2D(0,0),
+                new Point2D(0, 0),
+                tokenTxt,
+                (MTRMContainer) inventorySlots,
+                Colour.DARKBLUE,
+                gridBorderColour,
+                Colour.DARKGREY,
+                Colour.LIGHTGREY,
+                Colour.BLACK);
+
+        frames.add(slotOptions);
+
+        // display for stack string in slot
+        tokenTxt = new GuiTextField(0, Minecraft.getMinecraft().fontRenderer,
+                0,
+                0, 0, 20);
+        tokenTxt.setMaxStringLength(Integer.MAX_VALUE);
+
+        recipeDisplayFrame = new RecipeDisplayFrame(
+                new Point2D(0,0),
+                new Point2D(0, 0),
+                Colour.DARKBLUE,
+                gridBorderColour);
+        frames.add(recipeDisplayFrame);
     }
 
     Point2D getULShift() {
@@ -108,57 +125,36 @@ public class MPARCGui extends ContainerGui {
                 backgroundRect.finalRight() - spacer,
                 backgroundRect.finalTop() + spacer + 188);
 
-        for (SlotOptionsFrame slotOptionsFrame : slotOptions) {
-            slotOptionsFrame.extInit(
-                    backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer * 2 + 120,
-                    inventoryLeft - spacer * 2,
-                    backgroundRect.finalTop() + spacer + 188,
-
-                    backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer * 2 + 188,
-                    backgroundRect.finalRight() - spacer,
-                    backgroundRect.finalBottom() - spacer);
-        }
-
         recipeOptions.init(
                 backgroundRect.finalLeft() + spacer,
                 backgroundRect.finalTop() + spacer,
                 inventoryLeft - spacer * 2,
                 backgroundRect.finalTop() + spacer + 120
         );
+
+        slotOptions.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer * 2 + 120,
+                inventoryLeft - spacer * 2,
+                backgroundRect.finalTop() + spacer + 188);
+
+        tokenTxt.x = (int) (backgroundRect.finalLeft() + spacer);
+        tokenTxt.y = (int) (backgroundRect.finalTop() + spacer * 2 + 188);
+        tokenTxt.width = (int) (backgroundRect.finalRight() - backgroundRect.finalLeft() - spacer * 2);
+        tokenTxt.setVisible(true);
+
+        recipeDisplayFrame.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer * 2 + 212,
+                backgroundRect.finalRight() - spacer,
+                backgroundRect.finalBottom() - spacer);
     }
 
     public void resetRecipes() {
         // left side of inventory slots
         double inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
 
-        for (int i = 0; i < 10; i++) {
-            this.inventorySlots.getSlot(i).putStack(ItemStack.EMPTY);
-            slotOptions[i] = new SlotOptionsFrame(
-                    new Point2D(0, 0),
-                    new Point2D(0, 0),
-                    i,
-                    (MTRMContainer) inventorySlots,
-                    Colour.DARKBLUE,
-                    gridBorderColour,
-                    Colour.DARKGREY,
-                    Colour.LIGHTGREY,
-                    Colour.BLACK);
-            slotOptions[i].hide();
-            slotOptions[i].setEnabled(true);
-
-            slotOptions[i].extInit(
-                    backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer * 2 + 120,
-                    inventoryLeft - spacer * 2,
-                    backgroundRect.finalTop() + spacer + 188,
-
-                    backgroundRect.finalLeft() + spacer,
-                    backgroundRect.finalTop() + spacer * 2 + 188,
-                    backgroundRect.finalRight() - spacer,
-                    backgroundRect.finalBottom() - spacer);
-        }
+        slotOptions.reset();
     }
 
     /**
@@ -168,10 +164,9 @@ public class MPARCGui extends ContainerGui {
      * @param id
      */
     public void showOptionsFor(int id) {
-        for (int i = 0; i < 10; i++) {
-            slotOptions[i].setVisible(i==id);
-            slotOptions[i].setOptionsVisible(i==id);
-        }
+//            slotOptions[i].setVisible(i==id);
+//            slotOptions[i].setOptionsVisible(i==id);
+
 
         System.out.println("FIXME!!! not yet implemented");
 
@@ -277,12 +272,6 @@ public class MPARCGui extends ContainerGui {
                 return;
             }
         }
-
-        for (SlotOptionsFrame frame : slotOptions) {
-            if (frame.onMouseDown(x, y, mouseButton)) {
-                return;
-            }
-        }
     }
 
     /**
@@ -299,12 +288,6 @@ public class MPARCGui extends ContainerGui {
         double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
 
         for (IGuiFrame frame : frames) {
-            if (frame.onMouseUp(x, y, state)) {
-                return;
-            }
-        }
-
-        for (SlotOptionsFrame frame : slotOptions) {
             if (frame.onMouseUp(x, y, state)) {
                 return;
             }
@@ -326,6 +309,8 @@ public class MPARCGui extends ContainerGui {
         //-----------------
         super.drawScreen(mouseX, mouseY, partialTicks);
 
+        tokenTxt.drawTextBox();
+
         // Title
         Renderer.drawCenteredString("MPA-RecipeCreator", backgroundRect.centerx(), backgroundRect.finalTop() - 20);
 
@@ -343,11 +328,6 @@ public class MPARCGui extends ContainerGui {
         for (IGuiFrame frame : frames) {
             frame.update(x, y);
         }
-
-        // Slot options frames aren't added to the frames list so they can be more easily replaced
-        for (SlotOptionsFrame frame : slotOptions) {
-            frame.update(x, y);
-        }
     }
 
     /**
@@ -358,10 +338,6 @@ public class MPARCGui extends ContainerGui {
      */
     public void renderFrames(int mouseX, int mouseY, float partialTicks) {
         for (IGuiFrame frame : frames) {
-            frame.render(mouseX, mouseY, partialTicks);
-        }
-
-        for (SlotOptionsFrame frame : slotOptions) {
             frame.render(mouseX, mouseY, partialTicks);
         }
     }
@@ -406,10 +382,7 @@ public class MPARCGui extends ContainerGui {
     }
 
     public void rescale() {
-//        this.xSize = 560;
-
         this.xSize = 400;
-
         this.ySize = 330;
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
