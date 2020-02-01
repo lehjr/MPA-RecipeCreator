@@ -6,6 +6,7 @@ import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -97,8 +98,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
     public void selectSlot(int slot) {
         this.activeSlotID = slot;
         this.tokenTxt.setText(getStackToken(false, false, container.getSlot(slot).getStack()));
-        this.title.setLabel("Slot " + slot + " Options");
-
+        for (int id = 0; id < 10; id ++) {
+            useOreDict[id].setVisible(id==slot);
+        }
     }
 
     public void reset() {
@@ -122,8 +124,14 @@ public class SlotOptionsFrame extends ScrollableFrame {
      */
     public String getStackToken(boolean nextOreDict, boolean prevOreDict, ItemStack stack) {
         if (stack.isEmpty()) {
+            System.out.println("returning empty");
+
             return "empty";
         }
+
+        System.out.println("made it here");
+
+
         if (stack.getItem().getRegistryName() == null) {
             throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
         }

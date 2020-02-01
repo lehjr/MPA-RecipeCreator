@@ -8,7 +8,6 @@ import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.item.ItemStack;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -73,6 +72,12 @@ public class MPARCGui extends ContainerGui {
         );
         frames.add(recipeOptions);
 
+        // display for stack string in slot
+        tokenTxt = new GuiTextField(0, Minecraft.getMinecraft().fontRenderer,
+                0,
+                0, 0, 20);
+        tokenTxt.setMaxStringLength(Integer.MAX_VALUE);
+
         slotOptions = new SlotOptionsFrame(
                 new Point2D(0,0),
                 new Point2D(0, 0),
@@ -85,12 +90,6 @@ public class MPARCGui extends ContainerGui {
                 Colour.BLACK);
 
         frames.add(slotOptions);
-
-        // display for stack string in slot
-        tokenTxt = new GuiTextField(0, Minecraft.getMinecraft().fontRenderer,
-                0,
-                0, 0, 20);
-        tokenTxt.setMaxStringLength(Integer.MAX_VALUE);
 
         recipeDisplayFrame = new RecipeDisplayFrame(
                 new Point2D(0,0),
@@ -169,6 +168,9 @@ public class MPARCGui extends ContainerGui {
 
 
         System.out.println("FIXME!!! not yet implemented");
+
+    slotOptions.selectSlot(id);
+
 
 
 
