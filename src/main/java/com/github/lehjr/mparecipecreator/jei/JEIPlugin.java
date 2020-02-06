@@ -8,7 +8,6 @@ import mezz.jei.api.recipe.VanillaRecipeCategoryUid;
 import mezz.jei.gui.overlay.GuiProperties;
 import net.minecraft.client.gui.inventory.GuiContainer;
 
-
 @mezz.jei.api.JEIPlugin
 public class JEIPlugin implements IModPlugin {
 	@Override

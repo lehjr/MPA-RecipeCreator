@@ -131,6 +131,10 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
                 Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
                 mtrmGui.showOptionsFor(index);
             });
+            this.button.setOnReleased(onReleased-> {
+                mtrmGui.showOptionsFor(index);
+            });
+
             this.tile = new DrawableTile(getTileUL(), getTileUL().plus(gridWidth, gridHeight), backgroundColour, gridColour);
         }
 
@@ -192,7 +196,18 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
 
     @Override
     public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        return this.border.containsPoint(mouseX, mouseY);
+        if (this.border.containsPoint(mouseX, mouseY)) {
+            for (BoxHolder holder : boxes) {
+                if (holder instanceof DrawableBoxHolder) {
+                    if(((DrawableBoxHolder) holder).button.hitBox(mouseX, mouseY)) {
+                        ((DrawableBoxHolder) holder).button.onReleased();
+                        return true;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     public Point2D getUlShift() {

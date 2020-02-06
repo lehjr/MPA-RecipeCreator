@@ -6,8 +6,11 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
+import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -156,6 +159,30 @@ public class MPARCGui extends ContainerGui {
         slotOptions.reset();
     }
 
+    public JSONObject getRecipeJson() {
+        JSONObject recipeJson = new JSONObject();
+
+
+
+
+        recipeJson.put("result", slotOptions.getStackJson(0));
+
+        System.out.println("json: " + recipeJson.toString());
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonOutput = gson.toJson(recipeJson.toString());
+
+        System.out.println("jsonOutput: " + jsonOutput);
+
+
+
+
+        return recipeJson;
+    }
+
+
+
+
     /**
      * Toggles the weird collection of checkboxes and buttons.
      *
@@ -166,7 +193,7 @@ public class MPARCGui extends ContainerGui {
         slotOptions.selectSlot(id);
 
 
-
+        slotOptions.getStackJson(id);
 
 //        if (editing != id) {
 //            lastOreId = 0;

@@ -6,9 +6,9 @@ import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
+import org.json.JSONObject;
 
 /**
  * @author lehjr
@@ -19,7 +19,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
     int activeSlotID;
     MTRMContainer container;
 
-    private int lastOreId = 0;
+    private int oreIndex[] = new int[10];
     final int spacer = 4;
 
     private ClickableArrow prevOreDictArrow, nextOreDictArrow;
@@ -51,17 +51,24 @@ public class SlotOptionsFrame extends ScrollableFrame {
         nextOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         nextOreDictArrow.setDrawShaft(false);
         nextOreDictArrow.setOnPressed(pressed-> {
-            this.tokenTxt.setText(getStackToken(true, false, container.getSlot(activeSlotID).getStack()));
+            this.tokenTxt.setText(getStackToken(true, false, activeSlotID));
         });
 
         prevOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         prevOreDictArrow.setDrawShaft(false);
         prevOreDictArrow.setDirection(DrawableArrow.ArrowDirection.LEFT);
         prevOreDictArrow.setOnPressed(pressed-> {
-            this.tokenTxt.setText(getStackToken(false, true, container.getSlot(activeSlotID).getStack()));
+            this.tokenTxt.setText(getStackToken(false, true, activeSlotID));
         });
 
         activeSlotID = -1;
+        for (int id = 0; id < 10; id ++) {
+            useOreDict[id] = new CheckBox(id, new Point2D(0, 0), "Use ore dictionary", true); //ID_OPTION_OREDICT
+            useOreDict[id].setOnPressed(pressed -> {
+                this.tokenTxt.setText(getStackToken(false, false, activeSlotID));
+            });
+        }
+
         reset();
     }
 
@@ -95,81 +102,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
         }
     }
 
-    public void selectSlot(int slot) {
-        this.activeSlotID = slot;
-        this.tokenTxt.setText(getStackToken(false, false, container.getSlot(slot).getStack()));
-        for (int id = 0; id < 10; id ++) {
-            useOreDict[id].setVisible(id==slot);
-        }
-        setLabel();
-    }
-
-    void setLabel() {
-        this.title .setLabel("Slot " + (activeSlotID >=0 && activeSlotID <=10 ? activeSlotID + " " : "") + "Options");
-    }
-
-    public void reset() {
-        for (int id = 0; id < 10; id ++) {
-            useOreDict[id] = new CheckBox(id, new Point2D(0,0), "Use ore dictionary", true); //ID_OPTION_OREDICT
-            useOreDict[id].setOnPressed(pressed->{
-                this.tokenTxt.setText(getStackToken(false, false, container.getSlot(activeSlotID).getStack()));
-            });
-            useOreDict[id].setVisible(false);
-            useOreDict[id].setChecked(false);
-        }
-        activeSlotID = -1;
-        setLabel();
-    }
-
-    /**
-     * This entire section just gets the formatted string for display/use in the MineTweaker recipe.
-     *
-     * @param nextOreDict
-     * @param stack
-     * @return
-     */
-    public String getStackToken(boolean nextOreDict, boolean prevOreDict, ItemStack stack) {
-        if (stack.isEmpty()) {
-            return "empty";
-        }
-        if (stack.getItem().getRegistryName() == null) {
-            throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
-        }
-        boolean oreDict = activeSlotID > -1 && activeSlotID < 11 && this.useOreDict[activeSlotID].isChecked();
-        String stackName = stack.getItem().getRegistryName().toString();
-        StringBuilder builder = new StringBuilder("<");
-        if (oreDict) {
-            int[] ids = OreDictionary.getOreIDs(stack);
-            if (ids.length != 0) {
-                stackName = "ore:" + OreDictionary.getOreName(ids[lastOreId]);
-                if (nextOreDict) {
-                    lastOreId++;
-                } else if (prevOreDict) {
-                    lastOreId--;
-                }
-
-                if (lastOreId >= ids.length || lastOreId < 0) {
-                    lastOreId = 0;
-                }
-
-                nextOreDictArrow.setVisible(lastOreId > -1 && lastOreId + 1 < ids.length);
-                prevOreDictArrow.setVisible(lastOreId > 0);
-
-            } else {
-                nextOreDictArrow.setVisible(false);
-                prevOreDictArrow.setVisible(false);
-            }
-        }
-        builder.append(stackName);
-        builder.append('>');
-
-        if (stack.getCount() > 1) {
-            builder.append(" * ").append(stack.getCount());
-        }
-
-        return builder.toString();
-    }
-
     @Override
     public boolean onMouseDown(double mouseX, double mouseY, int button) {
         if (isVisible()) {
@@ -192,11 +124,134 @@ public class SlotOptionsFrame extends ScrollableFrame {
         return false;
     }
 
-    @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
-        if (isVisible()) {
-            super.onMouseUp(mouseX, mouseY, button);
+    public void selectSlot(int slot) {
+        this.activeSlotID = slot;
+        this.tokenTxt.setText(getStackToken(false, false, slot));
+        for (int id = 0; id < 10; id ++) {
+            useOreDict[id].setVisible(id==slot);
         }
-        return false;
+        setLabel();
+    }
+
+    void setLabel() {
+        this.title .setLabel("Slot " + (activeSlotID >=0 && activeSlotID <=10 ? activeSlotID + " " : "") + "Options");
+    }
+
+    public void reset() {
+        for (int id = 0; id < 10; id ++) {
+            useOreDict[id].setVisible(false);
+            useOreDict[id].setChecked(false);
+            oreIndex[id] = 0;
+        }
+        activeSlotID = -1;
+        setLabel();
+    }
+
+    ItemStack getStack(int slot) {
+        return container.getSlot(slot).getStack();
+    }
+
+    /**
+     *
+     * @param slot
+     * @return JSon representing the item stack in the given slot
+     */
+    public JSONObject getStackJson(int slot) {
+        JSONObject jsonObject = new JSONObject();
+
+        ItemStack stack = getStack(slot);
+        if (!stack.isEmpty()) {
+            boolean usingOredict = useOreDict[slot].isChecked();
+
+            if (usingOredict) {
+                int[] ids = OreDictionary.getOreIDs(stack);
+                jsonObject.put("type", "forge:ore_dict");
+                jsonObject.put("ore", OreDictionary.getOreName(ids[oreIndex[slot]]));
+            } else {
+                // fail here, but not gracefully I guess
+                if (stack.getItem().getRegistryName() == null) {
+                    throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
+                }
+                jsonObject.put("item", stack.getItem().getRegistryName().toString());
+            }
+
+            // set the stack count
+            if (stack.getCount() > 1) {
+                jsonObject.put("count", stack.getCount());
+            }
+        }
+        return jsonObject;
+    }
+
+    /**
+     * @param nextOreDict
+     * @param prevOreDict
+     * @param slot
+     * @return the string for display in the text bar
+     */
+    public String getStackToken(boolean nextOreDict, boolean prevOreDict, int slot) {
+        System.out.println("slot selected: " + slot);
+
+        if (slot < 0 || slot > 10) {
+            return "No slot selected";
+        }
+
+        ItemStack stack = getStack(slot);
+
+        // return empty slot string
+        if (stack.isEmpty()) {
+            useOreDict[slot].disableAndHide();
+
+            if (slot == activeSlotID) {
+                nextOreDictArrow.disableAndHide();
+                prevOreDictArrow.disableAndHide();
+            }
+            return "empty";
+        }
+
+        // fail here, but not gracefully I guess
+        if (stack.getItem().getRegistryName() == null) {
+            throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
+        }
+
+        if (slot == activeSlotID) {
+            useOreDict[slot].enableAndShow();
+        }
+
+        boolean oreDict = activeSlotID > -1 && activeSlotID < 11 && this.useOreDict[slot].isChecked();
+
+        String stackName = stack.getItem().getRegistryName().toString();
+        StringBuilder builder = new StringBuilder();
+        if (oreDict) {
+            int[] ids = OreDictionary.getOreIDs(stack);
+            if (ids.length != 0) {
+                stackName = "ore:" + OreDictionary.getOreName(ids[oreIndex[slot]]);
+                if (nextOreDict) {
+                    oreIndex[slot]++;
+                } else if (prevOreDict) {
+                    oreIndex[slot]--;
+                }
+
+                if (oreIndex[slot] >= ids.length || oreIndex[slot] < 0) {
+                    oreIndex[slot] = 0;
+                }
+
+                if (activeSlotID == slot) {
+                    nextOreDictArrow.setVisible(oreIndex[slot] > -1 && oreIndex[slot] + 1 < ids.length);
+                    prevOreDictArrow.setVisible(oreIndex[slot] > 0);
+                }
+            } else {
+                nextOreDictArrow.setVisible(false);
+                prevOreDictArrow.setVisible(false);
+            }
+        }
+        builder.append(stackName);
+        builder.append('>');
+
+        if (stack.getCount() > 1) {
+            builder.append(" * ").append(stack.getCount());
+        }
+
+        return builder.toString();
     }
 }

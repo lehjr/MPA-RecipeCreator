@@ -82,6 +82,9 @@ public class RecipeOptionsFrame extends ScrollableFrame {
 
             System.out.println("Save button pressed");
 
+            mtrmGuiIn.getRecipeJson();
+
+
 //            messageSend.shapeless = shapeless.isChecked();
 //            messageSend.mirrored = mirrored.isChecked();
 //            MPA_RecipeCreator.getInstance().getSnw().sendToServer(messageSend);
@@ -109,7 +112,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
                 left + 3,
                 conditions.getPosition().getY() + spacer * 2,
                 right - 3,
-                conditions.getPosition().getY() + spacer + 60
+                bottom - spacer
         );
 
         save.setPosition(new Point2D(right - 15 - spacer - save.finalWidth() * 2, top + save.finalHeight() * 0.5 + spacer));

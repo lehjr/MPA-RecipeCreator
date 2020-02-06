@@ -20,11 +20,6 @@ public class MPARCGuiProperties implements IGuiProperties {
         return guiContainer.width != 0 && guiContainer.height != 0 ? new MPARCGuiProperties(guiContainer.getClass(), guiContainer.getGuiLeft(), guiContainer.getGuiTop(), guiContainer.getXSize(), guiContainer.getYSize(), guiContainer.width, guiContainer.height) : null;
     }
 
-//    public static MPARCGuiProperties create(RecipesGui recipesGui) {
-//        int extraWidth = recipesGui.getRecipeCatalystExtraWidth();
-//        return new MPARCGuiProperties(recipesGui.getClass(), recipesGui.getGuiLeft() - extraWidth, recipesGui.getGuiTop(), recipesGui.getXSize() + extraWidth, recipesGui.getYSize(), recipesGui.width, recipesGui.height);
-//    }
-
     public static boolean areEqual(@Nullable IGuiProperties a, @Nullable IGuiProperties b) {
         if (a == b) {
             return true;
