@@ -7,6 +7,8 @@ import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.JsonUtils;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.OreDictionary;
 import org.json.JSONObject;
 
@@ -172,7 +174,28 @@ public class SlotOptionsFrame extends ScrollableFrame {
                 if (stack.getItem().getRegistryName() == null) {
                     throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
                 }
+
+                if (stack.hasTagCompound()) {
+                    if (!stack.getItem().getRegistryName().toString().equals("forge:bucketfilled")) {
+                        jsonObject.put("type", "minecraft:item_nbt");
+                    }
+
+                    String nbtString = stack.getTagCompound().toString();
+                    System.out.println("nbtString: " + nbtString);
+
+                    jsonObject.put("nbt", new JSONObject(nbtString));
+
+                    // <modularpowerarmor:powerarmor_feet>.withTag({MMModItem: {render: {"mps_boots.boots2": {part: "boots2", model: "mps_boots"}, texSpec: {part: "feet", model: "default_armorskin"}, "mps_boots.boots1": {part: "boots1", model: "mps_boots"}, colours: [-1, -15642881] as int[]}}})
+
+
+
+
+                }
+
                 jsonObject.put("item", stack.getItem().getRegistryName().toString());
+                if (stack.getHasSubtypes()) {
+                    jsonObject.put("data", stack.getItemDamage());
+                }
             }
 
             // set the stack count
@@ -246,7 +269,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
             }
         }
         builder.append(stackName);
-        builder.append('>');
 
         if (stack.getCount() > 1) {
             builder.append(" * ").append(stack.getCount());

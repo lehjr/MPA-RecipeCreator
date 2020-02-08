@@ -1,21 +1,30 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.modularpowerarmor.basemod.Constants;
+import com.github.lehjr.modularpowerarmor.item.component.ItemComponent;
 import com.github.lehjr.mpalib.client.gui.ContainerGui;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.item.ItemStack;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Dries007
@@ -152,9 +161,6 @@ public class MPARCGui extends ContainerGui {
     }
 
     public void resetRecipes() {
-        // left side of inventory slots
-        double inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
-
         slotOptions.reset();
     }
 
@@ -163,6 +169,46 @@ public class MPARCGui extends ContainerGui {
         JSONObject recipeJson = new JSONObject();
         recipeJson.put("result", slotOptions.getStackJson(0));
         JSONArray conditions = recipeOptions.conditionsFrame.getJson();
+
+        ItemStack resultStack = slotOptions.getStack(0);
+
+        if (resultStack.isEmpty()) {
+            recipeDisplayFrame.setFileName("Recipe Invalid");
+        } else {
+            slotOptions.getStack(0);
+            String filename = "";
+
+            if(!conditions.isEmpty()) {
+                for (Object line : conditions) {
+                    if (line instanceof JSONObject && ((JSONObject) line).has("type")) {
+                        String line1 = ((JSONObject) line).getString("type");
+                        line1 = line1.replace("_enabled", "");
+
+                        filename += line1;
+                    } else {
+                        System.out.println( line.getClass());
+                    }
+                }
+            }
+
+            String resultRegName = resultStack.getDisplayName()
+                    .replace(".tile", "")
+                    .replace(".", "_")
+                    .replace(" ", "_")
+                    .toLowerCase();
+
+            // 1.12.2 only
+            if(resultStack.getItem().getRegistryName().getNamespace().toLowerCase().equals(/*MPA Constants */ Constants.MODID.toLowerCase())
+                    && resultStack.getItem() instanceof ItemComponent) {
+                resultRegName = "component_" + resultRegName;
+            }
+
+            if (filename.isEmpty()) {
+                recipeDisplayFrame.setFileName(resultRegName);
+            } else {
+                recipeDisplayFrame.setFileName(filename + "/" + resultRegName);
+            }
+        }
 
         if (!conditions.isEmpty()) {
             recipeJson.put("conditions", conditions);
@@ -303,14 +349,15 @@ public class MPARCGui extends ContainerGui {
             recipeJson.put("keys", keys);
         }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(recipeJson.toString());
         String prettyJsonString = gson.toJson(je);
 
-
         System.out.println("json: " + recipeJson.toString());
         System.out.println("prettyJson: " + prettyJsonString);
+
+        recipeDisplayFrame.setRecipe(prettyJsonString);
 
         System.out.println("lines: " + prettyJsonString.split("\n").length);
 

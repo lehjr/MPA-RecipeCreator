@@ -22,15 +22,20 @@ public class RecipeDisplayFrame extends ScrollableFrame {
         title.setLabel("FileName: " + fileName);
     }
 
-    public void setRecipe() {
+    public void setRecipe(String recipe) {
 
     }
 
     @Override
     public void init(double left, double top, double right, double bottom) {
         super.init(left, top, right, bottom);
-        title.setPosition(new Point2D(left, top).plus(4, 4));
+        title.setPosition(border.getUL().copy().plus(24, 10));
+    }
 
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        super.render(mouseX, mouseY, partialTicks);
+        title.render(mouseX, mouseY, partialTicks);
     }
 
     public void reset() {
