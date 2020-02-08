@@ -129,10 +129,10 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
             this.button.enableAndShow();
             this.button.setOnPressed(onPressed-> {
                 Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
-                mtrmGui.showOptionsFor(index);
+                mtrmGui.selectSlot(index);
             });
             this.button.setOnReleased(onReleased-> {
-                mtrmGui.showOptionsFor(index);
+                mtrmGui.selectSlot(index);
             });
 
             this.tile = new DrawableTile(getTileUL(), getTileUL().plus(gridWidth, gridHeight), backgroundColour, gridColour);

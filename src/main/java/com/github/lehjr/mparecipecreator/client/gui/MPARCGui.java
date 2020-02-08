@@ -6,17 +6,16 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Dries007
@@ -82,7 +81,7 @@ public class MPARCGui extends ContainerGui {
         tokenTxt.setMaxStringLength(Integer.MAX_VALUE);
 
         slotOptions = new SlotOptionsFrame(
-                new Point2D(0,0),
+                new Point2D(0, 0),
                 new Point2D(0, 0),
                 tokenTxt,
                 (MTRMContainer) inventorySlots,
@@ -95,7 +94,7 @@ public class MPARCGui extends ContainerGui {
         frames.add(slotOptions);
 
         recipeDisplayFrame = new RecipeDisplayFrame(
-                new Point2D(0,0),
+                new Point2D(0, 0),
                 new Point2D(0, 0),
                 Colour.DARKBLUE,
                 gridBorderColour);
@@ -160,126 +159,167 @@ public class MPARCGui extends ContainerGui {
     }
 
     public JSONObject getRecipeJson() {
+        String backupChars = "#@$%^&*(){}";
         JSONObject recipeJson = new JSONObject();
-
-
-
-
         recipeJson.put("result", slotOptions.getStackJson(0));
+        JSONArray conditions = recipeOptions.conditionsFrame.getJson();
 
-        System.out.println("json: " + recipeJson.toString());
+        if (!conditions.isEmpty()) {
+            recipeJson.put("conditions", conditions);
+        }
+        // fixme: missing "data" (subtypes not present in 1.14.4), "nbt"
+
+        if (recipeOptions.isShapeless()) {
+            recipeJson.put("type", "mpa_shapeless");
+
+            // fixme: overlapping values and oredict issues from having individually set oredict settings?
+            List<JSONObject> ingredients = new ArrayList<>();
+
+            for (int i = 1; i < 11; i++) {
+                if (!this.inventorySlots.getSlot(i).getStack().isEmpty()) {
+                    JSONObject ingredient = slotOptions.getStackJson(i);
+
+                    boolean match = false;
+
+                    if (ingredients.isEmpty()) {
+                        ingredients.add(slotOptions.getStackJson(i));
+                    } else {
+                        for (JSONObject jsonObject : ingredients) {
+                            if (jsonObject.has("item") && ingredient.has("item")) {
+                                if (jsonObject.getString("item").equals(ingredient.getString("item"))) {
+                                    match = true;
+                                }
+                            } else if (jsonObject.has("ore") && ingredient.has("ore")) {
+                                if (jsonObject.getString("ore").equals(ingredient.getString("ore"))) {
+                                    match = true;
+                                }
+                            }
+
+                            if (match) {
+                                int index = ingredients.indexOf(jsonObject);
+
+                                int count = 1;
+                                if (jsonObject.has("count")) {
+                                    count = jsonObject.getInt("count");
+                                }
+
+                                if (ingredient.has("count")) {
+                                    count += ingredient.getInt("count");
+                                } else {
+                                    count += 1;
+                                }
+
+                                if (count != 1) {
+                                    jsonObject.put("count", count);
+                                    ingredients.set(index, jsonObject);
+                                }
+                                break;
+                            } else {
+                                ingredients.add(slotOptions.getStackJson(i));
+                            }
+                        }
+                    }
+                }
+            }
+            recipeJson.put("ingredients", ingredients);
+        } else {
+            if (slotOptions.getStackJson(0).has("item")) {
+                recipeJson.put("type", "mpa_shaped");
+            } else {
+                recipeJson.put("type", "mpa_shaped_ore");
+            }
+
+            // only in shaped recipes
+            if (recipeOptions.isMirrored()) {
+                recipeJson.put("mirrored", true);
+            }
+
+            Map<String, JSONObject> keys = new HashMap<>();
+            String[] pattern = {"   ", "   ", "   "};
+
+            char character = " ".charAt(0);
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    int i = row * 3 + col + 1;
+
+                    if (!this.inventorySlots.getSlot(i).getStack().isEmpty()) {
+                        JSONObject ingredient = slotOptions.getStackJson(i);
+                        String ingredientString = "";
+
+                        if (ingredient.has("item")) {
+                            String[] ingredientStringList = ingredient.getString("item").split(":");
+                            ingredientString = ingredientStringList[ingredientStringList.length - 1].toUpperCase();
+                        } else if (ingredient.has("ore")) {
+                            ingredientString = ingredient.getString("ore").toUpperCase();
+                        }
+
+                        boolean keyFound = false;
+                        for (int index = 0; i < ingredientString.length(); index++) {
+                            character = ingredientString.charAt(index);
+                            String key = String.valueOf(character);
+
+                            // add key to map
+                            if (keys.isEmpty() || !keys.containsKey(character)) {
+                                keys.put(key, ingredient);
+                                StringBuilder sb = new StringBuilder(pattern[row]);
+                                sb.setCharAt(col, character);
+                                pattern[row] = sb.toString();
+                                keyFound = true;
+                                break;
+
+                                // check if key is already in map and json is a match, else new key needed
+                            } else if (keys.containsKey(character)) {
+                                JSONObject object = keys.get(key);
+                                if (object.equals(ingredient)) {
+                                    StringBuilder sb = new StringBuilder(pattern[row]);
+                                    sb.setCharAt(col, character);
+                                    pattern[row] = sb.toString();
+                                    keyFound = true;
+                                    break;
+                                    // check next letter
+                                } else {
+                                    continue;
+                                }
+                            }
+                        }
+
+                        // fallback on a set of backup characters
+                        if (!keyFound) {
+                            for (int index = 0; i < backupChars.length(); index++) {
+                                character = backupChars.charAt(index);
+                                String key = String.valueOf(character);
+                                keys.put(key, ingredient);
+                                StringBuilder sb = new StringBuilder(pattern[row]);
+                                sb.setCharAt(col, character);
+                                pattern[row] = sb.toString();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            recipeJson.put("pattern", pattern);
+            recipeJson.put("keys", keys);
+        }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String jsonOutput = gson.toJson(recipeJson.toString());
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(recipeJson.toString());
+        String prettyJsonString = gson.toJson(je);
 
-        System.out.println("jsonOutput: " + jsonOutput);
 
+        System.out.println("json: " + recipeJson.toString());
+        System.out.println("prettyJson: " + prettyJsonString);
 
-
+        System.out.println("lines: " + prettyJsonString.split("\n").length);
 
         return recipeJson;
     }
 
 
-
-
-    /**
-     * Toggles the weird collection of checkboxes and buttons.
-     *
-     *
-     * @param id
-     */
-    public void showOptionsFor(int id) {
+    public void selectSlot(int id) {
         slotOptions.selectSlot(id);
-
-
-        slotOptions.getStackJson(id);
-
-//        if (editing != id) {
-//            lastOreId = 0;
-//        }
-//        editing = id;
-//        String token = messageSend.data[id];
-//        if (token == null) {
-//            tokenTxt.setText("empty");
-//
-//            oreDict.setEnabled(id != 0);
-//            oreDict.setChecked(id != 0);
-//            nextOreDict.setEnabled(id != 0);
-//
-//            for (CheckBox[] group : allGroups) {
-//                for (CheckBox checkBox : group) {
-//                    checkBox.setChecked(false);
-//                    if (sliders.containsKey(checkBox)) {
-//                        for (RangedSliderExt slider : sliders.get(checkBox)) {
-//                            slider.minValue = 0;
-//                            slider.maxValue = 0;
-//                            slider.setValue(0);
-//                        }
-//                    }
-//                    if (labels.containsKey(checkBox)) {
-//                        for (GuiCustomLabel l : labels.get(checkBox)) {
-//                            l.draw = false;
-//                        }
-//                    }
-//                }
-//            }
-//            inventorySlots.getSlot(RETURN_SLOT_ID).putStack(ItemStack.EMPTY);
-//        } else {
-//            tokenTxt.setText(token);
-//
-//            oreDict.setEnabled(id != 0);
-//            oreDict.setChecked(ORE_DICT.matcher(token).find() && id != 0);
-//            nextOreDict.setEnabled(oreDict.isChecked() && id != 0);
-//
-//            for (CheckBox[] group : allGroups) {
-//                for (CheckBox checkBox : group) {
-//                    if (patterns.containsKey(checkBox)) {
-//                        checkBox.setChecked(patterns.get(checkBox).matcher(token).find());
-//                        radioBoxToggle(checkBox, group);
-//                    }
-//                }
-//            }
-//
-//            Matcher m = GIVE_BACK.matcher(token);
-//            if (m.find()) {
-//                int meta = m.group(3) != null ? Integer.parseInt(m.group(3)) : 0;
-//                int size = m.group(4) != null ? Integer.parseInt(m.group(4)) : 1;
-//                Item i = Item.REGISTRY.getObject(new ResourceLocation(m.group(1), m.group(2)));
-//                if (i != null) {
-//                    inventorySlots.getSlot(RETURN_SLOT_ID).putStack(new ItemStack(i, size, meta));
-//                }
-//            }
-//        }
-//
-//        for (CheckBox[] group : allGroups) {
-//            for (CheckBox checkBox : group) {
-//                checkBox.setEnabled(id != 0);
-//                if (!sliders.containsKey(checkBox)) continue;
-//                RangedSliderExt[] sliderA = sliders.get(checkBox);
-//                for (RangedSliderExt slider : sliderA) {
-//                    slider.minValue = 0;
-//                    slider.maxValue = Integer.MAX_VALUE;
-//                    slider.setValue(0);
-//                    if (!oreDict.isChecked()) {
-//                        ItemStack stack = inventorySlots.getSlot(editing).getStack();
-//                        if (!stack.isEmpty()) {
-//                            slider.maxValue = stack.getMaxDamage();
-//                        }
-//                    }
-//                }
-//                if (token != null && patterns.containsKey(checkBox)) {
-//                    Matcher matcher = patterns.get(checkBox).matcher(token);
-//                    if (matcher.find()) {
-//                        for (int i = 0; i < matcher.groupCount() && i < sliderA.length; i++) {
-//                            sliderA[i].setValue(Integer.parseInt(matcher.group(i + 1)));
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        setOptionsVisible(true);
     }
 
     @Override
@@ -344,6 +384,7 @@ public class MPARCGui extends ContainerGui {
 
     /**
      * Update frames
+     *
      * @param x
      * @param y
      */
@@ -355,6 +396,7 @@ public class MPARCGui extends ContainerGui {
 
     /**
      * Render the frames
+     *
      * @param mouseX
      * @param mouseY
      * @param partialTicks

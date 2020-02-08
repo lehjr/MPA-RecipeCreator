@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.opengl.GL11;
 
@@ -80,23 +81,19 @@ public class ConditionsFrame extends ScrollableFrame {
     /**
      * Note that the conditions aren't setup for multiple conditions at this time
      */
-    public JsonObject getJson() {
-        JsonArray array = new JsonArray();
+    public JSONArray getJson() {
+        JSONArray array = new JSONArray();
 
         for (String label : checkBoxList.keySet()) {
             CheckBox box = checkBoxList.get(label);
 
             if (box.isChecked()) {
-                JsonObject condition = new JsonObject();
-                condition.addProperty("type", label);
-                array.add(condition);
+                JSONObject condition = new JSONObject();
+                condition.put("type", label);
+                array.put(condition);
             }
         }
-
-        JsonObject retObject = new JsonObject();
-        retObject.add("conditions", array);
-
-        return retObject;
+        return array;
     }
 
     @Override

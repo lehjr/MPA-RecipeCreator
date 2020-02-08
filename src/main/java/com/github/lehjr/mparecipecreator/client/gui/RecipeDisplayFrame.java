@@ -1,95 +1,44 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class RecipeDisplayFrame extends ScrollableFrame {
-    Map<String, String> recipeKeys;
-    String[] recipeGrid;
-    String output;
-
-    JSONObject jsonObject;
+    String recipe;
+    private ClickableLabel title;;
 
     public RecipeDisplayFrame(Point2D topleft, Point2D bottomright, Colour backgroundColour, Colour borderColour) {
         super(topleft, bottomright, backgroundColour, borderColour);
-
+        this.title = new ClickableLabel("FileName: ", new Point2D(topleft).copy().plus(4, 4));
         reset();
     }
 
+    public void setFileName(String fileName) {
+        title.setLabel("FileName: " + fileName);
+    }
+
+    public void setRecipe() {
+
+    }
+
+    @Override
+    public void init(double left, double top, double right, double bottom) {
+        super.init(left, top, right, bottom);
+        title.setPosition(new Point2D(left, top).plus(4, 4));
+
+    }
+
     public void reset() {
-        recipeKeys = new HashMap<>();
-        recipeGrid =  new String[9];
-        output = "";
-        jsonObject = new JSONObject();
-
-
+//        recipe = "";
+//        filename = "";
     }
 
-    /*
-    required fields:
-
-    conditions:
-        type
-
-    type: "modularpowerarmor:mpa_shaped"
-
-    pattern:
-        [list]
-
-    key:
-        string : value
-        string : value
-
-    result:
-        value
-
-
-
-
-
-
-
-
-
-
-    {
-  "conditions": [
-    {
-      "type": "modularpowerarmor:vanilla_recipes_enabled"
-    }
-  ],
-  "type": "modularpowerarmor:mpa_shaped",
-  "pattern": [
-    " W ",
-    "WI ",
-    " IW"
-  ],
-  "key": {
-    "I": {
-      "type": "forge:ore_dict",
-      "ore": "ingotIron"
-    },
-    "W": {
-      "type": "forge:ore_dict",
-      "ore": "componentWiring"
-    }
-  },
-  "result": {
-    "item": "modularpowerarmor:powerfist",
-    "count: 1
-  }
-}
-
-
-
-     */
-
-
+//                this.totalsize = checkBoxList.size() * 15;
 
 
 

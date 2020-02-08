@@ -80,14 +80,11 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         save.setOnPressed(pressed->{
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
 
+            //TODO: actually save recipe if valid
+
             System.out.println("Save button pressed");
 
             mtrmGuiIn.getRecipeJson();
-
-
-//            messageSend.shapeless = shapeless.isChecked();
-//            messageSend.mirrored = mirrored.isChecked();
-//            MPA_RecipeCreator.getInstance().getSnw().sendToServer(messageSend);
         });
 
         reset = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Reset Recipe"));
@@ -95,6 +92,15 @@ public class RecipeOptionsFrame extends ScrollableFrame {
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
             mtrmGuiIn.resetRecipes();
         });
+    }
+
+    public boolean isShapeless() {
+        return shapeless.isChecked();
+    }
+
+    // fixme: should only be enabled if shaped recipe
+    public boolean isMirrored() {
+        return mirrored.isChecked();
     }
 
     @Override
