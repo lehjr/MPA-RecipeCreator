@@ -9,10 +9,9 @@ import com.github.lehjr.mpalib.client.gui.slot.UniversalSlot;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.client.sound.Musique;
 import com.github.lehjr.mpalib.math.Colour;
-import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.util.text.ITextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,7 +127,7 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
             this.button = new Button(getButtonUL(), getButtonUL().plus(gridWidth + 10, gridHeight + 10), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK);
             this.button.enableAndShow();
             this.button.setOnPressed(onPressed-> {
-                Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
+                Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, 1);
                 mtrmGui.selectSlot(index);
             });
             this.button.setOnReleased(onReleased-> {
@@ -180,7 +179,12 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+    public boolean mouseScrolled(double v, double v1, double v2) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.border.containsPoint(mouseX, mouseY)) {
             for (BoxHolder holder : boxes) {
                 if (holder instanceof DrawableBoxHolder) {
@@ -195,7 +199,7 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (this.border.containsPoint(mouseX, mouseY)) {
             for (BoxHolder holder : boxes) {
                 if (holder instanceof DrawableBoxHolder) {
@@ -253,7 +257,7 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
     }
 
     @Override
-    public List<String> getToolTip(int i, int i1) {
+    public List<ITextComponent> getToolTip(int i, int i1) {
         return null;
     }
 

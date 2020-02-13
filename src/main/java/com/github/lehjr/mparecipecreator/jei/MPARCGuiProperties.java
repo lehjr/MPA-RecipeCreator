@@ -1,13 +1,13 @@
 package com.github.lehjr.mparecipecreator.jei;
 
 import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
-import mezz.jei.api.gui.IGuiProperties;
-import net.minecraft.client.gui.GuiScreen;
+import mezz.jei.api.gui.handlers.IGuiProperties;
+import net.minecraft.client.gui.screen.Screen;
 
 import javax.annotation.Nullable;
 
 public class MPARCGuiProperties implements IGuiProperties {
-    private final Class<? extends GuiScreen> guiClass;
+    private final Class<? extends Screen> guiClass;
     private final int guiLeft;
     private final int guiTop;
     private final int guiXSize;
@@ -24,11 +24,11 @@ public class MPARCGuiProperties implements IGuiProperties {
         if (a == b) {
             return true;
         } else {
-            return a != null && b != null && a.getGuiClass().equals(b.getGuiClass()) && a.getGuiLeft() == b.getGuiLeft() && a.getGuiXSize() == b.getGuiXSize() && a.getScreenWidth() == b.getScreenWidth() && a.getScreenHeight() == b.getScreenHeight();
+            return a != null && b != null && a.getScreenClass().equals(b.getScreenClass()) && a.getGuiLeft() == b.getGuiLeft() && a.getGuiXSize() == b.getGuiXSize() && a.getScreenWidth() == b.getScreenWidth() && a.getScreenHeight() == b.getScreenHeight();
         }
     }
 
-    private MPARCGuiProperties(Class<? extends GuiScreen> guiClass, int guiLeft, int guiTop, int guiXSize, int guiYSize, int screenWidth, int screenHeight) {
+    private MPARCGuiProperties(Class<? extends Screen> guiClass, int guiLeft, int guiTop, int guiXSize, int guiYSize, int screenWidth, int screenHeight) {
         this.guiClass = guiClass;
         this.guiLeft = guiLeft;
         this.guiTop = guiTop;
@@ -38,7 +38,8 @@ public class MPARCGuiProperties implements IGuiProperties {
         this.screenHeight = screenHeight;
     }
 
-    public Class<? extends GuiScreen> getGuiClass() {
+    @Override
+    public Class<? extends Screen> getScreenClass() {
         return this.guiClass;
     }
 

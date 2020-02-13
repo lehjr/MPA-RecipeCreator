@@ -1,11 +1,11 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.modularpowerarmor.client.gui.common.InventoryFrame;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
-import com.github.lehjr.mpalib.client.gui.frame.InventoryFrame;
+import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
-import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
-import net.minecraft.inventory.Container;
+import net.minecraft.inventory.container.Container;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,11 +113,11 @@ public class ExtInventoryFrame extends ScrollableFrame {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.isVisible()) {
-            super.onMouseDown(mouseX, mouseY, button);
+            super.mouseClicked(mouseX, mouseY, button);
             for (IGuiFrame frame : frames) {
-                if (frame.onMouseDown(mouseX, mouseY, button)) {
+                if (frame.mouseClicked(mouseX, mouseY, button)) {
                     return true;
                 }
             }
@@ -126,11 +126,11 @@ public class ExtInventoryFrame extends ScrollableFrame {
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (this.isVisible() && this.isEnabled()) {
-            super.onMouseUp(mouseX, mouseY, button);
+            super.mouseReleased(mouseX, mouseY, button);
             for (IGuiFrame frame : frames) {
-                if (frame.onMouseUp(mouseX, mouseY, button)) {
+                if (frame.mouseReleased(mouseX, mouseY, button)) {
                     return true;
                 }
             }

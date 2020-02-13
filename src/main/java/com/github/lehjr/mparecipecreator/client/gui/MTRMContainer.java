@@ -1,53 +1,59 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.*;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.CraftResultInventory;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.*;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.util.IWorldPosCallable;
 
 /**
  * @author Dries007
  */
 public class MTRMContainer extends Container {
+    //    public class WorkbenchContainer extends RecipeBookContainer<CraftingInventory> {
     /**
      * The crafting matrix inventory (3x3).
      */
-    public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
-    public InventoryCraftResult craftResult = new InventoryCraftResult();
-    private final World world;
+    public CraftingInventory craftMatrix = new CraftingInventory(this, 3, 3);
+    public CraftResultInventory craftResult = new CraftResultInventory();
     /** Position of the workbench */
-    private final BlockPos pos;
-    private final EntityPlayer player;
+    private final PlayerEntity player;
+    private final IWorldPosCallable posCallable;
 
+    public MTRMContainer(int windowID, PlayerInventory playerInventory) {
+        this(windowID, playerInventory, IWorldPosCallable.DUMMY);
+    }
 
-    public MTRMContainer(InventoryPlayer playerInventory) {
-        playerInventory.player.openContainer = this;
+    public MTRMContainer(int windowID, PlayerInventory playerInventory, IWorldPosCallable posCallable) {
+        super(ContainerType.CRAFTING, windowID);
+        this.posCallable = posCallable;
         this.player = playerInventory.player;
-        this.world = player.world;
-        this.pos = player.getPosition();
+
+        playerInventory.player.openContainer = this;
 
         // crafting result
-        this.addSlotToContainer(new SlotCrafting(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35));
+        this.addSlot(new CraftingResultSlot(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35));
 
         // crafting grid
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 3; ++col) {
-                this.addSlotToContainer(new Slot(this.craftMatrix, col + row * 3, 30 + col * 18, 17 + row * 18));
+                this.addSlot(new Slot(this.craftMatrix, col + row * 3, 30 + col * 18, 17 + row * 18));
             }
         }
 
         // player inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                this.addSlotToContainer(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         // player hotbar
         for (int col = 0; col < 9; ++col) {
-            this.addSlotToContainer(new Slot(playerInventory, col, 8 + col * 18, 142));
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
         }
     }
 
@@ -58,23 +64,23 @@ public class MTRMContainer extends Container {
         super.onCraftMatrixChanged(p_75130_1_);
     }
 
-    public boolean canInteractWith(EntityPlayer p_75145_1_) {
+    public boolean canInteractWith(PlayerEntity p_75145_1_) {
         return true;
     }
 
 
-    protected void retrySlotClick(int p_75133_1_, int p_75133_2_, boolean p_75133_3_, EntityPlayer player) {
+    protected void retrySlotClick(int p_75133_1_, int p_75133_2_, boolean p_75133_3_, PlayerEntity player) {
 
     }
 
     @Override
-    public ItemStack slotClick(int i, int mousebtn, ClickType clickTypeIn, EntityPlayer player) {
+    public ItemStack slotClick(int i, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
         ItemStack stack = ItemStack.EMPTY;
         if ((i >= 0 && i <= 9)) {
             if (mousebtn == 2) {
                 getSlot(i).putStack(ItemStack.EMPTY);
             } else if (mousebtn == 0) {
-                InventoryPlayer playerInv = player.inventory;
+                PlayerInventory playerInv = player.inventory;
 //                getSlot(i).onSlotChanged();
                 ItemStack stackSlot = getSlot(i).getStack();
                 ItemStack stackHeld = playerInv.getItemStack();
@@ -93,7 +99,7 @@ public class MTRMContainer extends Container {
                     getSlot(i).putStack(ItemStack.EMPTY);
                 }
             } else if (mousebtn == 1) {
-                InventoryPlayer playerInv = player.inventory;
+                PlayerInventory playerInv = player.inventory;
                 getSlot(i).onSlotChanged();
                 ItemStack stackSlot = getSlot(i).getStack();
                 ItemStack stackHeld = playerInv.getItemStack();
@@ -127,9 +133,9 @@ public class MTRMContainer extends Container {
      * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
      */
     @Override
-    public ItemStack transferStackInSlot(EntityPlayer player, int slots) {
-        if (slots < 10) {
-            inventorySlots.get(slots).putStack(ItemStack.EMPTY);
+    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+        if (index < 10) {
+            inventorySlots.get(index).putStack(ItemStack.EMPTY);
         }
         return ItemStack.EMPTY;
     }

@@ -1,12 +1,9 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
+import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
-import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class RecipeDisplayFrame extends ScrollableFrame {
     String recipe;

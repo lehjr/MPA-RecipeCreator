@@ -1,6 +1,5 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
-import com.github.lehjr.modularpowerarmor.basemod.Constants;
 import com.github.lehjr.modularpowerarmor.item.component.ItemComponent;
 import com.github.lehjr.mpalib.client.gui.ContainerGui;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
@@ -8,19 +7,14 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.github.lehjr.mparecipecreator.basemod.Constants;
+import com.google.gson.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
+import net.minecraft.util.text.ITextComponent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +36,7 @@ public class MPARCGui extends ContainerGui {
     private RecipeDisplayFrame recipeDisplayFrame;
 
     // text box
-    public GuiTextField tokenTxt;
+    public StackTextDisplayFrame tokenTxt;
 
     // separate frame for each slot
     private SlotOptionsFrame slotOptions;
@@ -51,8 +45,8 @@ public class MPARCGui extends ContainerGui {
     protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8);
     protected final Colour gridBackGound = new Colour(0.545D, 0.545D, 0.545D, 1);
 
-    public MPARCGui(MTRMContainer container) {
-        super(container);
+    public MPARCGui(Container container, PlayerInventory playerInventory, ITextComponent title) {
+        super(container, playerInventory, title);
         rescale();
 
         backgroundRect = new DrawableRect(absX(-1), absY(-1), absX(1), absY(1), true,
@@ -84,16 +78,14 @@ public class MPARCGui extends ContainerGui {
         frames.add(recipeOptions);
 
         // display for stack string in slot
-        tokenTxt = new GuiTextField(0, Minecraft.getMinecraft().fontRenderer,
-                0,
-                0, 0, 20);
-        tokenTxt.setMaxStringLength(Integer.MAX_VALUE);
+        tokenTxt = new StackTextDisplayFrame();
+        frames.add(tokenTxt);
 
         slotOptions = new SlotOptionsFrame(
                 new Point2D(0, 0),
                 new Point2D(0, 0),
                 tokenTxt,
-                (MTRMContainer) inventorySlots,
+                (MTRMContainer) container,
                 Colour.DARKBLUE,
                 gridBorderColour,
                 Colour.DARKGREY,
@@ -115,11 +107,11 @@ public class MPARCGui extends ContainerGui {
     }
 
     @Override
-    public void initGui() {
-        super.initGui();
-        Keyboard.enableRepeatEvents(true);
+    public void init() {
+        super.init();
+        Minecraft.getInstance().keyboardListener.enableRepeatEvents(true);
         creationTime = System.currentTimeMillis();
-        this.mc.player.openContainer = this.inventorySlots;
+        this.minecraft.player.openContainer = this.container;
         rescale();
 
         backgroundRect.setTargetDimensions(absX(-1), absY(-1), absX(1), absY(1));
@@ -148,9 +140,12 @@ public class MPARCGui extends ContainerGui {
                 inventoryLeft - spacer * 2,
                 backgroundRect.finalTop() + spacer + 188);
 
-        tokenTxt.x = (int) (backgroundRect.finalLeft() + spacer);
-        tokenTxt.y = (int) (backgroundRect.finalTop() + spacer * 2 + 188);
-        tokenTxt.width = (int) (backgroundRect.finalRight() - backgroundRect.finalLeft() - spacer * 2);
+        tokenTxt.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer * 2 + 188,
+                backgroundRect.finalRight() - spacer,
+                backgroundRect.finalTop() + spacer * 2 + 188 + 20
+        );
         tokenTxt.setVisible(true);
 
         recipeDisplayFrame.init(
@@ -164,11 +159,11 @@ public class MPARCGui extends ContainerGui {
         slotOptions.reset();
     }
 
-    public JSONObject getRecipeJson() {
+    public JsonObject getRecipeJson() {
         String backupChars = "#@$%^&*(){}";
-        JSONObject recipeJson = new JSONObject();
-        recipeJson.put("result", slotOptions.getStackJson(0));
-        JSONArray conditions = recipeOptions.conditionsFrame.getJson();
+        JsonObject recipeJson = new JsonObject();
+        recipeJson.add("result", slotOptions.getStackJson(0));
+        JsonArray conditions = recipeOptions.conditionsFrame.getJson();
 
         ItemStack resultStack = slotOptions.getStack(0);
 
@@ -178,10 +173,10 @@ public class MPARCGui extends ContainerGui {
             slotOptions.getStack(0);
             String filename = "";
 
-            if(!conditions.isEmpty()) {
+            if(conditions.size() != 0) {
                 for (Object line : conditions) {
-                    if (line instanceof JSONObject && ((JSONObject) line).has("type")) {
-                        String line1 = ((JSONObject) line).getString("type");
+                    if (line instanceof JsonObject && ((JsonObject) line).has("type")) {
+                        String line1 = ((JsonObject) line).get("type").getAsString();
                         line1 = line1.replace("_enabled", "");
 
                         filename += line1;
@@ -192,13 +187,14 @@ public class MPARCGui extends ContainerGui {
             }
 
             String resultRegName = resultStack.getDisplayName()
+                    .getFormattedText()
                     .replace(".tile", "")
                     .replace(".", "_")
                     .replace(" ", "_")
                     .toLowerCase();
 
             // 1.12.2 only
-            if(resultStack.getItem().getRegistryName().getNamespace().toLowerCase().equals(/*MPA Constants */ Constants.MODID.toLowerCase())
+            if(resultStack.getItem().getRegistryName().getNamespace().toLowerCase().equals(/*MPA Constants */ Constants.MOD_ID.toLowerCase())
                     && resultStack.getItem() instanceof ItemComponent) {
                 resultRegName = "component_" + resultRegName;
             }
@@ -210,53 +206,54 @@ public class MPARCGui extends ContainerGui {
             }
         }
 
-        if (!conditions.isEmpty()) {
-            recipeJson.put("conditions", conditions);
+        if (conditions.size() > 0) {
+            recipeJson.add("conditions", conditions);
         }
         // fixme: missing "data" (subtypes not present in 1.14.4), "nbt"
 
         if (recipeOptions.isShapeless()) {
-            recipeJson.put("type", "mpa_shapeless");
+            recipeJson.addProperty("type", "mpa_shapeless");
 
             // fixme: overlapping values and oredict issues from having individually set oredict settings?
-            List<JSONObject> ingredients = new ArrayList<>();
 
+            JsonArray ingredients = new JsonArray();
             for (int i = 1; i < 11; i++) {
-                if (!this.inventorySlots.getSlot(i).getStack().isEmpty()) {
-                    JSONObject ingredient = slotOptions.getStackJson(i);
+                if (!this.container.getSlot(i).getStack().isEmpty()) {
+                    JsonObject ingredient = slotOptions.getStackJson(i);
 
                     boolean match = false;
 
-                    if (ingredients.isEmpty()) {
+                    // add first ingredient without checking
+                    if (ingredients.size() == 0) {
                         ingredients.add(slotOptions.getStackJson(i));
+
+                        // check if ingredient is already in the list
                     } else {
-                        for (JSONObject jsonObject : ingredients) {
+                        for(int index = 0; i < ingredients.size(); index++) {
+                            JsonObject jsonObject = ingredients.get(index).getAsJsonObject();
                             if (jsonObject.has("item") && ingredient.has("item")) {
-                                if (jsonObject.getString("item").equals(ingredient.getString("item"))) {
+                                if (jsonObject.getAsJsonObject().get("item").getAsString().equals(ingredient.get("item").getAsString())) {
                                     match = true;
                                 }
-                            } else if (jsonObject.has("ore") && ingredient.has("ore")) {
-                                if (jsonObject.getString("ore").equals(ingredient.getString("ore"))) {
+                            } else if (jsonObject.getAsJsonObject().has("ore") && ingredient.has("ore")) {
+                                if (jsonObject.get("ore").getAsString().equals(ingredient.get("ore").getAsString())) {
                                     match = true;
                                 }
                             }
-
                             if (match) {
-                                int index = ingredients.indexOf(jsonObject);
-
                                 int count = 1;
-                                if (jsonObject.has("count")) {
-                                    count = jsonObject.getInt("count");
+                                if (jsonObject.getAsJsonObject().has("count")) {
+                                    count = jsonObject.getAsJsonObject().get("count").getAsInt();
                                 }
 
                                 if (ingredient.has("count")) {
-                                    count += ingredient.getInt("count");
+                                    count += ingredient.get("count").getAsInt();
                                 } else {
                                     count += 1;
                                 }
 
                                 if (count != 1) {
-                                    jsonObject.put("count", count);
+                                    jsonObject.getAsJsonObject().addProperty("count", count);
                                     ingredients.set(index, jsonObject);
                                 }
                                 break;
@@ -267,20 +264,20 @@ public class MPARCGui extends ContainerGui {
                     }
                 }
             }
-            recipeJson.put("ingredients", ingredients);
+            recipeJson.add("ingredients", ingredients);
         } else {
             if (slotOptions.getStackJson(0).has("item")) {
-                recipeJson.put("type", "mpa_shaped");
+                recipeJson.addProperty("type", "mpa_shaped");
             } else {
-                recipeJson.put("type", "mpa_shaped_ore");
+                recipeJson.addProperty("type", "mpa_shaped_ore");
             }
 
             // only in shaped recipes
             if (recipeOptions.isMirrored()) {
-                recipeJson.put("mirrored", true);
+                recipeJson.addProperty("mirrored", true);
             }
 
-            Map<String, JSONObject> keys = new HashMap<>();
+            Map<String, JsonObject> keys = new HashMap<>();
             String[] pattern = {"   ", "   ", "   "};
 
             char character = " ".charAt(0);
@@ -288,15 +285,15 @@ public class MPARCGui extends ContainerGui {
                 for (int col = 0; col < 3; col++) {
                     int i = row * 3 + col + 1;
 
-                    if (!this.inventorySlots.getSlot(i).getStack().isEmpty()) {
-                        JSONObject ingredient = slotOptions.getStackJson(i);
+                    if (!this.container.getSlot(i).getStack().isEmpty()) {
+                        JsonObject ingredient = slotOptions.getStackJson(i);
                         String ingredientString = "";
 
                         if (ingredient.has("item")) {
-                            String[] ingredientStringList = ingredient.getString("item").split(":");
+                            String[] ingredientStringList = ingredient.get("item").getAsString().split(":");
                             ingredientString = ingredientStringList[ingredientStringList.length - 1].toUpperCase();
                         } else if (ingredient.has("ore")) {
-                            ingredientString = ingredient.getString("ore").toUpperCase();
+                            ingredientString = ingredient.get("ore").getAsString().toUpperCase();
                         }
 
                         boolean keyFound = false;
@@ -315,7 +312,7 @@ public class MPARCGui extends ContainerGui {
 
                                 // check if key is already in map and json is a match, else new key needed
                             } else if (keys.containsKey(character)) {
-                                JSONObject object = keys.get(key);
+                                JsonObject object = keys.get(key);
                                 if (object.equals(ingredient)) {
                                     StringBuilder sb = new StringBuilder(pattern[row]);
                                     sb.setCharAt(col, character);
@@ -345,8 +342,17 @@ public class MPARCGui extends ContainerGui {
                 }
             }
 
-            recipeJson.put("pattern", pattern);
-            recipeJson.put("keys", keys);
+            JsonArray patternArray = new JsonArray();
+            for (String line : pattern) {
+                patternArray.add(line);
+            }
+            recipeJson.add("pattern", patternArray);
+
+            JsonObject keysJson = new JsonObject();
+            for (String key : keys.keySet()) {
+                keysJson.add(key, keys.get(key));
+            }
+            recipeJson.add("keys", keysJson);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -364,24 +370,24 @@ public class MPARCGui extends ContainerGui {
         return recipeJson;
     }
 
-
     public void selectSlot(int id) {
         slotOptions.selectSlot(id);
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        super.mouseClicked(mouseX, mouseY, button);
 
-        // slight precision boost by using doubles here
-        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
-        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
+//        // slight precision boost by using doubles here
+//        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
+//        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
 
         for (IGuiFrame frame : frames) {
-            if (frame.onMouseDown(x, y, mouseButton)) {
-                return;
+            if (frame.mouseClicked(mouseX, mouseY, button)) {
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -390,36 +396,36 @@ public class MPARCGui extends ContainerGui {
      * mouseUp
      */
     @Override
-    public void mouseReleased(int mouseX, int mouseY, int state) {
-        super.mouseReleased(mouseX, mouseY, state);
+    public boolean mouseReleased(double mouseX, double mouseY, int which) {
+        super.mouseReleased(mouseX, mouseY, which);
 
-        // slight precision boost by using doubles here
-        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
-        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
+//        // slight precision boost by using doubles here
+//        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
+//        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
 
         for (IGuiFrame frame : frames) {
-            if (frame.onMouseUp(x, y, state)) {
-                return;
+            if (frame.mouseReleased(mouseX, mouseY, which)) {
+                return true;
             }
         }
+        return false;
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        super.render(mouseX, mouseY, partialTicks);
 
-        // slight precision boost by using doubles here
-        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
-        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
+//        // slight precision boost by using doubles here
+//        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
+//        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
 
-        update(x, y);
+        update(mouseX, mouseY);
         this.drawBackground();
 
         renderFrames(mouseX, mouseY, partialTicks);
 
         //-----------------
-        super.drawScreen(mouseX, mouseY, partialTicks);
-
-        tokenTxt.drawTextBox();
+        super.render(mouseX, mouseY, partialTicks);
 
         // Title
         Renderer.drawCenteredString("MPA-RecipeCreator", backgroundRect.centerx(), backgroundRect.finalTop() - 20);
@@ -453,6 +459,8 @@ public class MPARCGui extends ContainerGui {
             frame.render(mouseX, mouseY, partialTicks);
         }
     }
+
+
 
     @Override
     public void drawBackground() {

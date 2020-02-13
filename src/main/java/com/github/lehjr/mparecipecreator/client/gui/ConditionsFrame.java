@@ -1,17 +1,16 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
+import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
-import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.IResource;
+import net.minecraft.resources.IResource;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.lwjgl.opengl.GL11;
 
 import java.io.InputStreamReader;
@@ -41,16 +40,18 @@ public class ConditionsFrame extends ScrollableFrame {
 
         try {
             if (checkBoxList.isEmpty()) {
-                IResource iresource = Minecraft.getMinecraft().getResourceManager()
+                IResource iresource = Minecraft.getInstance().getResourceManager()
                         .getResource(new ResourceLocation("modularpowerarmor", "recipes/_factories.json"));
 
                 Reader reader = new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8);
-                JSONObject jsonObject = new JSONObject(IOUtils.toString(reader));
-                JSONObject jobject = jsonObject.getJSONObject("conditions");
+                JsonElement root = new JsonParser().parse(reader);
+                JsonObject jsonObject = root.getAsJsonObject();
+                JsonObject jobject = jsonObject.getAsJsonObject("conditions");
 
-                for (String key : jobject.keySet()) {
+                for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                    String key = entry.getKey();
                     CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
-                    checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.id()));
+                    checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
                     checkBoxList.put(key, checkbox);
                 }
                 // moves the checkboxes without recreating them so their state is preserved
@@ -70,7 +71,7 @@ public class ConditionsFrame extends ScrollableFrame {
 
     void toggleCheckboxes(int id) {
         for (CheckBox checkbox : checkBoxList.values()) {
-            if(checkbox.id() == id) {
+            if(checkbox.getId() == id) {
                 continue;
             } else {
                 checkbox.setChecked(false);
@@ -81,16 +82,16 @@ public class ConditionsFrame extends ScrollableFrame {
     /**
      * Note that the conditions aren't setup for multiple conditions at this time
      */
-    public JSONArray getJson() {
-        JSONArray array = new JSONArray();
+    public JsonArray getJson() {
+        JsonArray array = new JsonArray();
 
         for (String label : checkBoxList.keySet()) {
             CheckBox box = checkBoxList.get(label);
 
             if (box.isChecked()) {
-                JSONObject condition = new JSONObject();
-                condition.put("type", label);
-                array.put(condition);
+                JsonObject condition = new JsonObject();
+                condition.addProperty("type", label);
+                array.add(condition);
             }
         }
         return array;
@@ -117,9 +118,9 @@ public class ConditionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.isEnabled() && this.isVisible()) {
-            super.onMouseDown(mouseX, mouseY, button);
+            super.mouseClicked(mouseX, mouseY, button);
 
             for (CheckBox checkBox : checkBoxList.values()) {
                 if (checkBox.mouseClicked(mouseX, mouseY + currentscrollpixels, button)) {

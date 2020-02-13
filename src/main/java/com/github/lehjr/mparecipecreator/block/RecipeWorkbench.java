@@ -1,47 +1,57 @@
 package com.github.lehjr.mparecipecreator.block;
 
-import com.github.lehjr.modularpowerarmor.basemod.ModularPowerArmor;
-import com.github.lehjr.mparecipecreator.basemod.Constants;
-import com.github.lehjr.mparecipecreator.basemod.MPA_RecipeCreator;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+
+import static net.minecraft.block.HorizontalBlock.HORIZONTAL_FACING;
 
 /**
  * @author lehjr
  */
 public class RecipeWorkbench extends Block {
-    public static final String translationKey = new StringBuilder(Constants.MODID).append(".").append("tinkerTable").toString();
-
-    public RecipeWorkbench(ResourceLocation regName) {
-        super(Material.IRON);
-        setRegistryName(regName);
-        setTranslationKey(translationKey);
-        setHardness(1.5F);
-        setResistance(1000.0F);
-        setHarvestLevel("pickaxe", 2);
-        setCreativeTab(MPA_RecipeCreator.getInstance().creativeTab);
-        setSoundType(SoundType.METAL);
-        setLightOpacity(0);
-        setLightLevel(0.4f);
-        setTickRandomly(false);
+    public RecipeWorkbench(String regName) {
+        this(new ResourceLocation(regName));
     }
 
-    @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (playerIn.isSneaking()) {
-            return false;
-        }
-        if (!worldIn.isRemote) {
-            playerIn.openGui(MPA_RecipeCreator.getInstance(), 0, worldIn, pos.getX(), pos.getY(), pos.getZ());
-        }
+    public RecipeWorkbench(ResourceLocation regName) {
+        super(Block.Properties.create(Material.WOOD)
+                .hardnessAndResistance(1.5F, 1000.0F)
+                .sound(SoundType.METAL)
+                .variableOpacity()
+                .lightValue(1));
+        setRegistryName(regName);
+        setDefaultState(this.stateContainer.getBaseState().with(HORIZONTAL_FACING, Direction.NORTH));
+    }
+
+    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
+
+
+
+        player.openContainer(state.getContainer(worldIn, pos));
+        player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
         return true;
+    }
+
+    private static final ITextComponent title = new TranslationTextComponent("container.crafting");
+    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
+        return new SimpleNamedContainerProvider((windowID, playerInventory, playerEntity) -> {
+            return new WorkbenchContainer(windowID, playerInventory, IWorldPosCallable.of(worldIn, pos));
+        }, title);
     }
 }

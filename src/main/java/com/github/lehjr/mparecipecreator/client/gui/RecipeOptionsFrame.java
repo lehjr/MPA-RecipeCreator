@@ -3,13 +3,13 @@ package com.github.lehjr.mparecipecreator.client.gui;
 import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
 import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.mpalib.client.gui.clickable.LabledButton;
+import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
-import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.client.sound.Musique;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
 
         save = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Save"));
         save.setOnPressed(pressed->{
-            Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
+            Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK,1);
 
             //TODO: actually save recipe if valid
 
@@ -89,7 +89,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
 
         reset = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Reset Recipe"));
         reset.setOnPressed(pressed-> {
-            Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1, Minecraft.getMinecraft().player.getPosition());
+            Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, 1);
             mtrmGuiIn.resetRecipes();
         });
     }
@@ -153,9 +153,9 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isVisible() && isEnabled()) {
-            super.onMouseDown(mouseX, mouseY, button);
+            super.mouseClicked(mouseX, mouseY, button);
 
             for (CheckBox checkBox : checkBoxes) {
                 if (checkBox.mouseClicked(mouseX, mouseY, button)) {
@@ -168,16 +168,16 @@ public class RecipeOptionsFrame extends ScrollableFrame {
                     return true;
                 }
             }
-            conditionsFrame.onMouseDown(mouseX, mouseY, button);
+            conditionsFrame.mouseClicked(mouseX, mouseY, button);
         }
         return false;
     }
 
     @Override
-    public boolean onMouseUp(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (isVisible() && isEnabled()) {
-            super.onMouseUp(mouseX, mouseY, button);
-            if (conditionsFrame.onMouseUp(mouseX, mouseY, button)) {
+            super.mouseReleased(mouseX, mouseY, button);
+            if (conditionsFrame.mouseReleased(mouseX, mouseY, button)) {
                 return true;
             }
         }

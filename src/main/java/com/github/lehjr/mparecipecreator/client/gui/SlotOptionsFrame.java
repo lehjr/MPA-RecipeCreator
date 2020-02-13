@@ -1,16 +1,22 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.mpalib.client.gui.clickable.*;
+import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableArrow;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
-import com.github.lehjr.mpalib.client.gui.scrollable.ScrollableFrame;
 import com.github.lehjr.mpalib.math.Colour;
-import net.minecraft.client.gui.GuiTextField;
+import com.github.lehjr.mpalib.nbt.NBT2Json;
+import com.google.gson.JsonObject;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.JsonUtils;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.oredict.OreDictionary;
-import org.json.JSONObject;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ResourceLocation;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author lehjr
@@ -21,19 +27,19 @@ public class SlotOptionsFrame extends ScrollableFrame {
     int activeSlotID;
     MTRMContainer container;
 
-    private int oreIndex[] = new int[10];
+    private ResourceLocation[] oreTags = new ResourceLocation[10];
     final int spacer = 4;
 
     private ClickableArrow prevOreDictArrow, nextOreDictArrow;
 
     // Slot specific
     private CheckBox[] useOreDict = new CheckBox[10];
-    GuiTextField tokenTxt;
+    StackTextDisplayFrame tokenTxt;
 
 
     public SlotOptionsFrame(Point2D topleft,
                             Point2D bottomright,
-                            GuiTextField tokenTxt,
+                            StackTextDisplayFrame tokenTxt,
                             MTRMContainer container,
                             Colour backgroundColour,
                             Colour borderColour,
@@ -53,21 +59,21 @@ public class SlotOptionsFrame extends ScrollableFrame {
         nextOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         nextOreDictArrow.setDrawShaft(false);
         nextOreDictArrow.setOnPressed(pressed-> {
-            this.tokenTxt.setText(getStackToken(true, false, activeSlotID));
+            this.tokenTxt.setLabel(getStackToken(true, false, activeSlotID));
         });
 
         prevOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         prevOreDictArrow.setDrawShaft(false);
         prevOreDictArrow.setDirection(DrawableArrow.ArrowDirection.LEFT);
         prevOreDictArrow.setOnPressed(pressed-> {
-            this.tokenTxt.setText(getStackToken(false, true, activeSlotID));
+            this.tokenTxt.setLabel(getStackToken(false, true, activeSlotID));
         });
 
         activeSlotID = -1;
         for (int id = 0; id < 10; id ++) {
             useOreDict[id] = new CheckBox(id, new Point2D(0, 0), "Use ore dictionary", true); //ID_OPTION_OREDICT
             useOreDict[id].setOnPressed(pressed -> {
-                this.tokenTxt.setText(getStackToken(false, false, activeSlotID));
+                this.tokenTxt.setLabel(getStackToken(false, false, activeSlotID));
             });
         }
 
@@ -105,9 +111,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public boolean onMouseDown(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isVisible()) {
-            super.onMouseDown(mouseX, mouseY, button);
+            super.mouseClicked(mouseX, mouseY, button);
 
             for (int id = 0; id < 10; id ++) {
                 if (useOreDict[id].mouseClicked(mouseX, mouseY, button)) {
@@ -128,7 +134,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
     public void selectSlot(int slot) {
         this.activeSlotID = slot;
-        this.tokenTxt.setText(getStackToken(false, false, slot));
+        this.tokenTxt.setLabel(getStackToken(false, false, slot));
         for (int id = 0; id < 10; id ++) {
             useOreDict[id].setVisible(id==slot);
         }
@@ -143,7 +149,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
         for (int id = 0; id < 10; id ++) {
             useOreDict[id].setVisible(false);
             useOreDict[id].setChecked(false);
-            oreIndex[id] = 0;
+            oreTags = new ResourceLocation[10];
         }
         activeSlotID = -1;
         setLabel();
@@ -158,49 +164,41 @@ public class SlotOptionsFrame extends ScrollableFrame {
      * @param slot
      * @return JSon representing the item stack in the given slot
      */
-    public JSONObject getStackJson(int slot) {
-        JSONObject jsonObject = new JSONObject();
+    public JsonObject getStackJson(int slot) {
+        JsonObject jsonObject = new JsonObject();
 
         ItemStack stack = getStack(slot);
         if (!stack.isEmpty()) {
             boolean usingOredict = useOreDict[slot].isChecked();
 
-            if (usingOredict) {
-                int[] ids = OreDictionary.getOreIDs(stack);
-                jsonObject.put("type", "forge:ore_dict");
-                jsonObject.put("ore", OreDictionary.getOreName(ids[oreIndex[slot]]));
+            if (usingOredict && oreTags[slot] != null) {
+                Item item = stack.getItem();
+                final Collection<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item);
+                jsonObject.addProperty("tag", oreTags[slot].toString());
             } else {
                 // fail here, but not gracefully I guess
                 if (stack.getItem().getRegistryName() == null) {
                     throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
                 }
 
-                if (stack.hasTagCompound()) {
+                if (stack.hasTag()) {
                     if (!stack.getItem().getRegistryName().toString().equals("forge:bucketfilled")) {
-                        jsonObject.put("type", "minecraft:item_nbt");
+                        jsonObject.addProperty("type", "minecraft:item_nbt");
                     }
 
-                    String nbtString = stack.getTagCompound().toString();
+                    String nbtString = stack.getTag().toString();
                     System.out.println("nbtString: " + nbtString);
 
-                    jsonObject.put("nbt", new JSONObject(nbtString));
+                    jsonObject.add("nbt", NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject()));
 
                     // <modularpowerarmor:powerarmor_feet>.withTag({MMModItem: {render: {"mps_boots.boots2": {part: "boots2", model: "mps_boots"}, texSpec: {part: "feet", model: "default_armorskin"}, "mps_boots.boots1": {part: "boots1", model: "mps_boots"}, colours: [-1, -15642881] as int[]}}})
-
-
-
-
                 }
-
-                jsonObject.put("item", stack.getItem().getRegistryName().toString());
-                if (stack.getHasSubtypes()) {
-                    jsonObject.put("data", stack.getItemDamage());
-                }
+                jsonObject.addProperty("item", stack.getItem().getRegistryName().toString());
             }
 
             // set the stack count
             if (stack.getCount() > 1) {
-                jsonObject.put("count", stack.getCount());
+                jsonObject.addProperty("count", stack.getCount());
             }
         }
         return jsonObject;
@@ -246,22 +244,27 @@ public class SlotOptionsFrame extends ScrollableFrame {
         String stackName = stack.getItem().getRegistryName().toString();
         StringBuilder builder = new StringBuilder();
         if (oreDict) {
-            int[] ids = OreDictionary.getOreIDs(stack);
-            if (ids.length != 0) {
-                stackName = "ore:" + OreDictionary.getOreName(ids[oreIndex[slot]]);
+            Item item = stack.getItem();
+            final Collection<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item);
+            if (ids.size() > 0) {
+                List<ResourceLocation> oreTagArray = ids.stream().collect(Collectors.toList());;
+
+                int index = oreTagArray.indexOf(oreTags[slot]);
                 if (nextOreDict) {
-                    oreIndex[slot]++;
+                    index ++;
                 } else if (prevOreDict) {
-                    oreIndex[slot]--;
+                    index--;
                 }
 
-                if (oreIndex[slot] >= ids.length || oreIndex[slot] < 0) {
-                    oreIndex[slot] = 0;
+                if (index >= ids.size() || index < 0) {
+                    index = 0;
                 }
+
+                stackName = "tag: " + oreTagArray.get(index);
 
                 if (activeSlotID == slot) {
-                    nextOreDictArrow.setVisible(oreIndex[slot] > -1 && oreIndex[slot] + 1 < ids.length);
-                    prevOreDictArrow.setVisible(oreIndex[slot] > 0);
+                    nextOreDictArrow.setVisible(index > -1 && index + 1 < ids.size());
+                    prevOreDictArrow.setVisible(index > 0);
                 }
             } else {
                 nextOreDictArrow.setVisible(false);

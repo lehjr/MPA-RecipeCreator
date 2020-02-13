@@ -1,19 +1,19 @@
 package com.github.lehjr.mparecipecreator.basemod;
 
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * @author lehjr
  */
-public class CreativeTab extends CreativeTabs {
+public class CreativeTab extends ItemGroup {
     public CreativeTab() {
         super("mparecipecreator");
     }
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     @Override
     public ItemStack createIcon() {
         return new ItemStack(ModObjects.INSTANCE.recipeWorkBench);
