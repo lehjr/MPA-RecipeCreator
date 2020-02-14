@@ -420,7 +420,6 @@ public class MPARCGui extends ContainerGui {
 //        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
 
         update(mouseX, mouseY);
-        this.drawBackground();
 
         renderFrames(mouseX, mouseY, partialTicks);
 
@@ -460,11 +459,9 @@ public class MPARCGui extends ContainerGui {
         }
     }
 
-
-
     @Override
-    public void drawBackground() {
-        this.drawDefaultBackground();
+    public void drawRectangularBackground() {
+        super.drawRectangularBackground();
         backgroundRect.draw();
     }
 
