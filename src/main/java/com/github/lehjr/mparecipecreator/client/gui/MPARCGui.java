@@ -14,31 +14,28 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author Dries007
  */
 public class MPARCGui extends ContainerGui<MTRMContainer> {
-    protected List<IGuiFrame> frames = new ArrayList<>();
     protected DrawableRect backgroundRect;
     protected long creationTime;
 
     final int slotWidth = 18;
     final int spacer = 4;
 
-    private ExtInventoryFrame inventoryFrame;
-    private RecipeOptionsFrame recipeOptions;
-    private RecipeDisplayFrame recipeDisplayFrame;
+    private final ExtInventoryFrame inventoryFrame;
+    private final RecipeOptionsFrame recipeOptions;
+    private final RecipeDisplayFrame recipeDisplayFrame;
 
     // text box
     public StackTextDisplayFrame tokenTxt;
 
     // separate frame for each slot
-    private SlotOptionsFrame slotOptions;
+    private final SlotOptionsFrame slotOptions;
 
     protected final Colour gridColour = new Colour(0.1F, 0.3F, 0.4F, 0.7F);
     protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8);
@@ -84,13 +81,12 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                 new Point2D(0, 0),
                 new Point2D(0, 0),
                 tokenTxt,
-                (MTRMContainer) container,
+                container,
                 Colour.DARKBLUE,
                 gridBorderColour,
                 Colour.DARKGREY,
                 Colour.LIGHTGREY,
                 Colour.BLACK);
-
         frames.add(slotOptions);
 
         recipeDisplayFrame = new RecipeDisplayFrame(
@@ -374,103 +370,14 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        super.mouseClicked(mouseX, mouseY, button);
-
-//        // slight precision boost by using doubles here
-//        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
-//        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
-
-        for (IGuiFrame frame : frames) {
-            if (frame.mouseClicked(mouseX, mouseY, button)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Called when the mouse is moved or a mouse button is released. Signature:
-     * (mouseX, mouseY, which) which==-1 is mouseMove, which==0 or which==1 is
-     * mouseUp
-     */
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int which) {
-        super.mouseReleased(mouseX, mouseY, which);
-
-//        // slight precision boost by using doubles here
-//        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
-//        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
-
-        for (IGuiFrame frame : frames) {
-            if (frame.mouseReleased(mouseX, mouseY, which)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
-        super.render(mouseX, mouseY, partialTicks);
-
-//        // slight precision boost by using doubles here
-//        double x = Mouse.getEventX() * this.width / (double) this.mc.displayWidth;
-//        double y = this.height - Mouse.getEventY() * this.height / (double) this.mc.displayHeight - 1;
-
-        update(mouseX, mouseY);
-
-        renderFrames(mouseX, mouseY, partialTicks);
-
-        //-----------------
+        this.renderBackground();
+        backgroundRect.draw();
         super.render(mouseX, mouseY, partialTicks);
 
         // Title
         Renderer.drawCenteredString("MPA-RecipeCreator", backgroundRect.centerx(), backgroundRect.finalTop() - 20);
-
-        //-------------------------------
-
         renderHoveredToolTip(mouseX, mouseY);
-    }
-
-    /**
-     * Update frames
-     *
-     * @param x
-     * @param y
-     */
-    public void update(double x, double y) {
-        for (IGuiFrame frame : frames) {
-            frame.update(x, y);
-        }
-    }
-
-    /**
-     * Render the frames
-     *
-     * @param mouseX
-     * @param mouseY
-     * @param partialTicks
-     */
-    public void renderFrames(int mouseX, int mouseY, float partialTicks) {
-        for (IGuiFrame frame : frames) {
-            frame.render(mouseX, mouseY, partialTicks);
-        }
-    }
-
-    @Override
-    public void drawRectangularBackground() {
-        super.drawRectangularBackground();
-        backgroundRect.draw();
-    }
-
-    /**
-     * Adds a frame to this gui's draw list.
-     *
-     * @param frame
-     */
-    public void addFrame(IGuiFrame frame) {
-        frames.add(frame);
     }
 
     /**

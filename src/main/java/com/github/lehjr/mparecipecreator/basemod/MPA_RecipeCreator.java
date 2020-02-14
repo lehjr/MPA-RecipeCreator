@@ -34,16 +34,12 @@ public final class MPA_RecipeCreator {
     }
 
     private void setupClient(final FMLClientSetupEvent event) {
-
         ScreenManager.registerFactory(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, MPARCGui::new);
-
-        System.out.println("RECIPE_WORKBENCH_CONTAINER_TYPE is null? " + (ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE == null));
-
     }
 
     @SubscribeEvent
     public void registerContainerTypes(final RegistryEvent.Register<ContainerType<?>> event) {
-        event.getRegistry().register(                // Crafting Gui
+        event.getRegistry().register(                // recipe creator gui
                 new ContainerType<>(MTRMContainer::new)
                         .setRegistryName(Constants.RECIPE_WORKBENCH_TYPE__REG_NAME));
     }
