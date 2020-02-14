@@ -13,11 +13,14 @@ public enum ModObjects {
     INSTANCE;
 
     /**
-     * Blocks -------------------------------------------------------------------------------------
+     * Block --------------------------------------------------------------------------------------
      */
     @ObjectHolder(Constants.RECIPE_WORKBENCH__REGNAME)
     public static final RecipeWorkbench recipeWorkBench = null;
 
+    /**
+     * Container type -----------------------------------------------------------------------------
+     */
     @ObjectHolder(Constants.RECIPE_WORKBENCH_TYPE__REG_NAME)
     public static final ContainerType<MTRMContainer> RECIPE_WORKBENCH_CONTAINER_TYPE = null;
 }

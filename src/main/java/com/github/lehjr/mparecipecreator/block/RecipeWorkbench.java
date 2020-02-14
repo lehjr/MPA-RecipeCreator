@@ -1,5 +1,6 @@
 package com.github.lehjr.mparecipecreator.block;
 
+import com.github.lehjr.mparecipecreator.client.gui.MTRMContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -7,10 +8,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.inventory.container.WorkbenchContainer;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.stats.Stats;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.ResourceLocation;
@@ -19,10 +16,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-
-import javax.annotation.Nullable;
-
-import static net.minecraft.block.HorizontalBlock.HORIZONTAL_FACING;
 
 /**
  * @author lehjr
@@ -43,18 +36,13 @@ public class RecipeWorkbench extends Block {
     }
 
     public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
-
-
-
         player.openContainer(state.getContainer(worldIn, pos));
-        player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
         return true;
     }
 
     private static final ITextComponent title = new TranslationTextComponent("container.crafting");
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
-        return new SimpleNamedContainerProvider((windowID, playerInventory, playerEntity) -> {
-            return new WorkbenchContainer(windowID, playerInventory, IWorldPosCallable.of(worldIn, pos));
-        }, title);
+        return new SimpleNamedContainerProvider((windowID, playerInventory, playerEntity) ->
+                new MTRMContainer(windowID, playerInventory, IWorldPosCallable.of(worldIn, pos)), title);
     }
 }

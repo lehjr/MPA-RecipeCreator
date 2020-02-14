@@ -1,5 +1,6 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.mparecipecreator.basemod.ModObjects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
@@ -28,11 +29,11 @@ public class MTRMContainer extends Container {
     }
 
     public MTRMContainer(int windowID, PlayerInventory playerInventory, IWorldPosCallable posCallable) {
-        super(ContainerType.CRAFTING, windowID);
+        super(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, windowID);
         this.posCallable = posCallable;
         this.player = playerInventory.player;
 
-        playerInventory.player.openContainer = this;
+//        playerInventory.player.openContainer = this;
 
         // crafting result
         this.addSlot(new CraftingResultSlot(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35));

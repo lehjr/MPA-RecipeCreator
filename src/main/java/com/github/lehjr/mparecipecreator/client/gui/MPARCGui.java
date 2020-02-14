@@ -11,7 +11,6 @@ import com.github.lehjr.mparecipecreator.basemod.Constants;
 import com.google.gson.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 
@@ -23,7 +22,7 @@ import java.util.Map;
 /**
  * @author Dries007
  */
-public class MPARCGui extends ContainerGui {
+public class MPARCGui extends ContainerGui<MTRMContainer> {
     protected List<IGuiFrame> frames = new ArrayList<>();
     protected DrawableRect backgroundRect;
     protected long creationTime;
@@ -45,7 +44,7 @@ public class MPARCGui extends ContainerGui {
     protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8);
     protected final Colour gridBackGound = new Colour(0.545D, 0.545D, 0.545D, 1);
 
-    public MPARCGui(Container container, PlayerInventory playerInventory, ITextComponent title) {
+    public MPARCGui(MTRMContainer container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
         rescale();
 
