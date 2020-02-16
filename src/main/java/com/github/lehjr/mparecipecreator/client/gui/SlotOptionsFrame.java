@@ -1,19 +1,19 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
-import com.github.lehjr.mpalib.client.gui.clickable.*;
+import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
+import com.github.lehjr.mpalib.client.gui.clickable.ClickableArrow;
+import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableArrow;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.math.Colour;
 import com.github.lehjr.mpalib.nbt.NBT2Json;
 import com.google.gson.JsonObject;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;

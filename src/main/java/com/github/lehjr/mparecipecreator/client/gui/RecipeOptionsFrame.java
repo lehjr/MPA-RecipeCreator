@@ -7,6 +7,7 @@ import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.sound.Musique;
 import com.github.lehjr.mpalib.math.Colour;
+import com.google.gson.JsonObject;
 import net.minecraft.util.SoundEvents;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     private LabledButton save;
     private LabledButton reset;
     private ClickableLabel title;
-
+    MPARCGui mtrmGui;
     ConditionsFrame conditionsFrame;
 
     public RecipeOptionsFrame(
@@ -123,6 +124,10 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         reset.setPosition(new Point2D(right - 15 - spacer - reset.finalWidth() * 2, top + save.finalHeight() + reset.finalHeight() * 0.5 + spacer * 2));
     }
 
+    public void setConditionsJson(JsonObject conditionsIn) {
+        conditionsFrame.setConditions(conditionsIn);
+    }
+
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         if (isVisible()) {
@@ -145,7 +150,12 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     public void update(double x, double y) {
         super.update(x, y);
 
+        JsonObject jsonObject = null;
+
         if (conditionsFrame.isEnabled() && conditionsFrame.isVisible()) {
+            if (jsonObject != null) {
+                conditionsFrame.setConditions(jsonObject);
+            }
             conditionsFrame.update(x, y);
         }
     }

@@ -6,7 +6,10 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.*;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.CraftingResultSlot;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IWorldPosCallable;
 
@@ -57,6 +60,11 @@ public class MTRMContainer extends Container {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
         }
     }
+
+
+
+
+
 
     /**
      * Callback for when the crafting matrix is changed.

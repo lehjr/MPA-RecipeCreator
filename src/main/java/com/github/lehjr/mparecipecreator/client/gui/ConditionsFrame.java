@@ -7,15 +7,8 @@ import com.github.lehjr.mpalib.math.Colour;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +17,7 @@ import java.util.Map;
  */
 public class ConditionsFrame extends ScrollableFrame {
     Map<String, CheckBox> checkBoxList = new HashMap<>();
-
+    JsonObject conditions = null;
     public ConditionsFrame(Point2D topleft, Point2D bottomright, Colour backgroundColour, Colour borderColour) {
         super(topleft, bottomright, backgroundColour, borderColour);
     }
@@ -35,34 +28,42 @@ public class ConditionsFrame extends ScrollableFrame {
         loadConditions();
     }
 
+    public void setConditions(JsonObject conditionsIn) {
+        this.conditions = conditionsIn;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        loadConditions();
+    }
+
     public void loadConditions() {
         Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
 
         try {
-            if (checkBoxList.isEmpty()) {
-                IResource iresource = Minecraft.getInstance().getResourceManager()
-                        .getResource(new ResourceLocation("modularpowerarmor", "recipes/_factories.json"));
+            if (this.conditions != null && this.conditions.size() > 0) {
+                if (checkBoxList.isEmpty()) {
+                    System.out.println("conditions: " + conditions.toString());
 
-                Reader reader = new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8);
-                JsonElement root = new JsonParser().parse(reader);
-                JsonObject jsonObject = root.getAsJsonObject();
-                JsonObject jobject = jsonObject.getAsJsonObject("conditions");
 
-                for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                    String key = entry.getKey();
-                    CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
-                    checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
-                    checkBoxList.put(key, checkbox);
-                }
-                // moves the checkboxes without recreating them so their state is preserved
-            } else {
-                int i =0;
-                for (CheckBox checkBox : checkBoxList.values()) {
-                    checkBox.setPosition(starterPoint.plus(0, i * 10));
-                    i++;
+                    JsonObject jobject = conditions.getAsJsonObject("conditions");
+
+                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                        String key = entry.getKey();
+                        CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
+                        checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
+                        checkBoxList.put(key, checkbox);
+                    }
+                    // moves the checkboxes without recreating them so their state is preserved
+                } else {
+                    int i =0;
+                    for (CheckBox checkBox : checkBoxList.values()) {
+                        checkBox.setPosition(starterPoint.plus(0, i * 10));
+                        i++;
+                    }
                 }
             }
-
             this.totalsize = checkBoxList.size() * 15;
         } catch (Exception e) {
             e.printStackTrace();

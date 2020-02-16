@@ -3,6 +3,7 @@ package com.github.lehjr.mparecipecreator.basemod;
 import com.github.lehjr.mparecipecreator.block.RecipeWorkbench;
 import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
 import com.github.lehjr.mparecipecreator.client.gui.MTRMContainer;
+import com.github.lehjr.mparecipecreator.network.MPARC_Packets;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.inventory.container.ContainerType;
@@ -14,6 +15,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
@@ -25,12 +27,19 @@ public final class MPA_RecipeCreator {
     public static final CreativeTab creativeTab = new CreativeTab();
 
     public MPA_RecipeCreator() {
+        // Register the setup method for modloading
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+
         // Register the setupClient method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupClient);
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.register(this);
 
+    }
+
+    private void setup(final FMLCommonSetupEvent event) {
+        MPARC_Packets.registerPackets();
     }
 
     private void setupClient(final FMLClientSetupEvent event) {

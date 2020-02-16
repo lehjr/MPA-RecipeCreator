@@ -3,7 +3,6 @@ package com.github.lehjr.mparecipecreator.basemod;
 import com.github.lehjr.mparecipecreator.block.RecipeWorkbench;
 import com.github.lehjr.mparecipecreator.client.gui.MTRMContainer;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.ObjectHolder;
 
 /**

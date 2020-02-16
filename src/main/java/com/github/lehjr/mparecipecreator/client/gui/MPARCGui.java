@@ -2,12 +2,13 @@ package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.modularpowerarmor.item.component.ItemComponent;
 import com.github.lehjr.mpalib.client.gui.ContainerGui;
-import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
 import com.github.lehjr.mparecipecreator.basemod.Constants;
+import com.github.lehjr.mparecipecreator.network.MPARC_Packets;
+import com.github.lehjr.mparecipecreator.network.packets.ConditionsRequestPacket;
 import com.google.gson.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
@@ -95,6 +96,8 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                 Colour.DARKBLUE,
                 gridBorderColour);
         frames.add(recipeDisplayFrame);
+
+        sendConditionRequest();
     }
 
     Point2D getULShift() {
@@ -150,8 +153,17 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                 backgroundRect.finalBottom() - spacer);
     }
 
+    public void sendConditionRequest() {
+        MPARC_Packets.CHANNEL_INSTANCE.sendToServer(new ConditionsRequestPacket());
+    }
+
+
     public void resetRecipes() {
         slotOptions.reset();
+    }
+
+    public void setConditionsJson(JsonObject conditionsJsonIn) {
+        recipeOptions.setConditionsJson(conditionsJsonIn);
     }
 
     public JsonObject getRecipeJson() {
@@ -371,6 +383,8 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
+//        super.render(mouseX, mouseY, partialTicks);
+
         this.renderBackground();
         backgroundRect.draw();
         super.render(mouseX, mouseY, partialTicks);
