@@ -1,5 +1,6 @@
 package com.github.lehjr.mparecipecreator.jei;
 
+import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -15,12 +16,12 @@ public class JEIPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
-
+		registration.addRecipeTransferHandler(new TransferInfo());
 	}
 
 	@Override
 	public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-
+		registration.addGuiScreenHandler(MPARCGui.class, new ScreenHandler());
 	}
 
 //	@Override

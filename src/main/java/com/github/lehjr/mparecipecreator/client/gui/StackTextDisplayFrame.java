@@ -25,6 +25,6 @@ public class StackTextDisplayFrame extends ScrollableFrame {
     public void render(int mouseX, int mouseY, float partialTicks) {
         super.render(mouseX, mouseY, partialTicks);
         Renderer.drawLeftAlignedStringString(slot != -1 ? "Slot " + slot + ": " +
-                this.label : "No slot selected", this.getBorder().center().getX(), this.getBorder().center().getY() - 4.0D);
+                this.label : "No slot selected", this.getBorder().finalLeft() + 4, this.getBorder().center().getY() - 4.0D);
     }
 }

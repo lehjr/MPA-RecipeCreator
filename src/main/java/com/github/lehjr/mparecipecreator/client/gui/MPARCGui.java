@@ -15,6 +15,9 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -157,16 +160,43 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
         MPARC_Packets.CHANNEL_INSTANCE.sendToServer(new ConditionsRequestPacket());
     }
 
-
     public void resetRecipes() {
         slotOptions.reset();
+        container.craftMatrix.clear();
+        container.craftResult.clear();
     }
 
     public void setConditionsJson(JsonObject conditionsJsonIn) {
         recipeOptions.setConditionsJson(conditionsJsonIn);
     }
 
-    public JsonObject getRecipeJson() {
+    String targetFolder = null;
+    public void setTargetFolder(String path) {
+        System.out.println("path: " + path);
+        if (path.endsWith("\\.") || path.endsWith("/.")) {
+            path = path.substring(0, path.length() -2);
+        }
+        File outDir = new File(path, "saved_recipes");
+       targetFolder = outDir.getAbsolutePath();
+    }
+
+    public void save() {
+        if(container.getSlot(0).getHasStack()) {
+            File file = new File(targetFolder, recipeDisplayFrame.title + ".json");
+            String prettyJson = getRecipeJson();
+
+            try {
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(prettyJson);
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public String getRecipeJson() {
         String backupChars = "#@$%^&*(){}";
         JsonObject recipeJson = new JsonObject();
         recipeJson.add("result", slotOptions.getStackJson(0));
@@ -187,8 +217,6 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                         line1 = line1.replace("_enabled", "");
 
                         filename += line1;
-                    } else {
-                        System.out.println( line.getClass());
                     }
                 }
             }
@@ -219,9 +247,7 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
         // fixme: missing "data" (subtypes not present in 1.14.4), "nbt"
 
         if (recipeOptions.isShapeless()) {
-            recipeJson.addProperty("type", "mpa_shapeless");
-
-            // fixme: overlapping values and oredict issues from having individually set oredict settings?
+            recipeJson.addProperty("type", "minecraft:crafting_shapeless");
 
             JsonArray ingredients = new JsonArray();
             for (int i = 1; i < 11; i++) {
@@ -242,8 +268,8 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                                 if (jsonObject.getAsJsonObject().get("item").getAsString().equals(ingredient.get("item").getAsString())) {
                                     match = true;
                                 }
-                            } else if (jsonObject.getAsJsonObject().has("ore") && ingredient.has("ore")) {
-                                if (jsonObject.get("ore").getAsString().equals(ingredient.get("ore").getAsString())) {
+                            } else if (jsonObject.getAsJsonObject().has("tag") && ingredient.has("tag")) {
+                                if (jsonObject.get("tag").getAsString().equals(ingredient.get("tag").getAsString())) {
                                     match = true;
                                 }
                             }
@@ -273,8 +299,10 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
             }
             recipeJson.add("ingredients", ingredients);
         } else {
+            // TODO: disable oredict for output
+
             if (slotOptions.getStackJson(0).has("item")) {
-                recipeJson.addProperty("type", "mpa_shaped");
+                recipeJson.addProperty("type", "minecraft:crafting_shaped");
             } else {
                 recipeJson.addProperty("type", "mpa_shaped_ore");
             }
@@ -287,7 +315,7 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
             Map<String, JsonObject> keys = new HashMap<>();
             String[] pattern = {"   ", "   ", "   "};
 
-            char character = " ".charAt(0);
+            char character;
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 3; col++) {
                     int i = row * 3 + col + 1;
@@ -299,8 +327,8 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                         if (ingredient.has("item")) {
                             String[] ingredientStringList = ingredient.get("item").getAsString().split(":");
                             ingredientString = ingredientStringList[ingredientStringList.length - 1].toUpperCase();
-                        } else if (ingredient.has("ore")) {
-                            ingredientString = ingredient.get("ore").getAsString().toUpperCase();
+                        } else if (ingredient.has("tag")) {
+                            ingredientString = ingredient.get("tag").getAsString().toUpperCase();
                         }
 
                         boolean keyFound = false;
@@ -367,18 +395,25 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
         JsonElement je = jp.parse(recipeJson.toString());
         String prettyJsonString = gson.toJson(je);
 
-        System.out.println("json: " + recipeJson.toString());
-        System.out.println("prettyJson: " + prettyJsonString);
+//        System.out.println("json: " + recipeJson.toString());
+//        System.out.println("prettyJson: " + prettyJsonString);
 
         recipeDisplayFrame.setRecipe(prettyJsonString);
 
-        System.out.println("lines: " + prettyJsonString.split("\n").length);
+//        System.out.println("lines: " + prettyJsonString.split("\n").length);
 
-        return recipeJson;
+        return prettyJsonString;
     }
 
-    public void selectSlot(int id) {
-        slotOptions.selectSlot(id);
+    @Override
+    public void update(double x, double y) {
+        super.update(x, y);
+        getRecipeJson();
+    }
+
+    public void selectSlot(int index) {
+        slotOptions.selectSlot(index);
+        tokenTxt.setSlot(index);
     }
 
     @Override

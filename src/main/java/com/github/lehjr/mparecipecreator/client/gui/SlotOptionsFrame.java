@@ -14,8 +14,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
+import javax.swing.*;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -27,13 +30,13 @@ public class SlotOptionsFrame extends ScrollableFrame {
     int activeSlotID;
     MTRMContainer container;
 
-    private ResourceLocation[] oreTags = new ResourceLocation[10];
+    private Map<Integer, ResourceLocation> oreTags = new HashMap<>();
     final int spacer = 4;
 
     private ClickableArrow prevOreDictArrow, nextOreDictArrow;
 
     // Slot specific
-    private CheckBox[] useOreDict = new CheckBox[10];
+    private Map<Integer, CheckBox> useOreDict = new HashMap<>();
     StackTextDisplayFrame tokenTxt;
 
 
@@ -70,13 +73,13 @@ public class SlotOptionsFrame extends ScrollableFrame {
         });
 
         activeSlotID = -1;
-        for (int id = 0; id < 10; id ++) {
-            useOreDict[id] = new CheckBox(id, new Point2D(0, 0), "Use ore dictionary", true); //ID_OPTION_OREDICT
-            useOreDict[id].setOnPressed(pressed -> {
-                this.tokenTxt.setLabel(getStackToken(false, false, activeSlotID));
-            });
+        for (int id = 1; id < 10; id ++) {
+            CheckBox box = new CheckBox(id, new Point2D(0, 0), "Use ore dictionary", false);
+            box.disableAndHide();
+            box.setOnPressed(pressed ->
+                        this.tokenTxt.setLabel(getStackToken(false, false, activeSlotID)));
+            useOreDict.put(id,box);
         }
-
         reset();
     }
 
@@ -90,22 +93,40 @@ public class SlotOptionsFrame extends ScrollableFrame {
         title.setPosition(slotSpecificCol.plus(0,spacer));
 
         nextLineSC+=10;
-        for (int id = 0; id < 10; id ++) {
-            useOreDict[id].setPosition(slotSpecificCol.plus(0, nextLineSC));
+        for (CheckBox checkBox : useOreDict.values()) {
+            checkBox.setPosition(slotSpecificCol.plus(0, nextLineSC));
         }
 
         prevOreDictArrow.setTargetDimensions(new Point2D(left + 93, top + 137), new Point2D(12, 17));
         nextOreDictArrow.setTargetDimensions(new Point2D(left + 38, top + 137), new Point2D(12, 17));
     }
 
+    @Override
+    public void update(double mouseX, double mouseY) {
+        super.update(mouseX, mouseY);
+        for (int id = 1; id < 10; id ++) {
+            if (id == activeSlotID) {
+                if (container.getSlot(id).getHasStack()) {
+                    useOreDict.get(id).enableAndShow();
+                } else {
+                    useOreDict.get(id).disableAndHide();
+                }
+            } else {
+                useOreDict.get(id).disableAndHide();
+            }
+        }
+        this.tokenTxt.setLabel(getStackToken(false, false, activeSlotID));
+    }
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
+        super.render(mouseX, mouseY, partialTicks);
         if (isVisible()) {
             super.render(mouseX, mouseY, partialTicks);
             title.render(mouseX, mouseY, partialTicks);
-            for (int id = 0; id < 10; id ++) {
-                useOreDict[id].render(mouseX, mouseY, partialTicks);
+
+            if (useOreDict.get(activeSlotID) != null) {
+                useOreDict.get(activeSlotID).render(mouseX, mouseY, partialTicks);
             }
         }
     }
@@ -115,8 +136,8 @@ public class SlotOptionsFrame extends ScrollableFrame {
         if (isVisible()) {
             super.mouseClicked(mouseX, mouseY, button);
 
-            for (int id = 0; id < 10; id ++) {
-                if (useOreDict[id].mouseClicked(mouseX, mouseY, button)) {
+            for (CheckBox checkBox : useOreDict.values()) {
+                if (checkBox.mouseClicked(mouseX, mouseY, button)) {
                     return true;
                 }
             }
@@ -134,10 +155,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
     public void selectSlot(int slot) {
         this.activeSlotID = slot;
-        this.tokenTxt.setLabel(getStackToken(false, false, slot));
-        for (int id = 0; id < 10; id ++) {
-            useOreDict[id].setVisible(id==slot);
-        }
+
         setLabel();
     }
 
@@ -146,10 +164,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     public void reset() {
-        for (int id = 0; id < 10; id ++) {
-            useOreDict[id].setVisible(false);
-            useOreDict[id].setChecked(false);
-            oreTags = new ResourceLocation[10];
+        for (int id = 1; id < 10; id ++) {
+            useOreDict.get(id).disableAndHide();
+            oreTags = new HashMap<>();
         }
         activeSlotID = -1;
         setLabel();
@@ -169,12 +186,12 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
         ItemStack stack = getStack(slot);
         if (!stack.isEmpty()) {
-            boolean usingOredict = useOreDict[slot].isChecked();
+            boolean usingOredict = slot !=0 ? useOreDict.get(slot).isChecked() : false;
 
-            if (usingOredict && oreTags[slot] != null) {
+            if (usingOredict && oreTags.get(slot) != null) {
                 Item item = stack.getItem();
                 final Collection<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item);
-                jsonObject.addProperty("tag", oreTags[slot].toString());
+                jsonObject.addProperty("tag", oreTags.get(slot).toString());
             } else {
                 // fail here, but not gracefully I guess
                 if (stack.getItem().getRegistryName() == null) {
@@ -187,8 +204,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
                     }
 
                     String nbtString = stack.getTag().toString();
-                    System.out.println("nbtString: " + nbtString);
-
                     jsonObject.add("nbt", NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject()));
 
                     // <modularpowerarmor:powerarmor_feet>.withTag({MMModItem: {render: {"mps_boots.boots2": {part: "boots2", model: "mps_boots"}, texSpec: {part: "feet", model: "default_armorskin"}, "mps_boots.boots1": {part: "boots1", model: "mps_boots"}, colours: [-1, -15642881] as int[]}}})
@@ -211,8 +226,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
      * @return the string for display in the text bar
      */
     public String getStackToken(boolean nextOreDict, boolean prevOreDict, int slot) {
-        System.out.println("slot selected: " + slot);
-
         if (slot < 0 || slot > 10) {
             return "No slot selected";
         }
@@ -221,8 +234,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
         // return empty slot string
         if (stack.isEmpty()) {
-            useOreDict[slot].disableAndHide();
-
             if (slot == activeSlotID) {
                 nextOreDictArrow.disableAndHide();
                 prevOreDictArrow.disableAndHide();
@@ -235,11 +246,11 @@ public class SlotOptionsFrame extends ScrollableFrame {
             throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
         }
 
-        if (slot == activeSlotID) {
-            useOreDict[slot].enableAndShow();
+        if (slot == activeSlotID && slot != 0) {
+            useOreDict.get(slot).enableAndShow();
         }
 
-        boolean oreDict = activeSlotID > -1 && activeSlotID < 11 && this.useOreDict[slot].isChecked();
+        boolean oreDict = /*activeSlotID > -1 && activeSlotID < 11 && */(slot !=0 ? useOreDict.get(slot).isChecked() : false);
 
         String stackName = stack.getItem().getRegistryName().toString();
         StringBuilder builder = new StringBuilder();
@@ -249,7 +260,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
             if (ids.size() > 0) {
                 List<ResourceLocation> oreTagArray = ids.stream().collect(Collectors.toList());;
 
-                int index = oreTagArray.indexOf(oreTags[slot]);
+                int index = oreTagArray.indexOf(oreTags.get(slot));
                 if (nextOreDict) {
                     index ++;
                 } else if (prevOreDict) {

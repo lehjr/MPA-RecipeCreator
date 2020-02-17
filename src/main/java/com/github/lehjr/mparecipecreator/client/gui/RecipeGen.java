@@ -33,7 +33,7 @@ public class RecipeGen {
 
     // Set whether or not the recipe is shapeless
     public void setType(boolean shapeless) {
-        recipe.addProperty("type", shapeless ? "mpa_shapeless" : "mpa_shaped");
+        recipe.addProperty("type", shapeless ? "tag" : "minecraft:crafting_shaped");
     }
 
     public void setMirrored(boolean mirrored) {
@@ -50,7 +50,7 @@ public class RecipeGen {
 /*
 
   "recipes": {
-    "mpa_shaped": "com.github.lehjr.modularpowerarmor.recipe.RecipeFactory"
+    "minecraft:crafting_shaped": "com.github.lehjr.modularpowerarmor.recipe.RecipeFactory"
   },
   "conditions": {
     "enderio_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",

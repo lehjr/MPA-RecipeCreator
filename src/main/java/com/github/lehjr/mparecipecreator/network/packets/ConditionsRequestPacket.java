@@ -58,7 +58,7 @@ public class ConditionsRequestPacket {
                             JsonParser jp = new JsonParser();
                             JsonElement je = jp.parse(jsonString);
                             String prettyJsonString = gson.toJson(je);
-                            MPARC_Packets.CHANNEL_INSTANCE.reply(new ConditionsResponsePacket(prettyJsonString), ctx.get());
+                            MPARC_Packets.CHANNEL_INSTANCE.reply(new ConditionsResponsePacket(prettyJsonString, server.getDataDirectory().getAbsolutePath()), ctx.get());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
