@@ -83,7 +83,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
 
             System.out.println("Save button pressed");
 
-            mtrmGuiIn.getRecipeJson();
+            mtrmGuiIn.save();
         });
 
         reset = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Reset Recipe"));

@@ -177,15 +177,15 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
             path = path.substring(0, path.length() -2);
         }
         File outDir = new File(path, "saved_recipes");
-       targetFolder = outDir.getAbsolutePath();
+        targetFolder = outDir.getAbsolutePath();
     }
 
     public void save() {
         if(container.getSlot(0).getHasStack()) {
             File file = new File(targetFolder, recipeDisplayFrame.title + ".json");
             String prettyJson = getRecipeJson();
-
             try {
+                file.getParentFile().mkdir();
                 FileWriter fileWriter = new FileWriter(file);
                 fileWriter.write(prettyJson);
                 fileWriter.flush();
