@@ -15,10 +15,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
 import javax.swing.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,22 +23,19 @@ import java.util.stream.Collectors;
  */
 public class SlotOptionsFrame extends ScrollableFrame {
     private ClickableLabel title;
-
     int activeSlotID;
     MTRMContainer container;
+    CheckBox useOreDictCheckbox;
+    RecipeGen recipeGen;
 
     private Map<Integer, ResourceLocation> oreTags = new HashMap<>();
     final int spacer = 4;
 
     private ClickableArrow prevOreDictArrow, nextOreDictArrow;
 
-    // Slot specific
-    private Map<Integer, CheckBox> useOreDict = new HashMap<>();
-    StackTextDisplayFrame tokenTxt;
-
     public SlotOptionsFrame(Point2D topleft,
                             Point2D bottomright,
-                            StackTextDisplayFrame tokenTxt,
+                            RecipeGen recipeGenIn,
                             MTRMContainer container,
                             Colour backgroundColour,
                             Colour borderColour,
@@ -49,9 +43,8 @@ public class SlotOptionsFrame extends ScrollableFrame {
                             Colour arrowHighlightedBackground,
                             Colour arrowBorderColour) {
         super(topleft, bottomright, backgroundColour, borderColour);
-        this.activeSlotID = activeSlotID;
         this.container = container;
-        this.tokenTxt = tokenTxt;
+        this.recipeGen = recipeGenIn;
 
         Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
 
@@ -61,25 +54,31 @@ public class SlotOptionsFrame extends ScrollableFrame {
         nextOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         nextOreDictArrow.setDrawShaft(false);
         nextOreDictArrow.setOnPressed(pressed-> {
-            this.tokenTxt.setLabel(getStackToken(true, false, activeSlotID));
+            this.recipeGen.setOreDictIndexForward(activeSlotID);
         });
 
         prevOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         prevOreDictArrow.setDrawShaft(false);
         prevOreDictArrow.setDirection(DrawableArrow.ArrowDirection.LEFT);
         prevOreDictArrow.setOnPressed(pressed-> {
-            this.tokenTxt.setLabel(getStackToken(false, true, activeSlotID));
+            this.recipeGen.setOreDictIndexReverse(activeSlotID);
         });
 
         activeSlotID = -1;
-        for (int id = 1; id < 10; id ++) {
-            CheckBox box = new CheckBox(id, new Point2D(0, 0), "Use ore dictionary", false);
-            box.disableAndHide();
-            box.setOnPressed(pressed ->
-                        this.tokenTxt.setLabel(getStackToken(false, false, activeSlotID)));
-            useOreDict.put(id,box);
-        }
+
+        useOreDictCheckbox = new CheckBox(1, new Point2D(0, 0), "Use ore dictionary", false);
+        useOreDictCheckbox.disableAndHide();
+        useOreDictCheckbox.setOnPressed(pressed -> {
+            if (this.activeSlotID < 0) {
+                recipeGen.useOredict.put(activeSlotID, useOreDictCheckbox.isChecked());
+            }
+        });
+
         reset();
+    }
+
+    public int getActiveSlotID() {
+        return activeSlotID;
     }
 
     @Override
@@ -90,11 +89,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
         double nextLineSC = 0;
 
         title.setPosition(slotSpecificCol.plus(0,spacer));
-
-        nextLineSC+=10;
-        for (CheckBox checkBox : useOreDict.values()) {
-            checkBox.setPosition(slotSpecificCol.plus(0, nextLineSC));
-        }
+        useOreDictCheckbox.setPosition(slotSpecificCol.plus(0, nextLineSC + 10));
 
         prevOreDictArrow.setTargetDimensions(new Point2D(left + 93, top + 137), new Point2D(12, 17));
         nextOreDictArrow.setTargetDimensions(new Point2D(left + 38, top + 137), new Point2D(12, 17));
@@ -103,18 +98,42 @@ public class SlotOptionsFrame extends ScrollableFrame {
     @Override
     public void update(double mouseX, double mouseY) {
         super.update(mouseX, mouseY);
-        for (int id = 1; id < 10; id ++) {
-            if (id == activeSlotID) {
-                if (container.getSlot(id).getHasStack()) {
-                    useOreDict.get(id).enableAndShow();
-                } else {
-                    useOreDict.get(id).disableAndHide();
-                }
+        if (activeSlotID < 1) {
+            useOreDictCheckbox.disableAndHide();
+        } else {
+            ItemStack stack = container.getSlot(activeSlotID).getStack();
+            if (stack.isEmpty()) {
+                useOreDictCheckbox.disableAndHide();
+                nextOreDictArrow.disableAndHide();
+                prevOreDictArrow.disableAndHide();
             } else {
-                useOreDict.get(id).disableAndHide();
+                Item item = stack.getItem();
+                final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
+                if (!ids.isEmpty()) {
+                    useOreDictCheckbox.enableAndShow();
+                    useOreDictCheckbox.setChecked(recipeGen.useOredict.getOrDefault(activeSlotID, false));
+                    if (recipeGen.useOredict.get(activeSlotID)) {
+                        int oreIndex = recipeGen.getOreIndex(activeSlotID);
+                        if (oreIndex < -1) {
+                            if (oreIndex -1 < ids.size()) {
+                                nextOreDictArrow.enableAndShow();
+                            } else {
+                                nextOreDictArrow.disableAndHide();
+                            }
+                            if (oreIndex > 0) {
+                                prevOreDictArrow.enableAndShow();
+                            } else {
+                                prevOreDictArrow.disableAndHide();
+                            }
+                        }
+                    } else {
+                        useOreDictCheckbox.disableAndHide();
+                        nextOreDictArrow.disableAndHide();
+                        prevOreDictArrow.disableAndHide();
+                    }
+                }
             }
         }
-        this.tokenTxt.setLabel(getStackToken(false, false, activeSlotID));
     }
 
     @Override
@@ -123,10 +142,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
         if (isVisible()) {
             super.render(mouseX, mouseY, partialTicks);
             title.render(mouseX, mouseY, partialTicks);
-
-            if (useOreDict.get(activeSlotID) != null) {
-                useOreDict.get(activeSlotID).render(mouseX, mouseY, partialTicks);
-            }
+            useOreDictCheckbox.render(mouseX, mouseY, partialTicks);
+            nextOreDictArrow.render(mouseX, mouseY, partialTicks);
+            prevOreDictArrow.render(mouseX, mouseY, partialTicks);
         }
     }
 
@@ -135,10 +153,8 @@ public class SlotOptionsFrame extends ScrollableFrame {
         if (isVisible()) {
             super.mouseClicked(mouseX, mouseY, button);
 
-            for (CheckBox checkBox : useOreDict.values()) {
-                if (checkBox.mouseClicked(mouseX, mouseY, button)) {
-                    return true;
-                }
+            if (useOreDictCheckbox.mouseClicked(mouseX, mouseY, button)) {
+                return true;
             }
 
             if (nextOreDictArrow.mouseClicked(mouseX, mouseY, button)) {
@@ -155,6 +171,12 @@ public class SlotOptionsFrame extends ScrollableFrame {
     public void selectSlot(int slot) {
         this.activeSlotID = slot;
 
+//        if (slot < 1) {
+//            useOreDictCheckbox.disableAndHide();
+//        } else {
+//            useOreDictCheckbox.enableAndShow();
+//        }
+//        useOreDictCheckbox.setChecked(useOredict.get(slot));
         setLabel();
     }
 
@@ -163,130 +185,8 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     public void reset() {
-        for (int id = 1; id < 10; id ++) {
-            useOreDict.get(id).disableAndHide();
-            oreTags = new HashMap<>();
-        }
+        useOreDictCheckbox.disableAndHide();
         activeSlotID = -1;
         setLabel();
-    }
-
-    ItemStack getStack(int slot) {
-        return container.getSlot(slot).getStack();
-    }
-
-    /**
-     *
-     * @param slot
-     * @return JSon representing the item stack in the given slot
-     */
-    public JsonObject getStackJson(int slot) {
-        JsonObject jsonObject = new JsonObject();
-
-        ItemStack stack = getStack(slot);
-        if (!stack.isEmpty()) {
-            boolean usingOredict = slot !=0 ? useOreDict.get(slot).isChecked() : false;
-
-            if (usingOredict && oreTags.get(slot) != null) {
-                Item item = stack.getItem();
-                final Collection<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item);
-                jsonObject.addProperty("tag", oreTags.get(slot).toString());
-            } else {
-                // fail here, but not gracefully I guess
-                if (stack.getItem().getRegistryName() == null) {
-                    throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
-                }
-
-                if (stack.hasTag()) {
-                    if (!stack.getItem().getRegistryName().toString().equals("forge:bucketfilled")) {
-                        jsonObject.addProperty("type", "minecraft:item_nbt");
-                    }
-
-                    String nbtString = stack.getTag().toString();
-                    jsonObject.add("nbt", NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject()));
-
-                    // <modularpowerarmor:powerarmor_feet>.withTag({MMModItem: {render: {"mps_boots.boots2": {part: "boots2", model: "mps_boots"}, texSpec: {part: "feet", model: "default_armorskin"}, "mps_boots.boots1": {part: "boots1", model: "mps_boots"}, colours: [-1, -15642881] as int[]}}})
-                }
-                jsonObject.addProperty("item", stack.getItem().getRegistryName().toString());
-            }
-
-            // set the stack count
-            if (stack.getCount() > 1) {
-                jsonObject.addProperty("count", stack.getCount());
-            }
-        }
-        return jsonObject;
-    }
-
-    /**
-     * @param nextOreDict
-     * @param prevOreDict
-     * @param slot
-     * @return the string for display in the text bar
-     */
-    public String getStackToken(boolean nextOreDict, boolean prevOreDict, int slot) {
-        if (slot < 0 || slot > 10) {
-            return "No slot selected";
-        }
-
-        ItemStack stack = getStack(slot);
-
-        // return empty slot string
-        if (stack.isEmpty()) {
-            if (slot == activeSlotID) {
-                nextOreDictArrow.disableAndHide();
-                prevOreDictArrow.disableAndHide();
-            }
-            return "empty";
-        }
-
-        // fail here, but not gracefully I guess
-        if (stack.getItem().getRegistryName() == null) {
-            throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
-        }
-
-        if (slot == activeSlotID && slot != 0) {
-            useOreDict.get(slot).enableAndShow();
-        }
-
-        boolean oreDict = /*activeSlotID > -1 && activeSlotID < 11 && */(slot !=0 ? useOreDict.get(slot).isChecked() : false);
-
-        String stackName = stack.getItem().getRegistryName().toString();
-        StringBuilder builder = new StringBuilder();
-        if (oreDict) {
-            Item item = stack.getItem();
-            final Collection<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item);
-            if (ids.size() > 0) {
-                List<ResourceLocation> oreTagArray = ids.stream().collect(Collectors.toList());;
-
-                int index = oreTagArray.indexOf(oreTags.get(slot));
-                if (nextOreDict) {
-                    index ++;
-                } else if (prevOreDict) {
-                    index--;
-                }
-
-                if (index >= ids.size() || index < 0) {
-                    index = 0;
-                }
-
-                stackName = "tag: " + oreTagArray.get(index);
-
-                if (activeSlotID == slot) {
-                    nextOreDictArrow.setVisible(index > -1 && index + 1 < ids.size());
-                    prevOreDictArrow.setVisible(index > 0);
-                }
-            } else {
-                nextOreDictArrow.setVisible(false);
-                prevOreDictArrow.setVisible(false);
-            }
-        }
-        builder.append(stackName);
-
-        if (stack.getCount() > 1) {
-            builder.append(" * ").append(stack.getCount());
-        }
-
-        return builder.toString();
     }
 }

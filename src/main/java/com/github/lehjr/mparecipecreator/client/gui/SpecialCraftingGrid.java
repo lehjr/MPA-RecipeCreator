@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 /**
  * Spaced crafting grid with result and corresponding buttons
  */
-public class CheckBoxCraftingGrid implements IGuiFrame {
+public class SpecialCraftingGrid implements IGuiFrame {
     Container container;
     protected DrawableRect border;
     Colour backgroundColour;
@@ -37,12 +37,12 @@ public class CheckBoxCraftingGrid implements IGuiFrame {
     final Point2D borderWH = new Point2D(160, 96);
     Point2D slot_ulShift = new Point2D(0, 0);
 
-    public CheckBoxCraftingGrid(Container containerIn,
-                                Point2D topleft,
-                                Colour backgroundColour,
-                                Colour borderColour,
-                                Colour gridColourIn,
-                                MPARCGui mtrmGuiIn) {
+    public SpecialCraftingGrid(Container containerIn,
+                               Point2D topleft,
+                               Colour backgroundColour,
+                               Colour borderColour,
+                               Colour gridColourIn,
+                               MPARCGui mtrmGuiIn) {
         this.container = containerIn;
         this.border = new DrawableRect(topleft, topleft.copy().plus(borderWH), /*backgroundColour*/ Colour.DARKBLUE, borderColour);
         this.backgroundColour = backgroundColour;

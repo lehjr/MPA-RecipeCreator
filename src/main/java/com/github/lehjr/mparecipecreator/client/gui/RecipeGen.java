@@ -1,7 +1,7 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.mpalib.nbt.NBT2Json;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
@@ -9,24 +9,32 @@ import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author lehjr
  */
 public class RecipeGen {
-    // <Slot, oredict index>
     private Map<Integer, Integer> oreTagIndeces = new HashMap<>();
+    public Map<Integer, Boolean> useOredict = new HashMap<>();
     MTRMContainer container;
+    RecipeOptionsFrame recipeOptions;
 
-    public RecipeGen(MTRMContainer containerIn) {
-        this.container=containerIn;
+    public RecipeGen(MTRMContainer containerIn, RecipeOptionsFrame recipeOptionsIn) {
+        this.container = containerIn;
+        this.recipeOptions = recipeOptionsIn;
+        reset();
     }
 
     public void reset() {
         oreTagIndeces = new HashMap<>();
+        useOredict = new HashMap<>();
+        for (int id = 0; id < 10; id ++) {
+            useOredict.put(id, false);
+        }
     }
 
     /**
@@ -36,6 +44,24 @@ public class RecipeGen {
     @Nonnull
     ItemStack getStack(int slot) {
         return container.getSlot(slot).getStack();
+    }
+
+    public int setOreDictIndexForward(int slot) {
+        if (oreTagIndeces.containsKey(slot)) {
+            return setOreTagIndex(slot, oreTagIndeces.get(slot) + 1);
+        }
+        return -1;
+    }
+
+    public int setOreDictIndexReverse(int slot) {
+        if (oreTagIndeces.containsKey(slot)) {
+            return setOreTagIndex(slot, oreTagIndeces.get(slot) - 1);
+        }
+        return -1;
+    }
+
+    public int getOreIndex(int slot) {
+        return oreTagIndeces.getOrDefault(slot, -1);
     }
 
     /**
@@ -50,7 +76,7 @@ public class RecipeGen {
             Item item = stack.getItem();
             final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
             if (!ids.isEmpty()) {
-                if (!(index < ids.size())) {
+                if (!(index < ids.size()) || index < 0) {
                     index = 0;
                 }
                 oreTagIndeces.put(slot, index);
@@ -124,5 +150,235 @@ public class RecipeGen {
             }
         }
         return stackJson;
+    }
+
+    /**
+     *
+     * @param slot
+     * @param usingOreDict
+     * @return the string for display in the text bar
+     */
+    public String getStackToken(int slot, boolean usingOreDict) {
+        if (slot < 0 || slot > 10) {
+            return "No slot selected";
+        }
+
+        ItemStack stack = getStack(slot);
+        // return empty slot string
+        if (stack.isEmpty()) {
+            return "empty";
+        }
+
+        // fail here, but not gracefully I guess
+        if (stack.getItem().getRegistryName() == null) {
+            throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
+        }
+
+        String stackName = stack.getItem().getRegistryName().toString();
+        StringBuilder builder = new StringBuilder();
+        if (usingOreDict) {
+            Item item = stack.getItem();
+            List<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item).stream().collect(Collectors.toList());
+            stackName = "tag: " + ids.get(oreTagIndeces.getOrDefault(slot, 0));
+            builder.append(stackName);
+
+            if (stack.getCount() > 1) {
+                builder.append(" * ").append(stack.getCount());
+            }
+        }
+        return builder.toString();
+    }
+
+    public JsonObject getStackJson(int slot) {
+        boolean usingOreDict = useOredict.getOrDefault(slot, false);
+        JsonObject stackJson = new JsonObject();
+        if (usingOreDict) {
+            stackJson = getOreJson(slot);
+        }
+        if (stackJson.size() == 0) {
+            return getStackJson(getStack(slot));
+        }
+        return stackJson;
+    }
+
+    public String getFileName() {
+        String filename = "";
+        ItemStack resultStack = getStack(0);
+        if (!resultStack.isEmpty()) {
+            JsonArray conditions = recipeOptions.conditionsFrame.getJson();
+            if (conditions.size() != 0) {
+                for (Object line : conditions) {
+                    if (line instanceof JsonObject && ((JsonObject) line).has("type")) {
+                        String line1 = ((JsonObject) line).get("type").getAsString();
+                        line1 = line1.replace("_enabled", "");
+                        filename += line1;
+                    }
+                }
+            }
+        }
+        return filename;
+    }
+
+
+    //-------------------------------------------------------------------------------------------------------------- //
+
+    public String getRecipeJson() {
+        String backupChars = "#@$%^&*(){}";
+        JsonObject recipeJson = new JsonObject();
+        ItemStack resultStack = getStack(0);
+        recipeJson.add("result", getStackJson(resultStack));
+        JsonArray conditions = recipeOptions.conditionsFrame.getJson();
+
+        if (conditions.size() > 0) {
+            recipeJson.add("conditions", conditions);
+        }
+
+        if (recipeOptions.isShapeless()) {
+            recipeJson.addProperty("type", "minecraft:crafting_shapeless");
+
+            JsonArray ingredients = new JsonArray();
+            for (int i = 1; i < 11; i++) {
+                if (!this.container.getSlot(i).getStack().isEmpty()) {
+                    JsonObject ingredient = getStackJson(i);
+
+                    boolean match = false;
+                    // add first ingredient without checking
+                    if (ingredients.size() == 0) {
+                        ingredients.add(getStackJson(i));
+
+                        // check if ingredient is already in the list
+                    } else {
+                        for(int index = 0; i < ingredients.size(); index++) {
+                            JsonObject jsonObject = ingredients.get(index).getAsJsonObject();
+                            if (jsonObject.has("item") && ingredient.has("item")) {
+                                if (jsonObject.getAsJsonObject().get("item").getAsString().equals(ingredient.get("item").getAsString())) {
+                                    match = true;
+                                }
+                            } else if (jsonObject.getAsJsonObject().has("tag") && ingredient.has("tag")) {
+                                if (jsonObject.get("tag").getAsString().equals(ingredient.get("tag").getAsString())) {
+                                    match = true;
+                                }
+                            }
+                            if (match) {
+                                int count = 1;
+                                if (jsonObject.getAsJsonObject().has("count")) {
+                                    count = jsonObject.getAsJsonObject().get("count").getAsInt();
+                                }
+
+                                if (ingredient.has("count")) {
+                                    count += ingredient.get("count").getAsInt();
+                                } else {
+                                    count += 1;
+                                }
+
+                                if (count != 1) {
+                                    jsonObject.getAsJsonObject().addProperty("count", count);
+                                    ingredients.set(index, jsonObject);
+                                }
+                                break;
+                            } else {
+                                ingredients.add(getStackJson(i));
+                            }
+                        }
+                    }
+                }
+            }
+            recipeJson.add("ingredients", ingredients);
+        } else {
+            // TODO: disable oredict for output
+//            if (getStackJson(0).has("item")) {
+            recipeJson.addProperty("type", "minecraft:crafting_shaped");
+//            } else {
+//                recipeJson.addProperty("type", "mpa_shaped_ore");
+//            }
+
+            // only in shaped recipes
+            if (recipeOptions.isMirrored()) {
+                recipeJson.addProperty("mirrored", true);
+            }
+
+            Map<String, JsonObject> keys = new HashMap<>();
+            String[] pattern = {"   ", "   ", "   "};
+
+            char character;
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    int i = row * 3 + col + 1;
+
+                    if (!this.container.getSlot(i).getStack().isEmpty()) {
+                        JsonObject ingredient = getStackJson(i);
+                        String ingredientString = "";
+
+                        if (ingredient.has("item")) {
+                            String[] ingredientStringList = ingredient.get("item").getAsString().split(":");
+                            ingredientString = ingredientStringList[ingredientStringList.length - 1].toUpperCase();
+                        } else if (ingredient.has("tag")) {
+                            ingredientString = ingredient.get("tag").getAsString().toUpperCase();
+                        }
+
+                        boolean keyFound = false;
+                        for (int index = 0; i < ingredientString.length(); index++) {
+                            character = ingredientString.charAt(index);
+                            String key = String.valueOf(character).toUpperCase();
+
+                            // add key to map
+                            if (keys.isEmpty() || !keys.containsKey(key)) {
+                                keys.put(key, ingredient);
+                                StringBuilder sb = new StringBuilder(pattern[row]);
+                                sb.setCharAt(col, character);
+                                pattern[row] = sb.toString();
+                                keyFound = true;
+                                break;
+
+                                // check if key is already in map and json is a match, else new key needed
+                            } else if (keys.containsKey(key)) {
+                                JsonObject object = keys.get(key);
+                                if (object.equals(ingredient)) {
+                                    StringBuilder sb = new StringBuilder(pattern[row]);
+                                    sb.setCharAt(col, character);
+                                    pattern[row] = sb.toString();
+                                    keyFound = true;
+                                    break;
+                                    // check next letter
+                                } else {
+                                    continue;
+                                }
+                            }
+                        }
+
+                        // fallback on a set of backup characters
+                        if (!keyFound) {
+                            for (int index = 0; i < backupChars.length(); index++) {
+                                character = backupChars.charAt(index);
+                                String key = String.valueOf(character);
+                                keys.put(key, ingredient);
+                                StringBuilder sb = new StringBuilder(pattern[row]);
+                                sb.setCharAt(col, character);
+                                pattern[row] = sb.toString();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            JsonArray patternArray = new JsonArray();
+            for (String line : pattern) {
+                patternArray.add(line);
+            }
+            recipeJson.add("pattern", patternArray);
+
+            JsonObject keysJson = new JsonObject();
+            for (String key : keys.keySet()) {
+                keysJson.add(key, keys.get(key));
+            }
+            recipeJson.add("keys", keysJson);
+        }
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(recipeJson.toString());
+        String prettyJsonString = gson.toJson(je);
+        return prettyJsonString;
     }
 }

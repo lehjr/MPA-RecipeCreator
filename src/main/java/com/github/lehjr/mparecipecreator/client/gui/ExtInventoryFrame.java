@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
  */
 public class ExtInventoryFrame extends ScrollableFrame {
     InventoryFrame mainInventory, hotbar;
-    CheckBoxCraftingGrid craftingGrid;
+    SpecialCraftingGrid craftingGrid;
     Container container;
     Point2D ulShift = new Point2D(0, 0);
     final int spacer = 4;
@@ -38,7 +38,7 @@ public class ExtInventoryFrame extends ScrollableFrame {
         this.container = container;
 
         // slots 0 - 9
-        craftingGrid = new CheckBoxCraftingGrid(
+        craftingGrid = new SpecialCraftingGrid(
                 container,
                 new Point2D(0, 0),
                 gridBackGound,
