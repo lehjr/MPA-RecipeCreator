@@ -39,7 +39,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
     private Map<Integer, CheckBox> useOreDict = new HashMap<>();
     StackTextDisplayFrame tokenTxt;
 
-
     public SlotOptionsFrame(Point2D topleft,
                             Point2D bottomright,
                             StackTextDisplayFrame tokenTxt,

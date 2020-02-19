@@ -12,6 +12,7 @@ import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.world.World;
 
 /**
  * @author Dries007
@@ -136,6 +137,13 @@ public class MTRMContainer extends Container {
             stack = super.slotClick(i, mousebtn, clickTypeIn, player);
         }
         return stack;
+    }
+
+    @Override
+    protected void clearContainer(PlayerEntity playerIn, World worldIn, IInventory inventoryIn) {
+
+
+        super.clearContainer(playerIn, worldIn, inventoryIn);
     }
 
     /**

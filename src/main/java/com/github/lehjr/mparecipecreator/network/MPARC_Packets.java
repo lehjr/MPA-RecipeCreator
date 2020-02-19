@@ -33,6 +33,5 @@ public class MPARC_Packets {
                 ConditionsResponsePacket::encode,
                 ConditionsResponsePacket::decode,
                 ConditionsResponsePacket::handle);
-
     }
 }

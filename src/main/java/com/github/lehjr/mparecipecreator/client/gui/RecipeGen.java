@@ -1,97 +1,128 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.mpalib.nbt.NBT2Json;
 import com.google.gson.JsonObject;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author lehjr
  */
 public class RecipeGen {
-    JsonObject recipe;
-    ItemStack outputStack;
+    // <Slot, oredict index>
+    private Map<Integer, Integer> oreTagIndeces = new HashMap<>();
+    MTRMContainer container;
 
-    public RecipeGen() {
-        this(ItemStack.EMPTY);
+    public RecipeGen(MTRMContainer containerIn) {
+        this.container=containerIn;
     }
 
-    public RecipeGen(@Nonnull ItemStack outputStackIn) {
-        this.outputStack = outputStackIn;
-        this.recipe = new JsonObject();
+    public void reset() {
+        oreTagIndeces = new HashMap<>();
     }
 
-    public void setConditions(Map<String, Boolean> conditions) {
-        JsonObject conditionsJson = new JsonObject();
+    /**
+     * @param slot index
+     * @return ItemStack from container slot
+     */
+    @Nonnull
+    ItemStack getStack(int slot) {
+        return container.getSlot(slot).getStack();
+    }
 
-        for (String key : conditions.keySet()) {
-            conditionsJson.addProperty(key, conditions.get(key));
+    /**
+     * Set the index of the tag list for the stack in the slot
+     * @param slot
+     * @param index
+     * @return
+     */
+    public int setOreTagIndex(int slot, int index) {
+        ItemStack stack = getStack(slot);
+        if (!stack.isEmpty()) {
+            Item item = stack.getItem();
+            final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
+            if (!ids.isEmpty()) {
+                if (!(index < ids.size())) {
+                    index = 0;
+                }
+                oreTagIndeces.put(slot, index);
+            }
+        } else {
+            index = -1;
         }
-        recipe.add("conditions", conditionsJson);
+        return index;
     }
 
-    // Set whether or not the recipe is shapeless
-    public void setType(boolean shapeless) {
-        recipe.addProperty("type", shapeless ? "tag" : "minecraft:crafting_shaped");
-    }
+    /**
+     * Gets the JsonObject representing the ItemStack.
+     * Does not fetch oredict (now tags) data
+     *
+     * @param stack
+     * @return
+     */
+    JsonObject getStackJson(@Nonnull ItemStack stack) {
+        JsonObject stackJson = new JsonObject();
+        if (!stack.isEmpty()) {
+            // fail here, but not gracefully I guess
+            if (stack.getItem().getRegistryName() == null) {
+                throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
+            }
 
-    public void setMirrored(boolean mirrored) {
-        recipe.addProperty("mirrored", mirrored);
-    }
+            if (stack.hasTag()) {
+                if (!stack.getItem().getRegistryName().toString().equals("forge:bucketfilled")) {
+                    stackJson.addProperty("type", "minecraft:item_nbt");
+                }
+                stackJson.add("nbt", NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject()));
+            }
+            stackJson.addProperty("item", stack.getItem().getRegistryName().toString());
 
-
-
-
-
-
-
-
-/*
-
-  "recipes": {
-    "minecraft:crafting_shaped": "com.github.lehjr.modularpowerarmor.recipe.RecipeFactory"
-  },
-  "conditions": {
-    "enderio_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",
-    "gregtech_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",
-    "ic2_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",
-    "ic2_classic_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",
-    "tech_reborn_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",
-    "thermal_expansion_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory",
-    "vanilla_recipes_enabled": "com.github.lehjr.modularpowerarmor.recipe.RecipeConditionFactory"
-  }
-
-
-
-
-    {
-        "conditions": [
-        {
-            "type": "modularpowerarmor:vanilla_recipes_enabled"
+            // set the stack count
+            if (stack.getCount() > 1) {
+                stackJson.addProperty("count", stack.getCount());
+            }
         }
-  ],
-        "type": "modularpowerarmor:mpa_shaped",
-            "pattern": [
-        "III",
-                "W W"
-  ],
-        "key": {
-        "I": {
-            "type": "forge:ore_dict",
-                    "ore": "ingotIron"
-        },
-        "W": {
-            "type": "forge:ore_dict",
-                    "ore": "componentWiring"
+        return stackJson;
+    }
+
+    /**
+     * @param slot
+     * @return
+     */
+    public JsonObject getOreJson(int slot) {
+        ItemStack stack = getStack(slot);
+        if (slot == 0) {
+            return getStackJson(stack);
         }
-    },
-        "result": {
-        "item": "modularpowerarmor:powerarmor_head"
+        JsonObject stackJson = new JsonObject();
+
+        if (!stack.isEmpty()) {
+            Item item = stack.getItem();
+            final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
+            if (!ids.isEmpty()) {
+                int index = 0;
+                if (oreTagIndeces.containsKey(slot)) {
+                    index = oreTagIndeces.get(slot);
+                }
+                stackJson.addProperty("tag", ids.get(index).toString());
+            }
+
+            if (stackJson.size() == 0) {
+                stackJson = getStackJson(stack);
+            }
+
+            // set the stack count
+            if (stack.getCount() > 1) {
+                stackJson.addProperty("count", stack.getCount());
+            }
+        }
+        return stackJson;
     }
-    }
-
- */
-
-
 }

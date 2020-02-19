@@ -1,7 +1,6 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.modularpowerarmor.item.component.ItemComponent;
-import com.github.lehjr.mpalib.client.gui.ContainerGui;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
@@ -24,7 +23,7 @@ import java.util.Map;
 /**
  * @author Dries007
  */
-public class MPARCGui extends ContainerGui<MTRMContainer> {
+public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
     protected DrawableRect backgroundRect;
     protected long creationTime;
 
@@ -221,6 +220,7 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
                 }
             }
 
+            // removing tile from regname
             String resultRegName = resultStack.getDisplayName()
                     .getFormattedText()
                     .replace(".tile", "")
@@ -394,14 +394,7 @@ public class MPARCGui extends ContainerGui<MTRMContainer> {
         JsonParser jp = new JsonParser();
         JsonElement je = jp.parse(recipeJson.toString());
         String prettyJsonString = gson.toJson(je);
-
-//        System.out.println("json: " + recipeJson.toString());
-//        System.out.println("prettyJson: " + prettyJsonString);
-
         recipeDisplayFrame.setRecipe(prettyJsonString);
-
-//        System.out.println("lines: " + prettyJsonString.split("\n").length);
-
         return prettyJsonString;
     }
 
