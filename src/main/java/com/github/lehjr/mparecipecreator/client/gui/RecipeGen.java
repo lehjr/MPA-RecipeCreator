@@ -213,7 +213,7 @@ public class RecipeGen {
                 for (Object line : conditions) {
                     if (line instanceof JsonObject && ((JsonObject) line).has("type")) {
                         String line1 = ((JsonObject) line).get("type").getAsString();
-                        line1 = line1.replace("_enabled", "");
+                        line1 = line1.replace("_recipes_enabled", "");
                         filename += line1;
                     }
                 }
