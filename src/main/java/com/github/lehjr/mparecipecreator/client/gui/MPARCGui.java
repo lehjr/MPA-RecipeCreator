@@ -1,5 +1,6 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.mpalib.client.gui.ExtendedContainerScreen;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
