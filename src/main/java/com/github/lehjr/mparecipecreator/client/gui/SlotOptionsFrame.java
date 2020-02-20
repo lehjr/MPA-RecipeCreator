@@ -170,13 +170,6 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
     public void selectSlot(int slot) {
         this.activeSlotID = slot;
-
-//        if (slot < 1) {
-//            useOreDictCheckbox.disableAndHide();
-//        } else {
-//            useOreDictCheckbox.enableAndShow();
-//        }
-//        useOreDictCheckbox.setChecked(useOredict.get(slot));
         setLabel();
     }
 

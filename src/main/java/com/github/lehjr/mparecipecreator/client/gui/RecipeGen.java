@@ -204,7 +204,10 @@ public class RecipeGen {
     public String getFileName() {
         String filename = "";
         ItemStack resultStack = getStack(0);
-        if (!resultStack.isEmpty()) {
+
+        if (resultStack.isEmpty()) {
+            return "Recipe Invalid";
+        } else {
             JsonArray conditions = recipeOptions.conditionsFrame.getJson();
             if (conditions.size() != 0) {
                 for (Object line : conditions) {
@@ -215,12 +218,28 @@ public class RecipeGen {
                     }
                 }
             }
+
+            String resultRegName = resultStack.getDisplayName()
+                    .getUnformattedComponentText()
+                    .replace(".tile", "")
+                    .replace(".", "_")
+                    .replace(" ", "_")
+                    .replace(":", "_")
+                    .toLowerCase();
+
+            if (filename.isEmpty()) {
+                return resultRegName;
+            } else {
+//                filename += resultStack.getItem().
+//                        getRegistryName().
+//                        toString().
+//                        toLowerCase().
+//                        replace(":", "_");
+
+                return filename + "/" + resultRegName;
+            }
         }
-        return filename;
     }
-
-
-    //-------------------------------------------------------------------------------------------------------------- //
 
     public String getRecipeJson() {
         String backupChars = "#@$%^&*(){}";

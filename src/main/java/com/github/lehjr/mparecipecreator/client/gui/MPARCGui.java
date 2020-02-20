@@ -159,6 +159,7 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
 
     public void resetRecipes() {
         slotOptions.reset();
+        recipeGen.reset();
         container.craftMatrix.clear();
         container.craftResult.clear();
     }
@@ -196,6 +197,13 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
     @Override
     public void update(double x, double y) {
         super.update(x, y);
+        int activeSlot = slotOptions.getActiveSlotID();
+
+        if (activeSlot >= 0) {
+            tokenTxt.setLabel(
+                    recipeGen.getStackToken(activeSlot,
+                            recipeGen.useOredict.getOrDefault(activeSlot, false)));
+        }
 
         recipeDisplayFrame.setFileName(recipeGen.getFileName());
         recipeDisplayFrame.setRecipe(recipeGen.getRecipeJson());
@@ -208,8 +216,6 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
-//        super.render(mouseX, mouseY, partialTicks);
-
         this.renderBackground();
         backgroundRect.draw();
         super.render(mouseX, mouseY, partialTicks);
