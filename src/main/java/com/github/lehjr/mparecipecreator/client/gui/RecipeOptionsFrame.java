@@ -78,11 +78,6 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         save = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Save"));
         save.setOnPressed(pressed->{
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK,1);
-
-            //TODO: actually save recipe if valid
-
-            System.out.println("Save button pressed");
-
             mtrmGuiIn.save();
         });
 

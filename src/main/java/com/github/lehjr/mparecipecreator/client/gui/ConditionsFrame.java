@@ -44,9 +44,6 @@ public class ConditionsFrame extends ScrollableFrame {
         try {
             if (this.conditions != null && this.conditions.size() > 0) {
                 if (checkBoxList.isEmpty()) {
-                    System.out.println("conditions: " + conditions.toString());
-
-
                     JsonObject jobject = conditions.getAsJsonObject("conditions");
 
                     for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {

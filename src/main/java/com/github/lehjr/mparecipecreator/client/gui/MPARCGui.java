@@ -40,7 +40,6 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
     protected final Colour gridBackGound = new Colour(0.545D, 0.545D, 0.545D, 1);
     public RecipeGen recipeGen;
 
-
     public MPARCGui(MTRMContainer container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
         rescale();
@@ -170,7 +169,6 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
 
     String targetFolder = null;
     public void setTargetFolder(String path) {
-        System.out.println("path: " + path);
         if (path.endsWith("\\.") || path.endsWith("/.")) {
             path = path.substring(0, path.length() -2);
         }

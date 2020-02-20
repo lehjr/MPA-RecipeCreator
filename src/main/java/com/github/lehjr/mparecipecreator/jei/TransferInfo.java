@@ -12,8 +12,6 @@ import static mezz.jei.api.constants.VanillaRecipeCategoryUid.CRAFTING;
 public class TransferInfo implements IRecipeTransferInfo<MTRMContainer> {
     @Override
     public Class<MTRMContainer> getContainerClass() {
-        System.out.println("doing something here");
-
         return MTRMContainer.class;
     }
 
@@ -24,22 +22,16 @@ public class TransferInfo implements IRecipeTransferInfo<MTRMContainer> {
 
     @Override
     public boolean canHandle(MTRMContainer mtrmContainer) {
-        System.out.println("doing something here");
-
         return true;
     }
 
     @Override
     public List<Slot> getRecipeSlots(MTRMContainer mtrmContainer) {
-        System.out.println("doing something here");
-
         return mtrmContainer.inventorySlots.subList(1, 10);
     }
 
     @Override
     public List<Slot> getInventorySlots(MTRMContainer mtrmContainer) {
-        System.out.println("doing something here");
-
         return mtrmContainer.inventorySlots.subList(10, mtrmContainer.inventorySlots.size() -1);
     }
 }
