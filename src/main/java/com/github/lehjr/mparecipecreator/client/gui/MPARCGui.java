@@ -200,9 +200,7 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
         int activeSlot = slotOptions.getActiveSlotID();
 
         if (activeSlot >= 0) {
-            tokenTxt.setLabel(
-                    recipeGen.getStackToken(activeSlot,
-                            recipeGen.useOredict.getOrDefault(activeSlot, false)));
+            tokenTxt.setLabel(recipeGen.getStackToken(activeSlot));
         }
 
         recipeDisplayFrame.setFileName(recipeGen.getFileName());

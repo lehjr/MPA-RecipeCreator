@@ -155,10 +155,10 @@ public class RecipeGen {
     /**
      *
      * @param slot
-     * @param usingOreDict
      * @return the string for display in the text bar
      */
-    public String getStackToken(int slot, boolean usingOreDict) {
+    public String getStackToken(int slot) {
+        boolean usingOreDict = useOredict.getOrDefault(slot, false);
         if (slot < 0 || slot > 10) {
             return "No slot selected";
         }
@@ -175,7 +175,7 @@ public class RecipeGen {
         }
 
         String stackName = stack.getItem().getRegistryName().toString();
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(stackName);
         if (usingOreDict) {
             Item item = stack.getItem();
             List<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item).stream().collect(Collectors.toList());
