@@ -5,7 +5,6 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
-import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.text.ITextComponent;
@@ -14,6 +13,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author Dries007
@@ -95,8 +96,6 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
                 Colour.DARKBLUE,
                 gridBorderColour);
         frames.add(recipeDisplayFrame);
-
-//        sendConditionRequest();
     }
 
     Point2D getULShift() {
@@ -152,33 +151,17 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
                 backgroundRect.finalBottom() - spacer);
     }
 
-//    public void sendConditionRequest() {
-//        MPARC_Packets.CHANNEL_INSTANCE.sendToServer(new ConditionsRequestPacket());
-//    }
-
     public void resetRecipes() {
         slotOptions.reset();
         recipeGen.reset();
         container.craftMatrix.clear();
         container.craftResult.clear();
     }
-//
-//    public void setConditionsJson(JsonObject conditionsJsonIn) {
-//        recipeOptions.setConditionsJson(conditionsJsonIn);
-//    }
-
-    String targetFolder = null;
-    public void setTargetFolder(String path) {
-        if (path.endsWith("\\.") || path.endsWith("/.")) {
-            path = path.substring(0, path.length() -2);
-        }
-        File outDir = new File(path, "saved_recipes");
-        targetFolder = outDir.getAbsolutePath();
-    }
 
     public void save() {
         if(container.getSlot(0).getHasStack()) {
-            File file = new File(targetFolder, recipeDisplayFrame.title + ".json");
+            Path dir = Paths.get("saved_recipes");
+            File file = new File(dir.toAbsolutePath().toString(), recipeDisplayFrame.title + ".json");
             String prettyJson = recipeGen.getRecipeJson();
             try {
                 Files.createDirectories(file.toPath().getParent());

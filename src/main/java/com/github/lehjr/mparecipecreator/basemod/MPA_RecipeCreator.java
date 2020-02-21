@@ -27,9 +27,6 @@ public final class MPA_RecipeCreator {
     public static final CreativeTab creativeTab = new CreativeTab();
 
     public MPA_RecipeCreator() {
-//        // Register the setup method for modloading
-//        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-
         // Register the setupClient method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupClient);
 
@@ -38,10 +35,6 @@ public final class MPA_RecipeCreator {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.register(this);
     }
-
-//    private void setup(final FMLCommonSetupEvent event) {
-//        MPARC_Packets.registerPackets();
-//    }
 
     private void setupClient(final FMLClientSetupEvent event) {
         ScreenManager.registerFactory(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, MPARCGui::new);

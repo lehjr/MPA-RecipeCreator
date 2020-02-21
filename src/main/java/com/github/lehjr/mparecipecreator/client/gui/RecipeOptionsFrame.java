@@ -119,10 +119,6 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         reset.setPosition(new Point2D(right - 15 - spacer - reset.finalWidth() * 2, top + save.finalHeight() + reset.finalHeight() * 0.5 + spacer * 2));
     }
 
-//    public void setConditionsJson(JsonObject conditionsIn) {
-//        conditionsFrame.setConditions(conditionsIn);
-//    }
-
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         if (isVisible()) {
@@ -144,13 +140,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     @Override
     public void update(double x, double y) {
         super.update(x, y);
-
-        JsonObject jsonObject = null;
-
         if (conditionsFrame.isEnabled() && conditionsFrame.isVisible()) {
-//            if (jsonObject != null) {
-//                conditionsFrame.setConditions(jsonObject);
-//            }
             conditionsFrame.update(x, y);
         }
     }

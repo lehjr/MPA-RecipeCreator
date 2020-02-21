@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class ConditionsFrame extends ScrollableFrame {
     Map<String, CheckBox> checkBoxList = new HashMap<>();
-    //    JsonObject conditions = null;
+
     public ConditionsFrame(Point2D topleft, Point2D bottomright, Colour backgroundColour, Colour borderColour) {
         super(topleft, bottomright, backgroundColour, borderColour);
     }
@@ -28,10 +28,6 @@ public class ConditionsFrame extends ScrollableFrame {
         loadConditions();
     }
 
-//    public void setConditions(JsonObject conditionsIn) {
-//        this.conditions = conditionsIn;
-//    }
-
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -40,31 +36,6 @@ public class ConditionsFrame extends ScrollableFrame {
 
     public void loadConditions() {
         Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
-//        try {
-//            if (this.conditions != null && this.conditions.size() > 0) {
-//                if (checkBoxList.isEmpty()) {
-//                    JsonObject jobject = conditions.getAsJsonObject("conditions");
-//
-//                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-//                        String key = entry.getKey();
-//                        CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
-//                        checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
-//                        checkBoxList.put(key, checkbox);
-//                    }
-//                    // moves the checkboxes without recreating them so their state is preserved
-//                } else {
-//                    int i =0;
-//                    for (CheckBox checkBox : checkBoxList.values()) {
-//                        checkBox.setPosition(starterPoint.plus(0, i * 10));
-//                        i++;
-//                    }
-//                }
-//            }
-//            this.totalsize = checkBoxList.size() * 15;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
         if (checkBoxList.isEmpty()) {
             for (String condition: Config.getConditions()) {
                 CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), condition, false);
