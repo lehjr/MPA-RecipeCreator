@@ -5,8 +5,6 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
-import com.github.lehjr.mparecipecreator.network.MPARC_Packets;
-import com.github.lehjr.mparecipecreator.network.packets.ConditionsRequestPacket;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
@@ -15,6 +13,7 @@ import net.minecraft.util.text.ITextComponent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * @author Dries007
@@ -97,7 +96,7 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
                 gridBorderColour);
         frames.add(recipeDisplayFrame);
 
-        sendConditionRequest();
+//        sendConditionRequest();
     }
 
     Point2D getULShift() {
@@ -153,9 +152,9 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
                 backgroundRect.finalBottom() - spacer);
     }
 
-    public void sendConditionRequest() {
-        MPARC_Packets.CHANNEL_INSTANCE.sendToServer(new ConditionsRequestPacket());
-    }
+//    public void sendConditionRequest() {
+//        MPARC_Packets.CHANNEL_INSTANCE.sendToServer(new ConditionsRequestPacket());
+//    }
 
     public void resetRecipes() {
         slotOptions.reset();
@@ -163,10 +162,10 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
         container.craftMatrix.clear();
         container.craftResult.clear();
     }
-
-    public void setConditionsJson(JsonObject conditionsJsonIn) {
-        recipeOptions.setConditionsJson(conditionsJsonIn);
-    }
+//
+//    public void setConditionsJson(JsonObject conditionsJsonIn) {
+//        recipeOptions.setConditionsJson(conditionsJsonIn);
+//    }
 
     String targetFolder = null;
     public void setTargetFolder(String path) {
@@ -182,7 +181,7 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
             File file = new File(targetFolder, recipeDisplayFrame.title + ".json");
             String prettyJson = recipeGen.getRecipeJson();
             try {
-                file.getParentFile().mkdir();
+                Files.createDirectories(file.toPath().getParent());
                 FileWriter fileWriter = new FileWriter(file);
                 fileWriter.write(prettyJson);
                 fileWriter.flush();

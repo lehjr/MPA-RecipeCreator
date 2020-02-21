@@ -102,13 +102,11 @@ public class RecipeGen {
                 throw new IllegalStateException("PLEASE REPORT: Item not empty, but getRegistryName null? Debug info: " + stack);
             }
 
+            stackJson.addProperty("item", stack.getItem().getRegistryName().toString());
+
             if (stack.hasTag()) {
-                if (!stack.getItem().getRegistryName().toString().equals("forge:bucketfilled")) {
-                    stackJson.addProperty("type", "minecraft:item_nbt");
-                }
                 stackJson.add("nbt", NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject()));
             }
-            stackJson.addProperty("item", stack.getItem().getRegistryName().toString());
 
             // set the stack count
             if (stack.getCount() > 1) {
@@ -211,8 +209,8 @@ public class RecipeGen {
             JsonArray conditions = recipeOptions.conditionsFrame.getJson();
             if (conditions.size() != 0) {
                 for (Object line : conditions) {
-                    if (line instanceof JsonObject && ((JsonObject) line).has("type")) {
-                        String line1 = ((JsonObject) line).get("type").getAsString();
+                    if (line instanceof JsonObject && ((JsonObject) line).has("condition")) {
+                        String line1 = ((JsonObject) line).get("condition").getAsString();
                         line1 = line1.replace("_recipes_enabled", "");
                         filename += line1;
                     }
@@ -391,7 +389,7 @@ public class RecipeGen {
             for (String key : keys.keySet()) {
                 keysJson.add(key, keys.get(key));
             }
-            recipeJson.add("keys", keysJson);
+            recipeJson.add("key", keysJson);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();

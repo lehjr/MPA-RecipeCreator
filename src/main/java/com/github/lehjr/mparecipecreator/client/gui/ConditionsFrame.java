@@ -4,8 +4,8 @@ import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.math.Colour;
+import com.github.lehjr.mparecipecreator.basemod.Config;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.lwjgl.opengl.GL11;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class ConditionsFrame extends ScrollableFrame {
     Map<String, CheckBox> checkBoxList = new HashMap<>();
-    JsonObject conditions = null;
+    //    JsonObject conditions = null;
     public ConditionsFrame(Point2D topleft, Point2D bottomright, Colour backgroundColour, Colour borderColour) {
         super(topleft, bottomright, backgroundColour, borderColour);
     }
@@ -28,9 +28,9 @@ public class ConditionsFrame extends ScrollableFrame {
         loadConditions();
     }
 
-    public void setConditions(JsonObject conditionsIn) {
-        this.conditions = conditionsIn;
-    }
+//    public void setConditions(JsonObject conditionsIn) {
+//        this.conditions = conditionsIn;
+//    }
 
     @Override
     public void setVisible(boolean visible) {
@@ -40,30 +40,44 @@ public class ConditionsFrame extends ScrollableFrame {
 
     public void loadConditions() {
         Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
+//        try {
+//            if (this.conditions != null && this.conditions.size() > 0) {
+//                if (checkBoxList.isEmpty()) {
+//                    JsonObject jobject = conditions.getAsJsonObject("conditions");
+//
+//                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+//                        String key = entry.getKey();
+//                        CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
+//                        checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
+//                        checkBoxList.put(key, checkbox);
+//                    }
+//                    // moves the checkboxes without recreating them so their state is preserved
+//                } else {
+//                    int i =0;
+//                    for (CheckBox checkBox : checkBoxList.values()) {
+//                        checkBox.setPosition(starterPoint.plus(0, i * 10));
+//                        i++;
+//                    }
+//                }
+//            }
+//            this.totalsize = checkBoxList.size() * 15;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
-        try {
-            if (this.conditions != null && this.conditions.size() > 0) {
-                if (checkBoxList.isEmpty()) {
-                    JsonObject jobject = conditions.getAsJsonObject("conditions");
-
-                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                        String key = entry.getKey();
-                        CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), key, false);
-                        checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
-                        checkBoxList.put(key, checkbox);
-                    }
-                    // moves the checkboxes without recreating them so their state is preserved
-                } else {
-                    int i =0;
-                    for (CheckBox checkBox : checkBoxList.values()) {
-                        checkBox.setPosition(starterPoint.plus(0, i * 10));
-                        i++;
-                    }
-                }
+        if (checkBoxList.isEmpty()) {
+            for (String condition: Config.getConditions()) {
+                CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), condition, false);
+                checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
+                checkBoxList.put(condition, checkbox);
             }
-            this.totalsize = checkBoxList.size() * 15;
-        } catch (Exception e) {
-            e.printStackTrace();
+            // moves the checkboxes without recreating them so their state is preserved
+        } else {
+            int i =0;
+            for (CheckBox checkBox : checkBoxList.values()) {
+                checkBox.setPosition(starterPoint.plus(0, i * 10));
+                i++;
+            }
         }
     }
 
@@ -82,13 +96,12 @@ public class ConditionsFrame extends ScrollableFrame {
      */
     public JsonArray getJson() {
         JsonArray array = new JsonArray();
-
         for (String label : checkBoxList.keySet()) {
             CheckBox box = checkBoxList.get(label);
-
             if (box.isChecked()) {
                 JsonObject condition = new JsonObject();
-                condition.addProperty("type", label);
+                condition.addProperty("type", "modularpowerarmor:conditional");
+                condition.addProperty("condition", label);
                 array.add(condition);
             }
         }

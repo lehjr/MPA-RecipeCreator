@@ -5,14 +5,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.world.World;
 
 /**
  * @author Dries007
@@ -37,8 +35,6 @@ public class MTRMContainer extends Container {
         this.posCallable = posCallable;
         this.player = playerInventory.player;
 
-//        playerInventory.player.openContainer = this;
-
         // crafting result
         this.addSlot(new CraftingResultSlot(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35));
 
@@ -62,25 +58,8 @@ public class MTRMContainer extends Container {
         }
     }
 
-
-
-
-
-
-    /**
-     * Callback for when the crafting matrix is changed.
-     */
-    public void onCraftMatrixChanged(IInventory p_75130_1_) {
-        super.onCraftMatrixChanged(p_75130_1_);
-    }
-
     public boolean canInteractWith(PlayerEntity p_75145_1_) {
         return true;
-    }
-
-
-    protected void retrySlotClick(int p_75133_1_, int p_75133_2_, boolean p_75133_3_, PlayerEntity player) {
-
     }
 
     @Override
@@ -137,13 +116,6 @@ public class MTRMContainer extends Container {
             stack = super.slotClick(i, mousebtn, clickTypeIn, player);
         }
         return stack;
-    }
-
-    @Override
-    protected void clearContainer(PlayerEntity playerIn, World worldIn, IInventory inventoryIn) {
-
-
-        super.clearContainer(playerIn, worldIn, inventoryIn);
     }
 
     /**
