@@ -124,16 +124,21 @@ public class SlotOptionsFrame extends ScrollableFrame {
                 final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
                 if (!ids.isEmpty()) {
                     useOreDictCheckbox[activeSlotID -1].enableAndShow();
-                    int oreIndex = recipeGen.getOreIndex(activeSlotID);
+                    if (useOreDictCheckbox[activeSlotID -1].isChecked()) {
+                        int oreIndex = recipeGen.getOreIndex(activeSlotID);
+                        if (oreIndex + 1 < ids.size()) {
+                            nextOreDictArrow.enableAndShow();
+                        } else {
+                            nextOreDictArrow.disableAndHide();
+                        }
 
-                    if (oreIndex -1 < ids.size()) {
-                        nextOreDictArrow.enableAndShow();
+                        if (oreIndex > 0) {
+                            prevOreDictArrow.enableAndShow();
+                        } else {
+                            prevOreDictArrow.disableAndHide();
+                        }
                     } else {
                         nextOreDictArrow.disableAndHide();
-                    }
-                    if (oreIndex > 0) {
-                        prevOreDictArrow.enableAndShow();
-                    } else {
                         prevOreDictArrow.disableAndHide();
                     }
                 } else {
@@ -142,6 +147,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
                     prevOreDictArrow.disableAndHide();
                 }
             }
+        } else {
+            nextOreDictArrow.disableAndHide();
+            prevOreDictArrow.disableAndHide();
         }
     }
 

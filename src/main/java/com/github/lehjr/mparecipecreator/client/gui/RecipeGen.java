@@ -6,7 +6,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
  * @author lehjr
  */
 public class RecipeGen {
-    private Map<Integer, Integer> oreTagIndeces = new HashMap<>();
+    private Map<Integer, Integer> oreTagIndices = new HashMap<>();
     public Map<Integer, Boolean> useOredict = new HashMap<>();
     MTRMContainer container;
     RecipeOptionsFrame recipeOptions;
@@ -31,7 +30,7 @@ public class RecipeGen {
     }
 
     public void reset() {
-        oreTagIndeces = new HashMap<>();
+        oreTagIndices = new HashMap<>();
         useOredict = new HashMap<>();
         for (int id = 0; id < 10; id ++) {
             useOredict.put(id, false);
@@ -48,21 +47,15 @@ public class RecipeGen {
     }
 
     public int setOreDictIndexForward(int slot) {
-        if (oreTagIndeces.containsKey(slot)) {
-            return setOreTagIndex(slot, oreTagIndeces.get(slot) + 1);
-        }
-        return -1;
+        return setOreTagIndex(slot, oreTagIndices.getOrDefault(slot, 0) + 1);
     }
 
     public int setOreDictIndexReverse(int slot) {
-        if (oreTagIndeces.containsKey(slot)) {
-            return setOreTagIndex(slot, oreTagIndeces.get(slot) - 1);
-        }
-        return -1;
+        return setOreTagIndex(slot, oreTagIndices.getOrDefault(slot, 0) - 1);
     }
 
     public int getOreIndex(int slot) {
-        return oreTagIndeces.getOrDefault(slot, 0);
+        return oreTagIndices.getOrDefault(slot, 0);
     }
 
     /**
@@ -80,7 +73,7 @@ public class RecipeGen {
                 if (!(index < ids.size()) || index < 0) {
                     index = 0;
                 }
-                oreTagIndeces.put(slot, index);
+                oreTagIndices.put(slot, index);
             }
         } else {
             index = -1;
@@ -132,15 +125,9 @@ public class RecipeGen {
             Item item = stack.getItem();
             final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
             if (!ids.isEmpty()) {
-
-                for (ResourceLocation location : ids) {
-                    System.out.println("location: " + location.toString());
-
-                }
-
                 int index = 0;
-                if (oreTagIndeces.containsKey(slot)) {
-                    index = oreTagIndeces.get(slot);
+                if (oreTagIndices.containsKey(slot)) {
+                    index = oreTagIndices.get(slot);
                 }
                 stackJson.addProperty("tag", ids.get(index).toString());
             }
@@ -184,13 +171,13 @@ public class RecipeGen {
         if (usingOreDict) {
             Item item = stack.getItem();
             List<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item).stream().collect(Collectors.toList());
-            stackName = "tag: " + ids.get(oreTagIndeces.getOrDefault(slot, 0));
+            stackName = "tag: " + ids.get(oreTagIndices.getOrDefault(slot, 0));
 
         }
         builder.append(stackName);
         if (stack.getCount() > 1) {
-                builder.append(" * ").append(stack.getCount());
-            }
+            builder.append(" * ").append(stack.getCount());
+        }
         return builder.toString();
     }
 
