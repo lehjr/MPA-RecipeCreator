@@ -184,7 +184,10 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         if (slotChanged != -1) {
             recipeGen.useOredict.put(slotChanged, false);
             recipeGen.setOreTagIndex(slotChanged,0);
-            slotOptions.useOreDictCheckbox[slotChanged -1].setChecked(false);
+            // no oredict for result
+            if (slotChanged < 0) {
+                slotOptions.useOreDictCheckbox[slotChanged - 1].setChecked(false);
+            }
         }
 
         int activeSlot = slotOptions.getActiveSlotID();
