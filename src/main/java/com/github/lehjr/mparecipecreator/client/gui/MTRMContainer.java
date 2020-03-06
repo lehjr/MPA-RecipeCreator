@@ -56,22 +56,32 @@ public class MTRMContainer extends Container {
         for (int col = 0; col < 9; ++col) {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
         }
+
+        this.onCraftMatrixChanged(this.craftMatrix);
     }
 
     public boolean canInteractWith(PlayerEntity p_75145_1_) {
         return true;
     }
 
+    /**
+     * Note only called if player is moving an itemstack through the dragging mechanics
+     * @param slotIndex
+     * @param mousebtn
+     * @param clickTypeIn
+     * @param player
+     * @return
+     */
     @Override
-    public ItemStack slotClick(int i, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
+    public ItemStack slotClick(int slotIndex, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
         ItemStack stack = ItemStack.EMPTY;
-        if ((i >= 0 && i <= 9)) {
+        if ((slotIndex >= 0 && slotIndex <= 9)) {
             if (mousebtn == 2) {
-                getSlot(i).putStack(ItemStack.EMPTY);
+                getSlot(slotIndex).putStack(ItemStack.EMPTY);
             } else if (mousebtn == 0) {
                 PlayerInventory playerInv = player.inventory;
 //                getSlot(i).onSlotChanged();
-                ItemStack stackSlot = getSlot(i).getStack();
+                ItemStack stackSlot = getSlot(slotIndex).getStack();
                 ItemStack stackHeld = playerInv.getItemStack();
 
                 if (!stackSlot.isEmpty()) {
@@ -80,40 +90,40 @@ public class MTRMContainer extends Container {
 
                 if (!stackHeld.isEmpty()) {
                     ItemStack newStack = stackHeld.copy();
-                    if (!(i == 0)) {
+                    if (!(slotIndex == 0)) {
                         newStack.setCount(1);
                     }
-                    getSlot(i).putStack(newStack);
+                    getSlot(slotIndex).putStack(newStack);
                 } else {
-                    getSlot(i).putStack(ItemStack.EMPTY);
+                    getSlot(slotIndex).putStack(ItemStack.EMPTY);
                 }
             } else if (mousebtn == 1) {
                 PlayerInventory playerInv = player.inventory;
-                getSlot(i).onSlotChanged();
-                ItemStack stackSlot = getSlot(i).getStack();
+                getSlot(slotIndex).onSlotChanged();
+                ItemStack stackSlot = getSlot(slotIndex).getStack();
                 ItemStack stackHeld = playerInv.getItemStack();
 
                 stack = stackSlot.copy();
 
                 if (!stackHeld.isEmpty()) {
                     stackHeld = stackHeld.copy();
-                    if (!stackSlot.isEmpty() && stackHeld.isItemEqual(stackSlot) && (i == 0)) {
+                    if (!stackSlot.isEmpty() && stackHeld.isItemEqual(stackSlot) && (slotIndex == 0)) {
                         if (stackSlot.getCount() < stackSlot.getMaxStackSize()) stackSlot.grow(1);
                     } else {
                         stackSlot.setCount(1);
                     }
-                    getSlot(i).putStack(stackSlot);
+                    getSlot(slotIndex).putStack(stackSlot);
                 } else {
                     if (!stackSlot.isEmpty()) {
                         stackSlot.shrink(1);
                         if (stackSlot.isEmpty()) {
-                            getSlot(i).putStack(ItemStack.EMPTY);
+                            getSlot(slotIndex).putStack(ItemStack.EMPTY);
                         }
                     }
                 }
             }
         } else {
-            stack = super.slotClick(i, mousebtn, clickTypeIn, player);
+            stack = super.slotClick(slotIndex, mousebtn, clickTypeIn, player);
         }
         return stack;
     }

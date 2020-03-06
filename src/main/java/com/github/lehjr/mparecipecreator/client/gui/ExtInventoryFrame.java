@@ -1,7 +1,7 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
-import com.github.lehjr.modularpowerarmor.client.gui.common.InventoryFrame;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
+import com.github.lehjr.mpalib.client.gui.frame.InventoryFrame;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.math.Colour;

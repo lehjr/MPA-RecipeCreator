@@ -7,7 +7,6 @@ import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.client.sound.Musique;
 import com.github.lehjr.mpalib.math.Colour;
-import com.google.gson.JsonObject;
 import net.minecraft.util.SoundEvents;
 
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     private LabledButton save;
     private LabledButton reset;
     private ClickableLabel title;
-    MPARCGui mtrmGui;
     ConditionsFrame conditionsFrame;
 
     public RecipeOptionsFrame(
@@ -102,11 +100,11 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         super.init(left, top, right, bottom);
 
         double nextLineRC = 0;
-        Point2D genericRecipeCol = new Point2D(left + 4, top + 8);
+        Point2D genericRecipeCol = new Point2D(left + 8, top + 8);
         title.setPosition(genericRecipeCol);
-        shapeless.setPosition(genericRecipeCol.plus(0, nextLineRC+=10));
-        mirrored.setPosition(genericRecipeCol.plus(0, nextLineRC+=10));
-        conditions.setPosition(genericRecipeCol.plus(0, nextLineRC+=10));
+        shapeless.setPosition(genericRecipeCol.plus(0, nextLineRC+=12));
+        mirrored.setPosition(genericRecipeCol.plus(0, nextLineRC+=12));
+        conditions.setPosition(genericRecipeCol.plus(0, nextLineRC+=12));
 
         conditionsFrame.init(
                 left + 3,
@@ -164,6 +162,14 @@ public class RecipeOptionsFrame extends ScrollableFrame {
             conditionsFrame.mouseClicked(mouseX, mouseY, button);
         }
         return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double dWheel) {
+        if (conditionsFrame.isVisible() && conditionsFrame.mouseScrolled(mouseX, mouseY, dWheel)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, dWheel);
     }
 
     @Override

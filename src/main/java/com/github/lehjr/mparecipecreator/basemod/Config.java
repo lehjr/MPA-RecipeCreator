@@ -55,7 +55,18 @@ public class Config {
                             "ic2_classic_recipes_enabled",
                             "tech_reborn_recipes_enabled",
                             "thermal_expansion_recipes_enabled",
+                            "silent_mechanisms_recipes_enabled",
+                            "industry_foregoing_recipes_enabled",
+                            "centralized_materials_recipes_enabled",
                             "vanilla_recipes_enabled"));
+                            /*
+                                Todo: add
+                                  SilentMechanisms
+                                  industryForgoing
+                                  centralizedMaterials
+
+                             */
+
         }
     }
 

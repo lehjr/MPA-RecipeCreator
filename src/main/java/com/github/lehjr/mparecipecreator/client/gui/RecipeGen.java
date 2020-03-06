@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class RecipeGen {
     }
 
     public int getOreIndex(int slot) {
-        return oreTagIndeces.getOrDefault(slot, -1);
+        return oreTagIndeces.getOrDefault(slot, 0);
     }
 
     /**
@@ -131,6 +132,12 @@ public class RecipeGen {
             Item item = stack.getItem();
             final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
             if (!ids.isEmpty()) {
+
+                for (ResourceLocation location : ids) {
+                    System.out.println("location: " + location.toString());
+
+                }
+
                 int index = 0;
                 if (oreTagIndeces.containsKey(slot)) {
                     index = oreTagIndeces.get(slot);
@@ -173,17 +180,17 @@ public class RecipeGen {
         }
 
         String stackName = stack.getItem().getRegistryName().toString();
-        StringBuilder builder = new StringBuilder(stackName);
+        StringBuilder builder = new StringBuilder();
         if (usingOreDict) {
             Item item = stack.getItem();
             List<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item).stream().collect(Collectors.toList());
             stackName = "tag: " + ids.get(oreTagIndeces.getOrDefault(slot, 0));
-            builder.append(stackName);
 
-            if (stack.getCount() > 1) {
+        }
+        builder.append(stackName);
+        if (stack.getCount() > 1) {
                 builder.append(" * ").append(stack.getCount());
             }
-        }
         return builder.toString();
     }
 

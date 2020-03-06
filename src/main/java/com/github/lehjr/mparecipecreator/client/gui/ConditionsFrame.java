@@ -35,7 +35,7 @@ public class ConditionsFrame extends ScrollableFrame {
     }
 
     public void loadConditions() {
-        Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
+        Point2D starterPoint = this.getULFinal().copy().plus(8, 14);
         if (checkBoxList.isEmpty()) {
             for (String condition: Config.getConditions()) {
                 CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), condition, false);
@@ -50,6 +50,8 @@ public class ConditionsFrame extends ScrollableFrame {
                 i++;
             }
         }
+
+        this.totalsize = checkBoxList.size() * 12;
     }
 
     void toggleCheckboxes(int id) {
@@ -77,11 +79,6 @@ public class ConditionsFrame extends ScrollableFrame {
             }
         }
         return array;
-    }
-
-    @Override
-    protected double getScrollAmount() {
-        return 1;
     }
 
     @Override

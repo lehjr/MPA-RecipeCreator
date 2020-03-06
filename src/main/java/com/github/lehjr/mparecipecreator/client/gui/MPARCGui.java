@@ -127,12 +127,12 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
                 backgroundRect.finalLeft() + spacer,
                 backgroundRect.finalTop() + spacer,
                 inventoryLeft - spacer * 2,
-                backgroundRect.finalTop() + spacer + 120
+                backgroundRect.finalTop() + spacer + 150
         );
 
         slotOptions.init(
                 backgroundRect.finalLeft() + spacer,
-                backgroundRect.finalTop() + spacer * 2 + 120,
+                backgroundRect.finalTop() + spacer * 2 + 150,
                 inventoryLeft - spacer * 2,
                 backgroundRect.finalTop() + spacer + 188);
 

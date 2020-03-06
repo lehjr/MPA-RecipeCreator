@@ -7,16 +7,14 @@ import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableArrow;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.math.Colour;
-import com.github.lehjr.mpalib.nbt.NBT2Json;
-import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 
-import javax.swing.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lehjr
@@ -25,7 +23,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
     private ClickableLabel title;
     int activeSlotID;
     MTRMContainer container;
-    CheckBox useOreDictCheckbox;
+    CheckBox[] useOreDictCheckbox = new CheckBox[9];
     RecipeGen recipeGen;
 
     private Map<Integer, ResourceLocation> oreTags = new HashMap<>();
@@ -66,14 +64,15 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
         activeSlotID = -1;
 
-        useOreDictCheckbox = new CheckBox(1, new Point2D(0, 0), "Use ore dictionary", false);
-        useOreDictCheckbox.disableAndHide();
-        useOreDictCheckbox.setOnPressed(pressed -> {
-            if (this.activeSlotID < 0) {
-                recipeGen.useOredict.put(activeSlotID, useOreDictCheckbox.isChecked());
-            }
-        });
-
+        for(int i=0; i < 9; i++) {
+            useOreDictCheckbox[i] = new CheckBox(i+1, new Point2D(0, 0), "Use ore dictionary", false);
+            useOreDictCheckbox[i].disableAndHide();
+            useOreDictCheckbox[i].setOnPressed(pressed -> {
+                if (getActiveSlotID() > 0) {
+                    recipeGen.useOredict.put(getActiveSlotID(), useOreDictCheckbox[getActiveSlotID()-1].isChecked());
+                }
+            });
+        }
         reset();
     }
 
@@ -89,48 +88,58 @@ public class SlotOptionsFrame extends ScrollableFrame {
         double nextLineSC = 0;
 
         title.setPosition(slotSpecificCol.plus(0,spacer));
-        useOreDictCheckbox.setPosition(slotSpecificCol.plus(0, nextLineSC + 10));
 
-        prevOreDictArrow.setTargetDimensions(new Point2D(left + 93, top + 137), new Point2D(12, 17));
-        nextOreDictArrow.setTargetDimensions(new Point2D(left + 38, top + 137), new Point2D(12, 17));
+        for(int i=0; i<9; i++) {
+            useOreDictCheckbox[i].setPosition(slotSpecificCol.plus(4, nextLineSC + 18));
+        }
+
+        prevOreDictArrow.setTargetDimensions(new Point2D(right - 40, top + 8), new Point2D(12, 17));
+        nextOreDictArrow.setTargetDimensions(new Point2D(right - 20, top + 8), new Point2D(12, 17));
     }
 
     @Override
     public void update(double mouseX, double mouseY) {
         super.update(mouseX, mouseY);
-        if (activeSlotID < 1) {
-            useOreDictCheckbox.disableAndHide();
-        } else {
+
+        for(int i=0; i< 9; i++) {
+            if (activeSlotID >= 1 && i + 1 == activeSlotID) {
+                continue;
+            }
+            useOreDictCheckbox[i].disableAndHide();
+
+            if (!container.getSlot(i+1).getHasStack()) {
+                useOreDictCheckbox[i].setChecked(false);
+            }
+        }
+
+        if (activeSlotID >= 1) {
             ItemStack stack = container.getSlot(activeSlotID).getStack();
             if (stack.isEmpty()) {
-                useOreDictCheckbox.disableAndHide();
+                useOreDictCheckbox[activeSlotID -1].setChecked(false);
+                useOreDictCheckbox[activeSlotID -1].disableAndHide();
                 nextOreDictArrow.disableAndHide();
                 prevOreDictArrow.disableAndHide();
             } else {
                 Item item = stack.getItem();
                 final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
                 if (!ids.isEmpty()) {
-                    useOreDictCheckbox.enableAndShow();
-                    useOreDictCheckbox.setChecked(recipeGen.useOredict.getOrDefault(activeSlotID, false));
-                    if (recipeGen.useOredict.get(activeSlotID)) {
-                        int oreIndex = recipeGen.getOreIndex(activeSlotID);
-                        if (oreIndex < -1) {
-                            if (oreIndex -1 < ids.size()) {
-                                nextOreDictArrow.enableAndShow();
-                            } else {
-                                nextOreDictArrow.disableAndHide();
-                            }
-                            if (oreIndex > 0) {
-                                prevOreDictArrow.enableAndShow();
-                            } else {
-                                prevOreDictArrow.disableAndHide();
-                            }
-                        }
+                    useOreDictCheckbox[activeSlotID -1].enableAndShow();
+                    int oreIndex = recipeGen.getOreIndex(activeSlotID);
+
+                    if (oreIndex -1 < ids.size()) {
+                        nextOreDictArrow.enableAndShow();
                     } else {
-                        useOreDictCheckbox.disableAndHide();
                         nextOreDictArrow.disableAndHide();
+                    }
+                    if (oreIndex > 0) {
+                        prevOreDictArrow.enableAndShow();
+                    } else {
                         prevOreDictArrow.disableAndHide();
                     }
+                } else {
+                    useOreDictCheckbox[activeSlotID -1].disableAndHide();
+                    nextOreDictArrow.disableAndHide();
+                    prevOreDictArrow.disableAndHide();
                 }
             }
         }
@@ -142,7 +151,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
         if (isVisible()) {
             super.render(mouseX, mouseY, partialTicks);
             title.render(mouseX, mouseY, partialTicks);
-            useOreDictCheckbox.render(mouseX, mouseY, partialTicks);
+            for (int i =0; i < 9; i++) {
+                useOreDictCheckbox[i].render(mouseX, mouseY, partialTicks);
+            }
             nextOreDictArrow.render(mouseX, mouseY, partialTicks);
             prevOreDictArrow.render(mouseX, mouseY, partialTicks);
         }
@@ -152,9 +163,10 @@ public class SlotOptionsFrame extends ScrollableFrame {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isVisible()) {
             super.mouseClicked(mouseX, mouseY, button);
-
-            if (useOreDictCheckbox.mouseClicked(mouseX, mouseY, button)) {
-                return true;
+            for (int i =0; i < 9; i++) {
+                if (useOreDictCheckbox[i].mouseClicked(mouseX, mouseY, button)) {
+                    return true;
+                }
             }
 
             if (nextOreDictArrow.mouseClicked(mouseX, mouseY, button)) {
@@ -178,7 +190,10 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     public void reset() {
-        useOreDictCheckbox.disableAndHide();
+        for(int i=0; i<9; i++) {
+            useOreDictCheckbox[i].disableAndHide();
+        }
+
         activeSlotID = -1;
         setLabel();
     }
