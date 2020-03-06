@@ -1,6 +1,6 @@
 package com.github.lehjr.mparecipecreator.block;
 
-import com.github.lehjr.mparecipecreator.client.gui.MTRMContainer;
+import com.github.lehjr.mparecipecreator.client.gui.MPARCContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -43,6 +43,6 @@ public class RecipeWorkbench extends Block {
     private static final ITextComponent title = new TranslationTextComponent("container.crafting");
     public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
         return new SimpleNamedContainerProvider((windowID, playerInventory, playerEntity) ->
-                new MTRMContainer(windowID, playerInventory, IWorldPosCallable.of(worldIn, pos)), title);
+                new MPARCContainer(windowID, playerInventory, IWorldPosCallable.of(worldIn, pos)), title);
     }
 }

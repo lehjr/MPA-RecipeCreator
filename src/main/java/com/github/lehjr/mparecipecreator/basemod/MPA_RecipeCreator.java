@@ -2,7 +2,7 @@ package com.github.lehjr.mparecipecreator.basemod;
 
 import com.github.lehjr.mparecipecreator.block.RecipeWorkbench;
 import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
-import com.github.lehjr.mparecipecreator.client.gui.MTRMContainer;
+import com.github.lehjr.mparecipecreator.client.gui.MPARCContainer;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.inventory.container.ContainerType;
@@ -43,7 +43,7 @@ public final class MPA_RecipeCreator {
     @SubscribeEvent
     public void registerContainerTypes(final RegistryEvent.Register<ContainerType<?>> event) {
         event.getRegistry().register(                // recipe creator gui
-                new ContainerType<>(MTRMContainer::new)
+                new ContainerType<>(MPARCContainer::new)
                         .setRegistryName(Constants.RECIPE_WORKBENCH_TYPE__REG_NAME));
     }
 

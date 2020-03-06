@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 public class RecipeGen {
     private Map<Integer, Integer> oreTagIndices = new HashMap<>();
     public Map<Integer, Boolean> useOredict = new HashMap<>();
-    MTRMContainer container;
+    MPARCContainer container;
     RecipeOptionsFrame recipeOptions;
 
-    public RecipeGen(MTRMContainer containerIn, RecipeOptionsFrame recipeOptionsIn) {
+    public RecipeGen(MPARCContainer containerIn, RecipeOptionsFrame recipeOptionsIn) {
         this.container = containerIn;
         this.recipeOptions = recipeOptionsIn;
         reset();
@@ -172,7 +172,6 @@ public class RecipeGen {
             Item item = stack.getItem();
             List<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item).stream().collect(Collectors.toList());
             stackName = "tag: " + ids.get(oreTagIndices.getOrDefault(slot, 0));
-
         }
         builder.append(stackName);
         if (stack.getCount() > 1) {

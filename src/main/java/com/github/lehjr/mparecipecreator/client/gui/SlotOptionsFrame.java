@@ -22,7 +22,7 @@ import java.util.Map;
 public class SlotOptionsFrame extends ScrollableFrame {
     private ClickableLabel title;
     int activeSlotID;
-    MTRMContainer container;
+    MPARCContainer container;
     CheckBox[] useOreDictCheckbox = new CheckBox[9];
     RecipeGen recipeGen;
 
@@ -34,7 +34,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
     public SlotOptionsFrame(Point2D topleft,
                             Point2D bottomright,
                             RecipeGen recipeGenIn,
-                            MTRMContainer container,
+                            MPARCContainer container,
                             Colour backgroundColour,
                             Colour borderColour,
                             Colour arrowNormalBackGound,

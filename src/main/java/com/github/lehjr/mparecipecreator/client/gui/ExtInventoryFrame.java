@@ -32,7 +32,7 @@ public class ExtInventoryFrame extends ScrollableFrame {
             Colour gridBackGound,
             Colour gridBorderColour,
             Colour gridColour,
-            MPARCGui mtrmGuiIn) {
+            MPARCGui mparcGui) {
         super(topleft, bottomright, backgroundColour, borderColour);
 
         this.container = container;
@@ -44,7 +44,7 @@ public class ExtInventoryFrame extends ScrollableFrame {
                 gridBackGound,
                 gridBorderColour,
                 gridColour,
-                mtrmGuiIn
+                mparcGui
         );
         frames.add(craftingGrid);
 

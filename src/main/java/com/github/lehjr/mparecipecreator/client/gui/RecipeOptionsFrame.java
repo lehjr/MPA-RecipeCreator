@@ -35,7 +35,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
             Colour backgroundColour,
             Colour borderColour,
             Colour conditionsBorder,
-            MPARCGui mtrmGuiIn) {
+            MPARCGui mparcGui) {
         super(topleft, bottomright, backgroundColour, borderColour);
 
         Point2D starterPoint = new Point2D(getULFinal());
@@ -76,13 +76,13 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         save = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Save"));
         save.setOnPressed(pressed->{
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK,1);
-            mtrmGuiIn.save();
+            mparcGui.save();
         });
 
         reset = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARKGREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Reset Recipe"));
         reset.setOnPressed(pressed-> {
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, 1);
-            mtrmGuiIn.resetRecipes();
+            mparcGui.resetRecipes();
         });
     }
 

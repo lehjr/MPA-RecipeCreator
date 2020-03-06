@@ -1,10 +1,14 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
+import com.github.lehjr.modularpowerarmor.client.gui.modechanging.GuiModeSelector;
 import com.github.lehjr.mparecipecreator.basemod.ModObjects;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.CraftingResultSlot;
@@ -15,7 +19,7 @@ import net.minecraft.util.IWorldPosCallable;
 /**
  * @author Dries007
  */
-public class MTRMContainer extends Container {
+public class MPARCContainer extends Container {
     //    public class WorkbenchContainer extends RecipeBookContainer<CraftingInventory> {
     /**
      * The crafting matrix inventory (3x3).
@@ -26,11 +30,11 @@ public class MTRMContainer extends Container {
     private final PlayerEntity player;
     private final IWorldPosCallable posCallable;
 
-    public MTRMContainer(int windowID, PlayerInventory playerInventory) {
+    public MPARCContainer(int windowID, PlayerInventory playerInventory) {
         this(windowID, playerInventory, IWorldPosCallable.DUMMY);
     }
 
-    public MTRMContainer(int windowID, PlayerInventory playerInventory, IWorldPosCallable posCallable) {
+    public MPARCContainer(int windowID, PlayerInventory playerInventory, IWorldPosCallable posCallable) {
         super(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, windowID);
         this.posCallable = posCallable;
         this.player = playerInventory.player;
@@ -57,7 +61,7 @@ public class MTRMContainer extends Container {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
         }
 
-        this.onCraftMatrixChanged(this.craftMatrix);
+//        this.onCraftMatrixChanged(this.craftMatrix);
     }
 
     public boolean canInteractWith(PlayerEntity p_75145_1_) {
@@ -72,8 +76,23 @@ public class MTRMContainer extends Container {
      * @param player
      * @return
      */
+
+    int slotChanged = -1;
+
+    public int getSlotChanged() {
+        int ret = slotChanged;
+        slotChanged = -1;
+        return ret;
+    }
+
     @Override
     public ItemStack slotClick(int slotIndex, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
+
+        // reset slot data for gui
+        if (player.world.isRemote && slotIndex >= 0 && slotIndex <= 9) {
+            slotChanged = slotIndex;
+        }
+
         ItemStack stack = ItemStack.EMPTY;
         if ((slotIndex >= 0 && slotIndex <= 9)) {
             if (mousebtn == 2) {
@@ -126,6 +145,11 @@ public class MTRMContainer extends Container {
             stack = super.slotClick(slotIndex, mousebtn, clickTypeIn, player);
         }
         return stack;
+    }
+
+    @Override
+    public void onCraftMatrixChanged(IInventory inventoryIn) {
+        // really don't need to sync this
     }
 
     /**

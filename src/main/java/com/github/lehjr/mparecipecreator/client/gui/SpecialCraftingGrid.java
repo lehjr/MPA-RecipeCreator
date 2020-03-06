@@ -28,7 +28,7 @@ public class SpecialCraftingGrid implements IGuiFrame {
     public final int gridWidth = 18;
     public final int gridHeight = 18;
     final int spacing = 14;
-    MPARCGui mtrmGui;
+    MPARCGui mparcGui;
     boolean isEnabled = true;
     boolean isVisible = true;
 
@@ -42,12 +42,12 @@ public class SpecialCraftingGrid implements IGuiFrame {
                                Colour backgroundColour,
                                Colour borderColour,
                                Colour gridColourIn,
-                               MPARCGui mtrmGuiIn) {
+                               MPARCGui mparcGui) {
         this.container = containerIn;
         this.border = new DrawableRect(topleft, topleft.copy().plus(borderWH), /*backgroundColour*/ Colour.DARKBLUE, borderColour);
         this.backgroundColour = backgroundColour;
         this.gridColour = gridColourIn;
-        this.mtrmGui = mtrmGuiIn;
+        this.mparcGui = mparcGui;
     }
 
     public void loadSlots() {
@@ -128,10 +128,10 @@ public class SpecialCraftingGrid implements IGuiFrame {
             this.button.enableAndShow();
             this.button.setOnPressed(onPressed-> {
                 Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, 1);
-                mtrmGui.selectSlot(index);
+                mparcGui.selectSlot(index);
             });
             this.button.setOnReleased(onReleased-> {
-                mtrmGui.selectSlot(index);
+                mparcGui.selectSlot(index);
             });
 
             this.tile = new DrawableTile(getTileUL(), getTileUL().plus(gridWidth, gridHeight), backgroundColour, gridColour);

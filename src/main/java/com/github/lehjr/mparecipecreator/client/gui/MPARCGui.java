@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 /**
  * @author Dries007
  */
-public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
+public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
     protected DrawableRect backgroundRect;
     protected long creationTime;
 
@@ -41,7 +41,7 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
     protected final Colour gridBackGound = new Colour(0.545D, 0.545D, 0.545D, 1);
     public RecipeGen recipeGen;
 
-    public MPARCGui(MTRMContainer container, PlayerInventory playerInventory, ITextComponent title) {
+    public MPARCGui(MPARCContainer container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
         rescale();
 
@@ -178,6 +178,15 @@ public class MPARCGui extends ExtendedContainerScreen<MTRMContainer> {
     @Override
     public void update(double x, double y) {
         super.update(x, y);
+
+        // reset's the slot's settings when teh contents changed.
+        int slotChanged = container.getSlotChanged();
+        if (slotChanged != -1) {
+            recipeGen.useOredict.put(slotChanged, false);
+            recipeGen.setOreTagIndex(slotChanged,0);
+            slotOptions.useOreDictCheckbox[slotChanged -1].setChecked(false);
+        }
+
         int activeSlot = slotOptions.getActiveSlotID();
 
         if (activeSlot >= 0) {
