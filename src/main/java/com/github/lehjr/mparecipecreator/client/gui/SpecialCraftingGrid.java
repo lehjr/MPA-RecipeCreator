@@ -1,6 +1,5 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
-import com.github.lehjr.modularpowerarmor.client.sound.SoundDictionary;
 import com.github.lehjr.mpalib.client.gui.clickable.Button;
 import com.github.lehjr.mpalib.client.gui.clickable.ClickableArrow;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
@@ -8,6 +7,7 @@ import com.github.lehjr.mpalib.client.gui.geometry.*;
 import com.github.lehjr.mpalib.client.gui.slot.UniversalSlot;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.client.sound.Musique;
+import com.github.lehjr.mpalib.client.sound.SoundDictionary;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;

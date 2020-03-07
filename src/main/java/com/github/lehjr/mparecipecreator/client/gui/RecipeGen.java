@@ -97,9 +97,11 @@ public class RecipeGen {
             }
 
             stackJson.addProperty("item", stack.getItem().getRegistryName().toString());
-
             if (stack.hasTag()) {
-                stackJson.add("nbt", NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject()));
+                JsonObject tagJson = NBT2Json.CompoundNBT2Json(stack.getTag(), new JsonObject());
+                if (tagJson.size() > 0) {
+                    stackJson.add("nbt", tagJson);
+                }
             }
 
             // set the stack count
@@ -193,23 +195,11 @@ public class RecipeGen {
     }
 
     public String getFileName() {
-        String filename = "";
         ItemStack resultStack = getStack(0);
 
         if (resultStack.isEmpty()) {
             return "Recipe Invalid";
         } else {
-            JsonArray conditions = recipeOptions.conditionsFrame.getJson();
-            if (conditions.size() != 0) {
-                for (Object line : conditions) {
-                    if (line instanceof JsonObject && ((JsonObject) line).has("condition")) {
-                        String line1 = ((JsonObject) line).get("condition").getAsString();
-                        line1 = line1.replace("_recipes_enabled", "");
-                        filename += line1;
-                    }
-                }
-            }
-
             String resultRegName = resultStack.getDisplayName()
                     .getUnformattedComponentText()
                     .replace(".tile", "")
@@ -217,18 +207,7 @@ public class RecipeGen {
                     .replace(" ", "_")
                     .replace(":", "_")
                     .toLowerCase();
-
-            if (filename.isEmpty()) {
-                return resultRegName;
-            } else {
-//                filename += resultStack.getItem().
-//                        getRegistryName().
-//                        toString().
-//                        toLowerCase().
-//                        replace(":", "_");
-
-                return filename + "/" + resultRegName;
-            }
+            return resultRegName;
         }
     }
 
@@ -237,9 +216,16 @@ public class RecipeGen {
         JsonObject recipeJson = new JsonObject();
         ItemStack resultStack = getStack(0);
         recipeJson.add("result", getStackJson(resultStack));
-        JsonArray conditions = recipeOptions.conditionsFrame.getJson();
+        JsonArray conditions = recipeOptions.conditionsFrame.getJsonArray();
 
-        if (conditions.size() > 0) {
+        if (conditions.size() > 1) {
+            JsonObject forgeAnd = new JsonObject();
+            forgeAnd.addProperty("type", "forge:and");
+            forgeAnd.add("values", conditions);
+            JsonArray array = new JsonArray();
+            array.add(forgeAnd);
+            recipeJson.add("conditions", array);
+        } else if (conditions.size() > 0) {
             recipeJson.add("conditions", conditions);
         }
 

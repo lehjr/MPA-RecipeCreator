@@ -1,9 +1,6 @@
 package com.github.lehjr.mparecipecreator.client.gui;
 
-import com.github.lehjr.modularpowerarmor.client.gui.modechanging.GuiModeSelector;
 import com.github.lehjr.mparecipecreator.basemod.ModObjects;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;

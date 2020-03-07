@@ -4,7 +4,7 @@ import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
 import com.github.lehjr.mpalib.math.Colour;
-import com.github.lehjr.mparecipecreator.basemod.Config;
+import com.github.lehjr.mparecipecreator.basemod.ConditionsJsonLoader;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.lwjgl.opengl.GL11;
@@ -16,7 +16,7 @@ import java.util.Map;
  * @author lehjr
  */
 public class ConditionsFrame extends ScrollableFrame {
-    Map<String, CheckBox> checkBoxList = new HashMap<>();
+    Map<CheckBox, JsonObject> checkBoxList = new HashMap<>();
 
     public ConditionsFrame(Point2D topleft, Point2D bottomright, Colour backgroundColour, Colour borderColour) {
         super(topleft, bottomright, backgroundColour, borderColour);
@@ -37,45 +37,40 @@ public class ConditionsFrame extends ScrollableFrame {
     public void loadConditions() {
         Point2D starterPoint = this.getULFinal().copy().plus(8, 14);
         if (checkBoxList.isEmpty()) {
-            for (String condition: Config.getConditions()) {
-                CheckBox checkbox = new CheckBox(checkBoxList.size(), starterPoint.plus(0, checkBoxList.size() * 10), condition, false);
-                checkbox.setOnPressed(press-> toggleCheckboxes(checkbox.getId()));
-                checkBoxList.put(condition, checkbox);
+            JsonArray jsonArray = ConditionsJsonLoader.getConditionsFromFile();
+            if (jsonArray != null) {
+                jsonArray.forEach(jsonElement -> {
+                    if (jsonElement instanceof JsonObject) {
+                        JsonObject jsonObject = jsonElement.getAsJsonObject();
+                        String condition = jsonObject.get("display_name").getAsString();
+                        jsonObject.remove("display_name");
+
+                        CheckBox checkbox = new CheckBox(checkBoxList.size(),
+                                starterPoint.plus(0, checkBoxList.size() * 10),
+                                condition, false);
+                        checkBoxList.put(checkbox, jsonObject);
+                    }
+                });
             }
             // moves the checkboxes without recreating them so their state is preserved
         } else {
             int i =0;
-            for (CheckBox checkBox : checkBoxList.values()) {
+            for (CheckBox checkBox : checkBoxList.keySet()) {
                 checkBox.setPosition(starterPoint.plus(0, i * 10));
                 i++;
             }
         }
-
         this.totalsize = checkBoxList.size() * 12;
-    }
-
-    void toggleCheckboxes(int id) {
-        for (CheckBox checkbox : checkBoxList.values()) {
-            if(checkbox.getId() == id) {
-                continue;
-            } else {
-                checkbox.setChecked(false);
-            }
-        }
     }
 
     /**
      * Note that the conditions aren't setup for multiple conditions at this time
      */
-    public JsonArray getJson() {
+    public JsonArray getJsonArray() {
         JsonArray array = new JsonArray();
-        for (String label : checkBoxList.keySet()) {
-            CheckBox box = checkBoxList.get(label);
+        for (CheckBox box : checkBoxList.keySet()) {
             if (box.isChecked()) {
-                JsonObject condition = new JsonObject();
-                condition.addProperty("type", "modularpowerarmor:conditional");
-                condition.addProperty("condition", label);
-                array.add(condition);
+                array.add(checkBoxList.get(box));
             }
         }
         return array;
@@ -88,7 +83,7 @@ public class ConditionsFrame extends ScrollableFrame {
             super.preRender(mouseX, mouseY, partialTicks);
             GL11.glPushMatrix();
             GL11.glTranslatef(0, -currentscrollpixels, 0);
-            for (CheckBox checkBox : checkBoxList.values()) {
+            for (CheckBox checkBox : checkBoxList.keySet()) {
                 checkBox.render(mouseX, mouseY, partialTicks);
             }
             GL11.glPopMatrix();
@@ -101,7 +96,7 @@ public class ConditionsFrame extends ScrollableFrame {
         if (this.isEnabled() && this.isVisible()) {
             super.mouseClicked(mouseX, mouseY, button);
 
-            for (CheckBox checkBox : checkBoxList.values()) {
+            for (CheckBox checkBox : checkBoxList.keySet()) {
                 if (checkBox.mouseClicked(mouseX, mouseY + currentscrollpixels, button)) {
                     return true;
                 }

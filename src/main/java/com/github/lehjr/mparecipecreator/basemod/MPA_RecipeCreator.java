@@ -1,8 +1,8 @@
 package com.github.lehjr.mparecipecreator.basemod;
 
 import com.github.lehjr.mparecipecreator.block.RecipeWorkbench;
-import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
 import com.github.lehjr.mparecipecreator.client.gui.MPARCContainer;
+import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.inventory.container.ContainerType;
@@ -12,9 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -29,11 +27,9 @@ public final class MPA_RecipeCreator {
     public MPA_RecipeCreator() {
         // Register the setupClient method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupClient);
-
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_SPEC, Config.setupConfigFile("client.toml").getAbsolutePath());
-
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.register(this);
+        ConditionsJsonLoader.setFile();
     }
 
     private void setupClient(final FMLClientSetupEvent event) {

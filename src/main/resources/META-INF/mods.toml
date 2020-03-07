@@ -30,9 +30,3 @@ issueTrackerURL="https://github.com/lehjr/MPA-RecipeCreator/issues"
     versionRange="[1,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.mparecipecreator]]
-    modId="modularpowerarmor"
-    mandatory=true
-    versionRange="[1,)"
-    ordering="NONE"
-    side="BOTH"
