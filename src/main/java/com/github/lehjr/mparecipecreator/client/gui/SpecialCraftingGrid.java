@@ -4,6 +4,7 @@ import com.github.lehjr.mpalib.client.gui.clickable.Button;
 import com.github.lehjr.mpalib.client.gui.clickable.ClickableArrow;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.*;
+import com.github.lehjr.mpalib.client.gui.slot.IHideableSlot;
 import com.github.lehjr.mpalib.client.gui.slot.UniversalSlot;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.client.sound.Musique;
@@ -31,19 +32,21 @@ public class SpecialCraftingGrid implements IGuiFrame {
     MPARCGui mparcGui;
     boolean isEnabled = true;
     boolean isVisible = true;
-
+    float zLevel;
 
     List<BoxHolder> boxes = new ArrayList<>();
-    final Point2D borderWH = new Point2D(160, 96);
-    Point2D slot_ulShift = new Point2D(0, 0);
+    final Point2F borderWH = new Point2F(160, 96);
+    Point2F slot_ulShift = new Point2F(0, 0);
 
     public SpecialCraftingGrid(Container containerIn,
-                               Point2D topleft,
+                               Point2F topleft,
+                               float zLevel,
                                Colour backgroundColour,
                                Colour borderColour,
                                Colour gridColourIn,
                                MPARCGui mparcGui) {
         this.container = containerIn;
+        this.zLevel = zLevel;
         this.border = new DrawableRect(topleft, topleft.copy().plus(borderWH), /*backgroundColour*/ Colour.DARKBLUE, borderColour);
         this.backgroundColour = backgroundColour;
         this.gridColour = gridColourIn;
@@ -51,14 +54,13 @@ public class SpecialCraftingGrid implements IGuiFrame {
     }
 
     public void loadSlots() {
-        Point2D wh = new Point2D(gridWidth + spacing, gridHeight + spacing);
-        Point2D ul = new Point2D(this.border.left(), this.border.top());
-        this.boxes = new ArrayList();
+        Point2F wh = new Point2F(gridWidth + spacing, gridHeight + spacing);
+        Point2F ul = new Point2F(this.border.finalLeft(), this.border.finalTop());
+        this.boxes.clear();;
         int i = 0;
 
         for(int row = 0; row < 3; ++row) {
             for(int col = 0; col < 5; ++col) {
-
                 RelativeRect rect = new RelativeRect(ul, ul.plus(wh));
                 if (col < 3) {
                     this.boxes.add(new DrawableBoxHolder(rect, (col + row * 3 + 1)));
@@ -80,31 +82,122 @@ public class SpecialCraftingGrid implements IGuiFrame {
                     }
                 }
 
-                Point2D position = rect.center().copy().minus(this.slot_ulShift);
+                Point2F position = rect.center().copy().minus(this.slot_ulShift);
 
                 // standard grid slot
                 if (col < 3) {
                     Slot slot = this.container.getSlot((col + row * 3 + 1));
                     if (slot instanceof UniversalSlot) {
                         ((UniversalSlot)slot).setPosition(position);
+                    } else if (slot instanceof IHideableSlot) {
+                        ((IHideableSlot) slot).setPosition(position);
                     } else {
-                        slot.xPos = (int)position.getX();
-                        slot.yPos = (int)position.getY();
+                        slot.xPos = (int) position.getX();
+                        slot.yPos = (int) position.getY();
                     }
+
                     // result
                 } else if (row == 1 && col == 4) {
+
+                    // position here: x: 366.0, y: 48.0
+                    // actual position here: x: 387.0, y: 11.0
+
                     Slot slot = container.getSlot(0);
                     if (slot instanceof UniversalSlot) {
                         ((UniversalSlot)slot).setPosition(position);
+                    } else if (slot instanceof IHideableSlot) {
+                        ((IHideableSlot) slot).setPosition(position);
                     } else {
-                        slot.xPos = (int)position.getX();
-                        slot.yPos = (int)position.getY();
+                        slot.xPos = (int) position.getX();
+                        slot.yPos = (int) position.getY();
                     }
                     // spacer
                 }
                 ++i;
             }
         }
+    }
+
+    @Override
+    public boolean mouseScrolled(double v, double v1, double v2) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.border.containsPoint(mouseX, mouseY)) {
+            for (BoxHolder holder : boxes) {
+                if (holder instanceof DrawableBoxHolder) {
+                    if(((DrawableBoxHolder) holder).button.hitBox((float)mouseX, (float) mouseY)) {
+                        ((DrawableBoxHolder) holder).button.onPressed();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (this.border.containsPoint(mouseX, mouseY)) {
+            for (BoxHolder holder : boxes) {
+                if (holder instanceof DrawableBoxHolder) {
+                    if(((DrawableBoxHolder) holder).button.hitBox((float)mouseX, (float) mouseY)) {
+                        ((DrawableBoxHolder) holder).button.onReleased();
+                        return true;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public Point2F getUlShift() {
+        return slot_ulShift;
+    }
+
+    public void setUlShift(Point2F ulShift) {
+        this.slot_ulShift = ulShift;
+    }
+
+    @Override
+    public void init(float left, float top, float right, float bottom) {
+        this.border.setTargetDimensions(left, top, left +  borderWH.getX(), top + borderWH.getY());
+        loadSlots();
+    }
+
+    @Override
+    public void update(double mouseX, double mouseY) {
+        loadSlots();
+    }
+
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) {
+        this.border.draw(zLevel);
+        if (this.boxes != null && !this.boxes.isEmpty()) {
+            for (BoxHolder boxHolder : boxes) {
+                boxHolder.render(mouseX, mouseY, partialTicks);
+            }
+        }
+
+        // SLOT NUMBER LABELS
+        IntStream.range(0, 11).forEach(i-> {
+            Renderer.drawString(
+                    String.valueOf(i),
+                    container.getSlot(i).xPos + 5 + slot_ulShift.getX() - 8,
+                    container.getSlot(i).yPos + 4 + slot_ulShift.getY() - 8,
+                    Colour.WHITE);
+        });
+    }
+
+
+
+    @Override
+    public void setTargetDimensions(float left, float top, float right, float bottom) {
+        border.setTargetDimensions(left, top, right, bottom);
+        loadSlots();
     }
 
     class BoxHolder {
@@ -137,12 +230,12 @@ public class SpecialCraftingGrid implements IGuiFrame {
             this.tile = new DrawableTile(getTileUL(), getTileUL().plus(gridWidth, gridHeight), backgroundColour, gridColour);
         }
 
-        Point2D getTileUL () {
-            return rect.center().minus(gridWidth * 0.5, gridHeight * 0.5);
+        Point2F getTileUL () {
+            return rect.center().minus(gridWidth * 0.5F, gridHeight * 0.5F);
         }
 
-        Point2D getButtonUL() {
-            return rect.center().minus(gridWidth * 0.5 + 5, gridHeight * 0.5 + 5);
+        Point2F getButtonUL() {
+            return rect.center().minus(gridWidth * 0.5F + 5, gridHeight * 0.5F + 5);
         }
 
         @Override
@@ -150,12 +243,12 @@ public class SpecialCraftingGrid implements IGuiFrame {
             if (button.getPosition() != rect.center()) {
                 button.setPosition(rect.center());
             }
-            button.render(mouseX, mouseY, partialTicks);
+            button.render(mouseX, mouseY, partialTicks, zLevel);
 
             if (tile.center() != rect.center()) {
                 tile.setPosition(rect.center());
             }
-            tile.draw();
+            tile.draw(zLevel);
         }
     }
 
@@ -164,96 +257,18 @@ public class SpecialCraftingGrid implements IGuiFrame {
 
         public DrawableArrowHolder(RelativeRect rectIn) {
             super(rectIn);
-            Point2D ul = rectIn.center().minus(gridWidth * 0.5, gridHeight * 0.5);
+            Point2F ul = rectIn.center().minus(gridWidth * 0.5F, gridHeight * 0.5F);
             arrow = new ClickableArrow(ul, ul.plus(18, 18), backgroundColour, Colour.WHITE, gridColour);
         }
 
         @Override
         public void render(int mouseX, int mouseY, float partialTicks) {
             if (arrow.center() != rect.center()) {
-                arrow.setLeft(rect.centerx() - gridWidth * 0.5);
-                arrow.setTop(rect.centery() - gridHeight * 0.5);
+                arrow.setLeft(rect.centerx() - gridWidth * 0.5F);
+                arrow.setTop(rect.centery() - gridHeight * 0.5F);
             }
-            arrow.draw();
+            arrow.draw(zLevel + 3);
         }
-    }
-
-    @Override
-    public boolean mouseScrolled(double v, double v1, double v2) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.border.containsPoint(mouseX, mouseY)) {
-            for (BoxHolder holder : boxes) {
-                if (holder instanceof DrawableBoxHolder) {
-                    if(((DrawableBoxHolder) holder).button.hitBox(mouseX, mouseY)) {
-                        ((DrawableBoxHolder) holder).button.onPressed();
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (this.border.containsPoint(mouseX, mouseY)) {
-            for (BoxHolder holder : boxes) {
-                if (holder instanceof DrawableBoxHolder) {
-                    if(((DrawableBoxHolder) holder).button.hitBox(mouseX, mouseY)) {
-                        ((DrawableBoxHolder) holder).button.onReleased();
-                        return true;
-                    }
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public Point2D getUlShift() {
-        return slot_ulShift;
-    }
-
-    public void setUlShift(Point2D ulShift) {
-        this.slot_ulShift = ulShift;
-    }
-
-    @Override
-    public void init(double left, double top, double right, double bottom) {
-        this.border.setTargetDimensions(left, top, left +  borderWH.getX(), top + borderWH.getY());
-        loadSlots();
-    }
-
-    @Override
-    public void update(double v, double v1) {
-        loadSlots();
-    }
-
-    @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        this.border.preDraw();
-        this.border.drawBackground();
-        if (this.boxes != null && !this.boxes.isEmpty()) {
-            for (BoxHolder thing : boxes) {
-                thing.render(mouseX, mouseY, partialTicks);
-            }
-        }
-        this.border.drawBorder();
-        this.border.postDraw();
-
-        // SLOT NUMBER LABELS
-        IntStream.range(0, 11).forEach(i-> {
-            Renderer.drawString(
-                    String.valueOf(i),
-                    container.getSlot(i).xPos + 5 + slot_ulShift.getX() - 8,
-                    container.getSlot(i).yPos + 4 + slot_ulShift.getY() - 8,
-                    Colour.WHITE);
-        });
-
     }
 
     @Override
@@ -287,73 +302,67 @@ public class SpecialCraftingGrid implements IGuiFrame {
     }
 
     @Override
-    public void setTargetDimensions(double left, double top, double right, double bottom) {
-        border.setTargetDimensions(left, top, right, bottom);
-        loadSlots();
-    }
-
-    @Override
-    public void setTargetDimensions(Point2D ul, Point2D wh) {
+    public void setTargetDimensions(Point2F ul, Point2F wh) {
         border.setTargetDimensions(ul, wh);
         loadSlots();
     }
 
     @Override
-    public IRect setLeft(double value) {
+    public IRect setLeft(float value) {
         setLeft(value);
         loadSlots();
         return this;
     }
 
     @Override
-    public IRect setRight(double value) {
+    public IRect setRight(float value) {
         setRight(value);
         loadSlots();
         return this;
     }
 
     @Override
-    public IRect setTop(double value) {
+    public IRect setTop(float value) {
         setTop(value);
         loadSlots();
         return this;
     }
 
     @Override
-    public IRect setBottom(double value) {
+    public IRect setBottom(float value) {
         setBottom(value);
         loadSlots();
         return this;
     }
 
     @Override
-    public IRect setWidth(double value) {
+    public IRect setWidth(float value) {
         border.setWidth(value);
         loadSlots();
         return this;
     }
 
     @Override
-    public IRect setHeight(double value) {
+    public IRect setHeight(float value) {
         border.setHeight(value);
         loadSlots();
         return this;
     }
 
     @Override
-    public void move(Point2D moveAmount) {
+    public void move(Point2F moveAmount) {
         border.move(moveAmount);
         loadSlots();
     }
 
     @Override
-    public void move(double x, double y) {
+    public void move(float x, float y) {
         border.move(x, y);
         loadSlots();
     }
 
     @Override
-    public void setPosition(Point2D position) {
+    public void setPosition(Point2F position) {
         border.setPosition(position);
         loadSlots();
     }

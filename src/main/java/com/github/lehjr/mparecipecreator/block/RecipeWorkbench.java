@@ -1,5 +1,6 @@
 package com.github.lehjr.mparecipecreator.block;
 
+import com.github.lehjr.mpalib.client.sound.SoundDictionary;
 import com.github.lehjr.mparecipecreator.client.gui.MPARCContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -8,6 +9,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.SimpleNamedContainerProvider;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.ResourceLocation;
@@ -35,9 +37,21 @@ public class RecipeWorkbench extends Block {
         setDefaultState(this.stateContainer.getBaseState());
     }
 
-    public boolean onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
-        player.openContainer(state.getContainer(worldIn, pos));
-        return true;
+    @Override
+    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
+        super.onBlockClicked(state, worldIn, pos, player);
+    }
+
+    @Override
+    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+        player.playSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, 1.0F, 1.0F);
+        if (worldIn.isRemote) {
+            return ActionResultType.SUCCESS;
+        } else {
+            player.openContainer(state.getContainer(worldIn, pos));
+//            player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
+            return ActionResultType.SUCCESS;
+        }
     }
 
     private static final ITextComponent title = new TranslationTextComponent("container.crafting");

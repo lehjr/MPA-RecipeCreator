@@ -2,12 +2,12 @@ package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
-import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
+import com.github.lehjr.mpalib.client.gui.geometry.Point2F;
 import com.github.lehjr.mpalib.math.Colour;
 import com.github.lehjr.mparecipecreator.basemod.ConditionsJsonLoader;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,12 +18,12 @@ import java.util.Map;
 public class ConditionsFrame extends ScrollableFrame {
     Map<CheckBox, JsonObject> checkBoxList = new HashMap<>();
 
-    public ConditionsFrame(Point2D topleft, Point2D bottomright, Colour backgroundColour, Colour borderColour) {
-        super(topleft, bottomright, backgroundColour, borderColour);
+    public ConditionsFrame(Point2F topleft, Point2F bottomright, float zLevel, Colour backgroundColour, Colour borderColour) {
+        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public void init(float left, float top, float right, float bottom) {
         super.init(left, top, right, bottom);
         loadConditions();
     }
@@ -35,7 +35,7 @@ public class ConditionsFrame extends ScrollableFrame {
     }
 
     public void loadConditions() {
-        Point2D starterPoint = this.getULFinal().copy().plus(8, 14);
+        Point2F starterPoint = this.getULFinal().copy().plus(8, 14);
         if (checkBoxList.isEmpty()) {
             JsonArray jsonArray = ConditionsJsonLoader.getConditionsFromFile();
             if (jsonArray != null) {
@@ -45,7 +45,7 @@ public class ConditionsFrame extends ScrollableFrame {
                         String condition = jsonObject.get("display_name").getAsString();
                         jsonObject.remove("display_name");
 
-                        CheckBox checkbox = new CheckBox(checkBoxList.size(),
+                        CheckBox checkbox = new CheckBox(
                                 starterPoint.plus(0, checkBoxList.size() * 10),
                                 condition, false);
                         checkBoxList.put(checkbox, jsonObject);
@@ -81,12 +81,12 @@ public class ConditionsFrame extends ScrollableFrame {
         if (this.isEnabled() && this.isVisible()) {
             this.currentscrollpixels = Math.min(currentscrollpixels, getMaxScrollPixels());
             super.preRender(mouseX, mouseY, partialTicks);
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0, -currentscrollpixels, 0);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0, -currentscrollpixels, 0);
             for (CheckBox checkBox : checkBoxList.keySet()) {
-                checkBox.render(mouseX, mouseY, partialTicks);
+                checkBox.render(mouseX, mouseY, partialTicks, zLevel);
             }
-            GL11.glPopMatrix();
+            RenderSystem.popMatrix();
             super.postRender(mouseX, mouseY, partialTicks);
         }
     }

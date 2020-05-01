@@ -84,12 +84,6 @@ public class MPARCContainer extends Container {
 
     @Override
     public ItemStack slotClick(int slotIndex, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
-
-        // reset slot data for gui
-        if (player.world.isRemote && slotIndex >= 0 && slotIndex <= 9) {
-            slotChanged = slotIndex;
-        }
-
         ItemStack stack = ItemStack.EMPTY;
         if ((slotIndex >= 0 && slotIndex <= 9)) {
             if (mousebtn == 2) {

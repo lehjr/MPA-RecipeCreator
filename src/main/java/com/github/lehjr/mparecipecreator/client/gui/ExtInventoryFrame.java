@@ -3,7 +3,7 @@ package com.github.lehjr.mparecipecreator.client.gui;
 import com.github.lehjr.mpalib.client.gui.frame.IGuiFrame;
 import com.github.lehjr.mpalib.client.gui.frame.InventoryFrame;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
-import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
+import com.github.lehjr.mpalib.client.gui.geometry.Point2F;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.inventory.container.Container;
 
@@ -18,14 +18,15 @@ public class ExtInventoryFrame extends ScrollableFrame {
     InventoryFrame mainInventory, hotbar;
     SpecialCraftingGrid craftingGrid;
     Container container;
-    Point2D ulShift = new Point2D(0, 0);
+    Point2F ulShift = new Point2F(0, 0);
     final int spacer = 4;
     final int slotHeight = 18;
     List<IGuiFrame> frames = new ArrayList<>();
 
     public ExtInventoryFrame(
-            Point2D topleft,
-            Point2D bottomright,
+            Point2F topleft,
+            Point2F bottomright,
+            float zLevel,
             Container container,
             Colour backgroundColour,
             Colour borderColour,
@@ -33,14 +34,15 @@ public class ExtInventoryFrame extends ScrollableFrame {
             Colour gridBorderColour,
             Colour gridColour,
             MPARCGui mparcGui) {
-        super(topleft, bottomright, backgroundColour, borderColour);
+        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
 
         this.container = container;
 
         // slots 0 - 9
         craftingGrid = new SpecialCraftingGrid(
                 container,
-                new Point2D(0, 0),
+                new Point2F(0, 0),
+                zLevel,
                 gridBackGound,
                 gridBorderColour,
                 gridColour,
@@ -50,7 +52,8 @@ public class ExtInventoryFrame extends ScrollableFrame {
 
         // slot 10-36
         mainInventory = new InventoryFrame(this.container,
-                new Point2D(0,0), new Point2D(0, 0),
+                new Point2F(0,0), new Point2F(0, 0),
+                zLevel,
                 gridBackGound, gridBorderColour, gridColour,
                 9, 3, new ArrayList<Integer>(){{
             IntStream.range(10, 37).forEach(i-> add(i));
@@ -59,7 +62,8 @@ public class ExtInventoryFrame extends ScrollableFrame {
 
         // slot 0-9
         hotbar = new InventoryFrame(this.container,
-                new Point2D(0,0), new Point2D(0, 0),
+                new Point2F(0,0), new Point2F(0, 0),
+                zLevel,
                 gridBackGound, gridBorderColour, gridColour,
                 9, 1, new ArrayList<Integer>(){{
             IntStream.range(37, 46).forEach(i-> add(i));
@@ -67,16 +71,16 @@ public class ExtInventoryFrame extends ScrollableFrame {
         frames.add(hotbar);
     }
 
-    public void setULShift(Point2D ulShift) {
+    public void setULShift(Point2F ulShift) {
         this.ulShift = ulShift;
     }
 
-    public Point2D getULShift() {
+    public Point2F getULShift() {
         return ulShift;
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public void init(float left, float top, float right, float bottom) {
         super.init(left, top, right, bottom);
 
         hotbar.init(

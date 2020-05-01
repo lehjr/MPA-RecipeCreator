@@ -5,7 +5,7 @@ import com.github.lehjr.mpalib.client.gui.clickable.ClickableArrow;
 import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableArrow;
-import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
+import com.github.lehjr.mpalib.client.gui.geometry.Point2F;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -31,8 +31,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
     private ClickableArrow prevOreDictArrow, nextOreDictArrow;
 
-    public SlotOptionsFrame(Point2D topleft,
-                            Point2D bottomright,
+    public SlotOptionsFrame(Point2F topleft,
+                            Point2F bottomright,
+                            float zLevel,
                             RecipeGen recipeGenIn,
                             MPARCContainer container,
                             Colour backgroundColour,
@@ -40,14 +41,14 @@ public class SlotOptionsFrame extends ScrollableFrame {
                             Colour arrowNormalBackGound,
                             Colour arrowHighlightedBackground,
                             Colour arrowBorderColour) {
-        super(topleft, bottomright, backgroundColour, borderColour);
+        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
         this.container = container;
         this.recipeGen = recipeGenIn;
 
-        Point2D starterPoint = this.getULFinal().copy().plus(4, 4);
+        Point2F starterPoint = this.getULFinal().copy().plus(4, 4);
 
         this.title = new ClickableLabel("Slot Options", starterPoint.copy());
-        title.setMode(0);
+        title.setMode(ClickableLabel.JustifyMode.LEFT);
 
         nextOreDictArrow = new ClickableArrow(0, 0, 0, 0, true, arrowNormalBackGound, arrowHighlightedBackground, arrowBorderColour);
         nextOreDictArrow.setDrawShaft(false);
@@ -65,7 +66,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
         activeSlotID = -1;
 
         for(int i=0; i < 9; i++) {
-            useOreDictCheckbox[i] = new CheckBox(i+1, new Point2D(0, 0), "Use ore dictionary", false);
+            useOreDictCheckbox[i] = new CheckBox(new Point2F(0, 0), "Use ore dictionary", false);
             useOreDictCheckbox[i].disableAndHide();
             useOreDictCheckbox[i].setOnPressed(pressed -> {
                 if (getActiveSlotID() > 0) {
@@ -81,11 +82,11 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public void init(float left, float top, float right, float bottom) {
         super.init(left, top, right, bottom);
         // Slot-specific controls
-        Point2D slotSpecificCol = this.getULFinal().plus(spacer, spacer);
-        double nextLineSC = 0;
+        Point2F slotSpecificCol = this.getULFinal().plus(spacer, spacer);
+        float nextLineSC = 0;
 
         title.setPosition(slotSpecificCol.plus(0,spacer));
 
@@ -93,8 +94,8 @@ public class SlotOptionsFrame extends ScrollableFrame {
             useOreDictCheckbox[i].setPosition(slotSpecificCol.plus(4, nextLineSC + 18));
         }
 
-        prevOreDictArrow.setTargetDimensions(new Point2D(right - 40, top + 8), new Point2D(12, 17));
-        nextOreDictArrow.setTargetDimensions(new Point2D(right - 20, top + 8), new Point2D(12, 17));
+        prevOreDictArrow.setTargetDimensions(new Point2F(right - 40, top + 8), new Point2F(12, 17));
+        nextOreDictArrow.setTargetDimensions(new Point2F(right - 20, top + 8), new Point2F(12, 17));
     }
 
     @Override
@@ -158,12 +159,12 @@ public class SlotOptionsFrame extends ScrollableFrame {
         super.render(mouseX, mouseY, partialTicks);
         if (isVisible()) {
             super.render(mouseX, mouseY, partialTicks);
-            title.render(mouseX, mouseY, partialTicks);
+            title.render(mouseX, mouseY, partialTicks, zLevel);
             for (int i =0; i < 9; i++) {
-                useOreDictCheckbox[i].render(mouseX, mouseY, partialTicks);
+                useOreDictCheckbox[i].render(mouseX, mouseY, partialTicks, zLevel);
             }
-            nextOreDictArrow.render(mouseX, mouseY, partialTicks);
-            prevOreDictArrow.render(mouseX, mouseY, partialTicks);
+            nextOreDictArrow.render(mouseX, mouseY, partialTicks, zLevel);
+            prevOreDictArrow.render(mouseX, mouseY, partialTicks, zLevel);
         }
     }
 

@@ -4,7 +4,7 @@ import com.github.lehjr.mpalib.client.gui.clickable.CheckBox;
 import com.github.lehjr.mpalib.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.mpalib.client.gui.clickable.LabledButton;
 import com.github.lehjr.mpalib.client.gui.frame.ScrollableFrame;
-import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
+import com.github.lehjr.mpalib.client.gui.geometry.Point2F;
 import com.github.lehjr.mpalib.client.sound.Musique;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.util.SoundEvents;
@@ -30,22 +30,22 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     ConditionsFrame conditionsFrame;
 
     public RecipeOptionsFrame(
-            Point2D topleft,
-            Point2D bottomright,
+            Point2F topleft,
+            Point2F bottomright,
+            float zLevel,
             Colour backgroundColour,
             Colour borderColour,
             Colour conditionsBorder,
             MPARCGui mparcGui) {
-        super(topleft, bottomright, backgroundColour, borderColour);
+        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
 
-        Point2D starterPoint = new Point2D(getULFinal());
+        Point2F starterPoint = new Point2F(getULFinal());
         this.title = new ClickableLabel("Recipe Options", starterPoint);
-        title.setMode(0);
+        title.setMode(ClickableLabel.JustifyMode.LEFT);
 
-        int id = 0;
-        shapeless = addCheckBox(new CheckBox(id++, starterPoint, "Shapeless", false));//ID_SHAPELESS
-        mirrored = addCheckBox(new CheckBox(id++, starterPoint, "Mirrored", true));//ID_MIRRORED
-        conditions = addCheckBox(new CheckBox(id++, starterPoint, "Conditions", false));//ID_CONDITIONS // fixme... not tied to anything yet
+        shapeless = addCheckBox(new CheckBox(starterPoint, "Shapeless", false));//ID_SHAPELESS
+        mirrored = addCheckBox(new CheckBox(starterPoint, "Mirrored", true));//ID_MIRRORED
+        conditions = addCheckBox(new CheckBox(starterPoint, "Conditions", false));//ID_CONDITIONS // fixme... not tied to anything yet
 
         shapeless.setOnPressed(press->{
             mirrored.setEnabled(!(shapeless.isChecked()));
@@ -66,7 +66,8 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         });
 
         conditionsFrame = new ConditionsFrame(
-                new Point2D(0,0), new Point2D(0, 0),
+                new Point2F(0,0), new Point2F(0, 0),
+                zLevel,
                 Colour.DARKBLUE,
                 conditionsBorder
         );
@@ -96,11 +97,11 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public void init(float left, float top, float right, float bottom) {
         super.init(left, top, right, bottom);
 
-        double nextLineRC = 0;
-        Point2D genericRecipeCol = new Point2D(left + 8, top + 8);
+        float nextLineRC = 0;
+        Point2F genericRecipeCol = new Point2F(left + 8, top + 8);
         title.setPosition(genericRecipeCol);
         shapeless.setPosition(genericRecipeCol.plus(0, nextLineRC+=12));
         mirrored.setPosition(genericRecipeCol.plus(0, nextLineRC+=12));
@@ -112,23 +113,22 @@ public class RecipeOptionsFrame extends ScrollableFrame {
                 right - 3,
                 bottom - spacer
         );
-
-        save.setPosition(new Point2D(right - 15 - spacer - save.finalWidth() * 2, top + save.finalHeight() * 0.5 + spacer));
-        reset.setPosition(new Point2D(right - 15 - spacer - reset.finalWidth() * 2, top + save.finalHeight() + reset.finalHeight() * 0.5 + spacer * 2));
+        save.setPosition(new Point2F(right, top).copy().plus(-(spacer + save.finalWidth() * 0.5F), spacer + save.finalHeight() * 0.5F));
+        reset.setPosition(save.getPosition().plus(0, 24F));
     }
 
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         if (isVisible()) {
             super.render(mouseX, mouseY, partialTicks);
-            title.render(mouseX, mouseY, partialTicks);
+            title.render(mouseX, mouseY, partialTicks, zLevel);
 
             for (CheckBox checkBox : checkBoxes) {
-                checkBox.render(mouseX, mouseY, partialTicks);
+                checkBox.render(mouseX, mouseY, partialTicks, zLevel);
             }
 
             for (LabledButton button : buttons) {
-                button.render(mouseX, mouseY, partialTicks);
+                button.render(mouseX, mouseY, partialTicks, zLevel);
             }
 
             conditionsFrame.render(mouseX, mouseY, partialTicks);

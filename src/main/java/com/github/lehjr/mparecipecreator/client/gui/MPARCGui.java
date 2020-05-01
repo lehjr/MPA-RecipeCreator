@@ -2,7 +2,7 @@ package com.github.lehjr.mparecipecreator.client.gui;
 
 import com.github.lehjr.mpalib.client.gui.ExtendedContainerScreen;
 import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
-import com.github.lehjr.mpalib.client.gui.geometry.Point2D;
+import com.github.lehjr.mpalib.client.gui.geometry.Point2F;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
 import net.minecraft.client.Minecraft;
@@ -37,21 +37,23 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
     private final SlotOptionsFrame slotOptions;
 
     protected final Colour gridColour = new Colour(0.1F, 0.3F, 0.4F, 0.7F);
-    protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8);
-    protected final Colour gridBackGound = new Colour(0.545D, 0.545D, 0.545D, 1);
+    protected final Colour gridBorderColour = Colour.LIGHTBLUE.withAlpha(0.8F);
+    protected final Colour gridBackGound = new Colour(0.545F, 0.545F, 0.545F, 1);
     public RecipeGen recipeGen;
 
     public MPARCGui(MPARCContainer container, PlayerInventory playerInventory, ITextComponent title) {
         super(container, playerInventory, title);
         rescale();
+        float zLevel = getBlitOffset();
 
         backgroundRect = new DrawableRect(absX(-1), absY(-1), absX(1), absY(1), true,
                 new Colour(0.0F, 0.2F, 0.0F, 0.8F),
                 new Colour(0.1F, 0.9F, 0.1F, 0.8F));
 
         inventoryFrame = new ExtInventoryFrame(
-                new Point2D(0, 0),
-                new Point2D(0, 0),
+                new Point2F(0, 0),
+                new Point2F(0, 0),
+                zLevel,
                 container,
                 Colour.DARKBLUE,
                 gridBorderColour,
@@ -64,8 +66,9 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         frames.add(inventoryFrame);
 
         recipeOptions = new RecipeOptionsFrame(
-                new Point2D(0, 0),
-                new Point2D(0, 0),
+                new Point2F(0, 0),
+                new Point2F(0, 0),
+                zLevel,
                 Colour.DARKBLUE,
                 gridBorderColour,
                 gridBackGound,
@@ -75,12 +78,13 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         recipeGen = new RecipeGen(container, recipeOptions);
 
         // display for stack string in slot
-        tokenTxt = new StackTextDisplayFrame();
+        tokenTxt = new StackTextDisplayFrame(zLevel);
         frames.add(tokenTxt);
 
         slotOptions = new SlotOptionsFrame(
-                new Point2D(0, 0),
-                new Point2D(0, 0),
+                new Point2F(0, 0),
+                new Point2F(0, 0),
+                zLevel,
                 recipeGen,
                 container,
                 Colour.DARKBLUE,
@@ -91,15 +95,16 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         frames.add(slotOptions);
 
         recipeDisplayFrame = new RecipeDisplayFrame(
-                new Point2D(0, 0),
-                new Point2D(0, 0),
+                new Point2F(0, 0),
+                new Point2F(0, 0),
+                zLevel,
                 Colour.DARKBLUE,
                 gridBorderColour);
         frames.add(recipeDisplayFrame);
     }
 
-    Point2D getULShift() {
-        return new Point2D(this.guiLeft, this.guiTop).plus(8, 8);
+    Point2F getULShift() {
+        return new Point2F(this.guiLeft, this.guiTop).plus(8, 8);
     }
 
     @Override
@@ -113,7 +118,7 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         backgroundRect.setTargetDimensions(absX(-1), absY(-1), absX(1), absY(1));
 
         // left side of inventory slots
-        double inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
+        float inventoryLeft = backgroundRect.finalRight() - spacer * 2 - 9 * slotWidth;
 
         // set the ulShift before setting init, since ulshift is set in init
         inventoryFrame.setULShift(getULShift());
@@ -156,6 +161,11 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         recipeGen.reset();
         container.craftMatrix.clear();
         container.craftResult.clear();
+    }
+
+    @Override
+    public boolean mouseClicked(double x, double y, int button) {
+        return super.mouseClicked(x, y, button);
     }
 
     public void save() {
@@ -208,7 +218,7 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
     @Override
     public void render(int mouseX, int mouseY, float partialTicks) {
         this.renderBackground();
-        backgroundRect.draw();
+        backgroundRect.draw(this.getBlitOffset());
         super.render(mouseX, mouseY, partialTicks);
 
         // Title
