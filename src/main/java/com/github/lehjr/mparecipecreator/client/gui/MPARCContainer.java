@@ -17,7 +17,6 @@ import net.minecraft.util.IWorldPosCallable;
  * @author Dries007
  */
 public class MPARCContainer extends Container {
-    //    public class WorkbenchContainer extends RecipeBookContainer<CraftingInventory> {
     /**
      * The crafting matrix inventory (3x3).
      */

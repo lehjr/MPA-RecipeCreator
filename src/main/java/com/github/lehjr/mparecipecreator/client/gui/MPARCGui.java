@@ -5,16 +5,10 @@ import com.github.lehjr.mpalib.client.gui.geometry.DrawableRect;
 import com.github.lehjr.mpalib.client.gui.geometry.Point2F;
 import com.github.lehjr.mpalib.client.render.Renderer;
 import com.github.lehjr.mpalib.math.Colour;
+import com.github.lehjr.mparecipecreator.basemod.DataPackWriter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.text.ITextComponent;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * @author Dries007
@@ -170,18 +164,7 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
 
     public void save() {
         if(container.getSlot(0).getHasStack()) {
-            Path dir = Paths.get("saved_recipes");
-            File file = new File(dir.toAbsolutePath().toString(), recipeDisplayFrame.title + ".json");
-            String prettyJson = recipeGen.getRecipeJson();
-            try {
-                Files.createDirectories(file.toPath().getParent());
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(prettyJson);
-                fileWriter.flush();
-                fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            DataPackWriter.writeRecipe(recipeGen.getRecipeJson(),recipeDisplayFrame.title + ".json");
         }
     }
 

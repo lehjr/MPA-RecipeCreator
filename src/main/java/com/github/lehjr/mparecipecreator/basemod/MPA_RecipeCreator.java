@@ -1,8 +1,10 @@
 package com.github.lehjr.mparecipecreator.basemod;
 
+import com.github.lehjr.mparecipecreator.basemod.config.Config;
 import com.github.lehjr.mparecipecreator.block.RecipeWorkbench;
 import com.github.lehjr.mparecipecreator.client.gui.MPARCContainer;
 import com.github.lehjr.mparecipecreator.client.gui.MPARCGui;
+import com.github.lehjr.mparecipecreator.network.NetHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.inventory.container.ContainerType;
@@ -12,8 +14,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
@@ -25,6 +30,11 @@ public final class MPA_RecipeCreator {
     public static final CreativeTab creativeTab = new CreativeTab();
 
     public MPA_RecipeCreator() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+
+        // Register the setup method for modloading
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the setupClient method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupClient);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -34,6 +44,10 @@ public final class MPA_RecipeCreator {
 
     private void setupClient(final FMLClientSetupEvent event) {
         ScreenManager.registerFactory(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, MPARCGui::new);
+    }
+
+    private void setup(final FMLCommonSetupEvent event) {
+        NetHandler.registerMPALibPackets();
     }
 
     @SubscribeEvent

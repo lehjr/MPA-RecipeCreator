@@ -2,8 +2,10 @@ package com.github.lehjr.mparecipecreator.basemod;
 
 import com.google.gson.*;
 
-import java.io.*;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -44,16 +46,7 @@ public class ConditionsJsonLoader {
 
             System.out.println("prettyJson: " + prettyJsonString);
 
-
-            try {
-                Files.createDirectories(jsonFile.toPath().getParent());
-                FileWriter fileWriter = new FileWriter(jsonFile);
-                fileWriter.write(prettyJsonString);
-                fileWriter.flush();
-                fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            DataPackWriter.INSTANCE.fileWriter(jsonFile, prettyJsonString, false);
         }
     }
 
