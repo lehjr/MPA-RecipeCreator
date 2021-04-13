@@ -6,16 +6,17 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.CraftingResultSlot;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.container.*;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIntArray;
 import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.IntReferenceHolder;
+import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
 
-/**
- * @author Dries007
- */
+import javax.annotation.Nullable;
+import java.util.List;
+
 public class MPARCContainer extends Container {
     /**
      * The crafting matrix inventory (3x3).
@@ -36,7 +37,12 @@ public class MPARCContainer extends Container {
         this.player = playerInventory.player;
 
         // crafting result
-        this.addSlot(new CraftingResultSlot(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35));
+        this.addSlot(new CraftingResultSlot(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35) {
+            @Override
+            public boolean isItemValid(ItemStack stack) {
+                return true;
+            }
+        });
 
         // crafting grid
         for (int row = 0; row < 3; ++row) {
@@ -84,8 +90,10 @@ public class MPARCContainer extends Container {
     @Override
     public ItemStack slotClick(int slotIndex, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
         ItemStack stack = ItemStack.EMPTY;
+
+        // handle crafting grid or result
         if ((slotIndex >= 0 && slotIndex <= 9)) {
-            if (mousebtn == 2) {
+            if (mousebtn == 1) {
                 getSlot(slotIndex).putStack(ItemStack.EMPTY);
             } else if (mousebtn == 0) {
                 PlayerInventory playerInv = player.inventory;
@@ -135,11 +143,6 @@ public class MPARCContainer extends Container {
             stack = super.slotClick(slotIndex, mousebtn, clickTypeIn, player);
         }
         return stack;
-    }
-
-    @Override
-    public void onCraftMatrixChanged(IInventory inventoryIn) {
-        // really don't need to sync this
     }
 
     /**

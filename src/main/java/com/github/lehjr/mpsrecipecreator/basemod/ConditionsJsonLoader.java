@@ -30,12 +30,12 @@ public class ConditionsJsonLoader {
                             "Centralized Materials Loaded",
                             "centralizedmaterials"));
 
-            // flag
-            conditionsList.add(
-                    flagJsonObject(
-                            "Vanilla Recipes Enabled",
-                            "modularpowerarmor:flag",
-                            "vanilla_recipes_enabled"));
+//            // flag
+//            conditionsList.add(
+//                    flagJsonObject(
+//                            "Vanilla Recipes Enabled",
+//                            "modularpowerarmor:flag",
+//                            "vanilla_recipes_enabled"));
 
             conditions.add("conditions", conditionsList);
 

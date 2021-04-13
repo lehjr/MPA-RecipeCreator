@@ -9,7 +9,10 @@ import com.github.lehjr.mpsrecipecreator.basemod.DataPackWriter;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.text.ITextComponent;
+
+import javax.annotation.Nullable;
 
 /**
  * @author Dries007
@@ -158,10 +161,45 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
         container.craftResult.clear();
     }
 
-    @Override
-    public boolean mouseClicked(double x, double y, int button) {
-        return super.mouseClicked(x, y, button);
+//    @Override
+//    public boolean mouseClicked(double x, double y, int button) {
+//        System.out.println("event listeners size:" + getEventListeners().size());
+//
+//
+////        boolean test = super.mouseClicked(x, y, button);
+////        System.out.println("test: " + test);
+////        return test;
+//
+//        // pick block = middle mouse button (2)
+//        // attack button = left mouse button (0)
+//        // place block/use item = right mounse button (1)
+//
+//        System.out.println("selected slot index: " + getSelectedSlot(x, y) == null ? null : container.inventorySlots.indexOf(getSelectedSlot(x, y)));
+//
+////            InputMappings.Input mouseKey = InputMappings.Type.MOUSE.getOrMakeInput(button);
+////            boolean flag = Minecraft.getInstance().gameSettings.keyBindPickBlock.isActiveAndMatches(mouseKey);
+////            boolean flag = Minecraft.getInstance().gameSettings.keyBindUseItem.isActiveAndMatches(mouseKey);
+////            boolean flag = Minecraft.getInstance().gameSettings.keyBindAttack.isActiveAndMatches(mouseKey);
+//
+//        return super.mouseClicked(x, y, button);
+//    }
+
+
+    @Nullable
+    private Slot getSelectedSlot(double mouseX, double mouseY) {
+        for(int i = 0; i < this.container.inventorySlots.size(); ++i) {
+            Slot slot = this.container.inventorySlots.get(i);
+            // isSlotSelected
+            if (this.isPointInRegion(slot.xPos, slot.yPos, 16, 16, mouseX, mouseY) && slot.isEnabled()) {
+                return slot;
+            }
+        }
+
+        return null;
     }
+
+
+
 
     public void save() {
         if(container.getSlot(0).getHasStack()) {

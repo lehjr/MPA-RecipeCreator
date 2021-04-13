@@ -195,7 +195,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     void setLabel() {
-        this.title .setLabel("Slot " + (activeSlotID >=0 && activeSlotID <=10 ? activeSlotID + " " : "") + "Options");
+        this.title.setLabel("Slot " + (activeSlotID >=0 && activeSlotID <=10 ? activeSlotID + " " : "") + "Options");
     }
 
     public void reset() {

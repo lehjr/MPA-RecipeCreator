@@ -11,8 +11,12 @@ import com.github.lehjr.numina.util.client.sound.Musique;
 import com.github.lehjr.numina.util.client.sound.SoundDictionary;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.ArrayList;
@@ -97,12 +101,10 @@ public class SpecialCraftingGrid implements IGuiFrame {
                         slot.yPos = (int) position.getY();
                     }
 
-                    // result
+                // result
                 } else if (row == 1 && col == 4) {
-
                     // position here: x: 366.0, y: 48.0
                     // actual position here: x: 387.0, y: 11.0
-
                     Slot slot = container.getSlot(0);
                     if (slot instanceof UniversalSlot) {
                         ((UniversalSlot)slot).setPosition(position);
@@ -124,6 +126,7 @@ public class SpecialCraftingGrid implements IGuiFrame {
         return false;
     }
 
+    /** Note: returning false here even when handled here so slot handling code still runs */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.border.containsPoint(mouseX, mouseY)) {
@@ -131,7 +134,8 @@ public class SpecialCraftingGrid implements IGuiFrame {
                 if (holder instanceof DrawableBoxHolder) {
                     if(((DrawableBoxHolder) holder).button.hitBox((float)mouseX, (float) mouseY)) {
                         ((DrawableBoxHolder) holder).button.onPressed();
-                        return true;
+//                        return true; // testing
+                        break;
                     }
                 }
             }
@@ -146,11 +150,10 @@ public class SpecialCraftingGrid implements IGuiFrame {
                 if (holder instanceof DrawableBoxHolder) {
                     if(((DrawableBoxHolder) holder).button.hitBox((float)mouseX, (float) mouseY)) {
                         ((DrawableBoxHolder) holder).button.onReleased();
-                        return true;
+                        break;
                     }
                 }
             }
-            return true;
         }
         return false;
     }
@@ -184,13 +187,12 @@ public class SpecialCraftingGrid implements IGuiFrame {
         }
 
         // SLOT NUMBER LABELS
-        IntStream.range(0, 11).forEach(i-> {
+        IntStream.range(0, 11).forEach(i->
             MuseRenderer.drawString(matrixStack,
                     String.valueOf(i),
                     container.getSlot(i).xPos + 5 + slot_ulShift.getX() - 8,
                     container.getSlot(i).yPos + 4 + slot_ulShift.getY() - 8,
-                    Colour.WHITE);
-        });
+                    Colour.WHITE));
     }
 
 
