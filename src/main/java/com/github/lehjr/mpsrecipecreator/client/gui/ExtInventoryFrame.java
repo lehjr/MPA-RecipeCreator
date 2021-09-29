@@ -1,9 +1,12 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
+import com.github.lehjr.numina.util.client.gui.IContainerULOffSet;
 import com.github.lehjr.numina.util.client.gui.frame.IGuiFrame;
 import com.github.lehjr.numina.util.client.gui.frame.InventoryFrame;
+import com.github.lehjr.numina.util.client.gui.frame.PlayerInventoryFrame;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
+import com.github.lehjr.numina.util.client.gui.gemoetry.RelativeRect;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.inventory.container.Container;
@@ -16,13 +19,16 @@ import java.util.stream.IntStream;
  * @author lehjr
  */
 public class ExtInventoryFrame extends ScrollableFrame {
+    PlayerInventoryFrame playerInventoryFrame;
+
+
     InventoryFrame mainInventory, hotbar;
     SpecialCraftingGrid craftingGrid;
     Container container;
-    MusePoint2D ulShift = new MusePoint2D(0, 0);
     final int spacer = 4;
     final int slotHeight = 18;
     List<IGuiFrame> frames = new ArrayList<>();
+    IContainerULOffSet.ulGetter ulGetter;
 
     public ExtInventoryFrame(
             MusePoint2D topleft,
@@ -34,10 +40,18 @@ public class ExtInventoryFrame extends ScrollableFrame {
             Colour gridBackGound,
             Colour gridBorderColour,
             Colour gridColour,
-            MPARCGui mparcGui) {
-        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
-
+            MPARCGui mparcGui,
+            IContainerULOffSet.ulGetter ulGetter
+    ) {
+        super(topleft, bottomright, backgroundColour, borderColour, Colour.PINK);
+        this.ulGetter = ulGetter;
         this.container = container;
+
+//        playerInventoryFrame = new PlayerInventoryFrame();
+        //     public PlayerInventoryFrame(Container container, final int mainInventoryStart, final int hotbarStart, ulGetter ulgetter) {
+        //
+
+
 
         // slots 0 - 9
         craftingGrid = new SpecialCraftingGrid(
@@ -47,41 +61,30 @@ public class ExtInventoryFrame extends ScrollableFrame {
                 gridBackGound,
                 gridBorderColour,
                 gridColour,
-                mparcGui
+                mparcGui,
+                ulGetter
         );
         frames.add(craftingGrid);
 
         // slot 10-36
         mainInventory = new InventoryFrame(this.container,
-                new MusePoint2D(0,0), new MusePoint2D(0, 0),
-                zLevel,
-                gridBackGound, gridBorderColour, gridColour,
                 9, 3, new ArrayList<Integer>(){{
             IntStream.range(10, 37).forEach(i-> add(i));
-        }});
+        }},
+                ulGetter);
         frames.add(mainInventory);
 
         // slot 0-9
         hotbar = new InventoryFrame(this.container,
-                new MusePoint2D(0,0), new MusePoint2D(0, 0),
-                zLevel,
-                gridBackGound, gridBorderColour, gridColour,
                 9, 1, new ArrayList<Integer>(){{
             IntStream.range(37, 46).forEach(i-> add(i));
-        }});
+        }},
+                ulGetter);
         frames.add(hotbar);
     }
 
-    public void setULShift(MusePoint2D ulShift) {
-        this.ulShift = ulShift;
-    }
-
-    public MusePoint2D getULShift() {
-        return ulShift;
-    }
-
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public RelativeRect init(double left, double top, double right, double bottom) {
         super.init(left, top, right, bottom);
 
         hotbar.init(
@@ -89,22 +92,19 @@ public class ExtInventoryFrame extends ScrollableFrame {
                 bottom - spacer - slotHeight,
                 right - spacer,
                 bottom - spacer);
-        hotbar.setUlShift(ulShift);
 
         mainInventory.init(
                 left + spacer,
                 hotbar.finalTop() - spacer - 3 * slotHeight,
                 right - spacer,
                 hotbar.finalTop() - spacer);
-        mainInventory.setUlShift(getULShift());
-
         craftingGrid.init(
                 left + spacer,
                 mainInventory.finalTop() - spacer * 2 - 96,
 
                 0, // ignored
                 0); // ignored
-        craftingGrid.setUlShift(getULShift());
+        return this;
     }
 
     @Override

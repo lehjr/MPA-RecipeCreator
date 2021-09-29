@@ -11,8 +11,8 @@ public class StackTextDisplayFrame extends ScrollableFrame {
     String label = "";
     int slot = -1;
 
-    public StackTextDisplayFrame(float zLevel) {
-        super(new MusePoint2D(0, 0), new MusePoint2D(0, 0), zLevel, Colour.BLACK, Colour.LIGHT_BLUE.withAlpha(0.8F));
+    public StackTextDisplayFrame() {
+        super();
     }
 
     public void setSlot(int slot) {
@@ -26,7 +26,7 @@ public class StackTextDisplayFrame extends ScrollableFrame {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
-        MuseRenderer.drawLeftAlignedStringString(matrixStack, slot != -1 ? "Slot " + slot + ": " +
-                this.label : "No slot selected", this.getBorder().finalLeft() + 4, this.getBorder().center().getY() - 4.0D);
+        MuseRenderer.drawLeftAlignedShadowedString(matrixStack, slot != -1 ? "Slot " + slot + ": " +
+                this.label : "No slot selected", finalLeft() + 4, center().getY() - 4.0D);
     }
 }

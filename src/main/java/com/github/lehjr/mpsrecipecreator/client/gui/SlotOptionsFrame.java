@@ -1,11 +1,11 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
-import com.github.lehjr.numina.util.client.gui.clickable.CheckBox;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableArrow;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.numina.util.client.gui.gemoetry.DrawableArrow;
 import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
+import com.github.lehjr.numina.util.client.gui.gemoetry.RelativeRect;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.item.Item;
@@ -34,19 +34,19 @@ public class SlotOptionsFrame extends ScrollableFrame {
 
     public SlotOptionsFrame(MusePoint2D topleft,
                             MusePoint2D bottomright,
-                            float zLevel,
                             RecipeGen recipeGenIn,
                             MPARCContainer container,
                             Colour backgroundColour,
+
                             Colour borderColour,
                             Colour arrowNormalBackGound,
                             Colour arrowHighlightedBackground,
                             Colour arrowBorderColour) {
-        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
+        super(topleft, bottomright, backgroundColour, borderColour, arrowBorderColour);
         this.container = container;
         this.recipeGen = recipeGenIn;
 
-        MusePoint2D starterPoint = this.getULFinal().copy().plus(4, 4);
+        MusePoint2D starterPoint = this.getUL().copy().plus(4, 4);
 
         this.title = new ClickableLabel("Slot Options", starterPoint.copy());
         title.setMode(ClickableLabel.JustifyMode.LEFT);
@@ -83,10 +83,10 @@ public class SlotOptionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public RelativeRect init(double left, double top, double right, double bottom) {
         super.init(left, top, right, bottom);
         // Slot-specific controls
-        MusePoint2D slotSpecificCol = this.getULFinal().plus(spacer, spacer);
+        MusePoint2D slotSpecificCol = this.getUL().plus(spacer, spacer);
         float nextLineSC = 0;
 
         title.setPosition(slotSpecificCol.plus(0,spacer));
@@ -94,9 +94,9 @@ public class SlotOptionsFrame extends ScrollableFrame {
         for(int i=0; i<9; i++) {
             useOreDictCheckbox[i].setPosition(slotSpecificCol.plus(4, nextLineSC + 18));
         }
-
-        prevOreDictArrow.setTargetDimensions(new MusePoint2D(right - 40, top + 8), new MusePoint2D(12, 17));
-        nextOreDictArrow.setTargetDimensions(new MusePoint2D(right - 20, top + 8), new MusePoint2D(12, 17));
+        prevOreDictArrow.setWH(new MusePoint2D(12, 17)).setLeft(right - 40).setTop(top + 8);
+        nextOreDictArrow.setWH(new MusePoint2D(12, 17)).setLeft(right - 20).setTop(top + 8);
+        return this;
     }
 
     @Override
@@ -109,13 +109,13 @@ public class SlotOptionsFrame extends ScrollableFrame {
             }
             useOreDictCheckbox[i].disableAndHide();
 
-            if (!container.getSlot(i+1).getHasStack()) {
+            if (!container.getSlot(i+1).hasItem()) {
                 useOreDictCheckbox[i].setChecked(false);
             }
         }
 
         if (activeSlotID >= 1) {
-            ItemStack stack = container.getSlot(activeSlotID).getStack();
+            ItemStack stack = container.getSlot(activeSlotID).getItem();
             if (stack.isEmpty()) {
                 useOreDictCheckbox[activeSlotID -1].setChecked(false);
                 useOreDictCheckbox[activeSlotID -1].disableAndHide();
@@ -123,7 +123,7 @@ public class SlotOptionsFrame extends ScrollableFrame {
                 prevOreDictArrow.disableAndHide();
             } else {
                 Item item = stack.getItem();
-                final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
+                final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getAllTags().getMatchingTags(item));
                 if (!ids.isEmpty()) {
                     useOreDictCheckbox[activeSlotID -1].enableAndShow();
                     if (useOreDictCheckbox[activeSlotID -1].isChecked()) {
@@ -159,12 +159,12 @@ public class SlotOptionsFrame extends ScrollableFrame {
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         if (isVisible()) {
-            title.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+            title.render(matrixStack, mouseX, mouseY, partialTicks);
             for (int i =0; i < 9; i++) {
-                useOreDictCheckbox[i].render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+                useOreDictCheckbox[i].render(matrixStack, mouseX, mouseY, partialTicks);
             }
-            nextOreDictArrow.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
-            prevOreDictArrow.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+            nextOreDictArrow.render(matrixStack, mouseX, mouseY, partialTicks);
+            prevOreDictArrow.render(matrixStack, mouseX, mouseY, partialTicks);
         }
     }
 

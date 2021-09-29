@@ -43,7 +43,7 @@ public final class MPS_RecipeCreator {
     }
 
     private void setupClient(final FMLClientSetupEvent event) {
-        ScreenManager.registerFactory(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, MPARCGui::new);
+        ScreenManager.register(ModObjects.RECIPE_WORKBENCH_CONTAINER_TYPE, MPARCGui::new);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
@@ -66,7 +66,7 @@ public final class MPS_RecipeCreator {
     public void registerItemBlock(RegistryEvent.Register<Item> itemBlockRegistryEvent) {
         itemBlockRegistryEvent.getRegistry().register(
                 new BlockItem(ModObjects.recipeWorkBench,
-                        new Item.Properties().group(creativeTab))
+                        new Item.Properties().tab(creativeTab))
                         .setRegistryName(new ResourceLocation(Constants.RECIPE_WORKBENCH__REGNAME)));
     }
 }

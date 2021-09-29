@@ -28,7 +28,7 @@ public class MPARCContainer extends Container {
     private final IWorldPosCallable posCallable;
 
     public MPARCContainer(int windowID, PlayerInventory playerInventory) {
-        this(windowID, playerInventory, IWorldPosCallable.DUMMY);
+        this(windowID, playerInventory, IWorldPosCallable.NULL);
     }
 
     public MPARCContainer(int windowID, PlayerInventory playerInventory, IWorldPosCallable posCallable) {
@@ -39,7 +39,7 @@ public class MPARCContainer extends Container {
         // crafting result
         this.addSlot(new CraftingResultSlot(playerInventory.player, this.craftMatrix, this.craftResult, 0, 124, 35) {
             @Override
-            public boolean isItemValid(ItemStack stack) {
+            public boolean mayPlace(ItemStack stack) {
                 return true;
             }
         });
@@ -66,10 +66,6 @@ public class MPARCContainer extends Container {
 //        this.onCraftMatrixChanged(this.craftMatrix);
     }
 
-    public boolean canInteractWith(PlayerEntity p_75145_1_) {
-        return true;
-    }
-
     /**
      * Note only called if player is moving an itemstack through the dragging mechanics
      * @param slotIndex
@@ -88,18 +84,18 @@ public class MPARCContainer extends Container {
     }
 
     @Override
-    public ItemStack slotClick(int slotIndex, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
+    public ItemStack clicked(int slotIndex, int mousebtn, ClickType clickTypeIn, PlayerEntity player) {
         ItemStack stack = ItemStack.EMPTY;
 
         // handle crafting grid or result
         if ((slotIndex >= 0 && slotIndex <= 9)) {
             if (mousebtn == 1) {
-                getSlot(slotIndex).putStack(ItemStack.EMPTY);
+                getSlot(slotIndex).set(ItemStack.EMPTY);
             } else if (mousebtn == 0) {
                 PlayerInventory playerInv = player.inventory;
 //                getSlot(i).onSlotChanged();
-                ItemStack stackSlot = getSlot(slotIndex).getStack();
-                ItemStack stackHeld = playerInv.getItemStack();
+                ItemStack stackSlot = getSlot(slotIndex).getItem();
+                ItemStack stackHeld = playerInv.getSelected();
 
                 if (!stackSlot.isEmpty()) {
                     stack = stackSlot.copy();
@@ -110,48 +106,53 @@ public class MPARCContainer extends Container {
                     if (!(slotIndex == 0)) {
                         newStack.setCount(1);
                     }
-                    getSlot(slotIndex).putStack(newStack);
+                    getSlot(slotIndex).set(newStack);
                 } else {
-                    getSlot(slotIndex).putStack(ItemStack.EMPTY);
+                    getSlot(slotIndex).set(ItemStack.EMPTY);
                 }
             } else if (mousebtn == 1) {
                 PlayerInventory playerInv = player.inventory;
-                getSlot(slotIndex).onSlotChanged();
-                ItemStack stackSlot = getSlot(slotIndex).getStack();
-                ItemStack stackHeld = playerInv.getItemStack();
+                getSlot(slotIndex).setChanged();
+                ItemStack stackSlot = getSlot(slotIndex).getItem();
+                ItemStack stackHeld = playerInv.getSelected();
 
                 stack = stackSlot.copy();
 
                 if (!stackHeld.isEmpty()) {
                     stackHeld = stackHeld.copy();
-                    if (!stackSlot.isEmpty() && stackHeld.isItemEqual(stackSlot) && (slotIndex == 0)) {
+                    if (!stackSlot.isEmpty() && stackHeld.sameItem(stackSlot) && (slotIndex == 0)) {
                         if (stackSlot.getCount() < stackSlot.getMaxStackSize()) stackSlot.grow(1);
                     } else {
                         stackSlot.setCount(1);
                     }
-                    getSlot(slotIndex).putStack(stackSlot);
+                    getSlot(slotIndex).set(stackSlot);
                 } else {
                     if (!stackSlot.isEmpty()) {
                         stackSlot.shrink(1);
                         if (stackSlot.isEmpty()) {
-                            getSlot(slotIndex).putStack(ItemStack.EMPTY);
+                            getSlot(slotIndex).set(ItemStack.EMPTY);
                         }
                     }
                 }
             }
         } else {
-            stack = super.slotClick(slotIndex, mousebtn, clickTypeIn, player);
+            stack = super.clicked(slotIndex, mousebtn, clickTypeIn, player);
         }
         return stack;
+    }
+
+    @Override
+    public boolean stillValid(PlayerEntity playerEntity) {
+        return true;
     }
 
     /**
      * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
      */
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
         if (index < 10) {
-            inventorySlots.get(index).putStack(ItemStack.EMPTY);
+            slots.get(index).set(ItemStack.EMPTY);
         }
         return ItemStack.EMPTY;
     }

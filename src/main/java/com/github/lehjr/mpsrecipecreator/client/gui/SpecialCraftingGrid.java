@@ -1,5 +1,7 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
+import com.github.lehjr.numina.config.NuminaSettings;
+import com.github.lehjr.numina.util.client.gui.IContainerULOffSet;
 import com.github.lehjr.numina.util.client.gui.clickable.Button;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableArrow;
 import com.github.lehjr.numina.util.client.gui.frame.IGuiFrame;
@@ -11,14 +13,11 @@ import com.github.lehjr.numina.util.client.sound.Musique;
 import com.github.lehjr.numina.util.client.sound.SoundDictionary;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.InputMappings;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.text.ITextComponent;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -26,22 +25,22 @@ import java.util.stream.IntStream;
 /**
  * Spaced crafting grid with result and corresponding buttons
  */
-public class SpecialCraftingGrid implements IGuiFrame {
+public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFrame, IContainerULOffSet {
     Container container;
-    protected DrawableMuseRect border;
     Colour backgroundColour;
     Colour gridColour;
-    public final int gridWidth = 18;
-    public final int gridHeight = 18;
+    public final int slotWidth = 18;
+    public final int slotHeight = 18;
     final int spacing = 14;
     MPARCGui mparcGui;
     boolean isEnabled = true;
     boolean isVisible = true;
     float zLevel;
+    MusePoint2D slot_ulShift = new MusePoint2D(0, 0);
+    IContainerULOffSet.ulGetter ulGetter;
 
     List<BoxHolder> boxes = new ArrayList<>();
     final MusePoint2D borderWH = new MusePoint2D(160, 96);
-    MusePoint2D slot_ulShift = new MusePoint2D(0, 0);
 
     public SpecialCraftingGrid(Container containerIn,
                                MusePoint2D topleft,
@@ -49,72 +48,54 @@ public class SpecialCraftingGrid implements IGuiFrame {
                                Colour backgroundColour,
                                Colour borderColour,
                                Colour gridColourIn,
-                               MPARCGui mparcGui) {
+                               MPARCGui mparcGui,
+                               IContainerULOffSet.ulGetter ulGetter) {
+
+        // (MusePoint2D ul, MusePoint2D br, Colour backgroundColour, Colour borderColour)
+        super(topleft, topleft.plus(new MusePoint2D(160, 96)), backgroundColour, gridColourIn);
+
+
         this.container = containerIn;
         this.zLevel = zLevel;
-        this.border = new DrawableMuseRect(topleft, topleft.copy().plus(borderWH), /*backgroundColour*/ Colour.DARKBLUE, borderColour);
+//        this.border = new DrawableRelativeRect(topleft, topleft.copy().plus(borderWH), /*backgroundColour*/ Colour.DARKBLUE, borderColour);
         this.backgroundColour = backgroundColour;
         this.gridColour = gridColourIn;
         this.mparcGui = mparcGui;
+        this.ulGetter=ulGetter;
     }
 
     public void loadSlots() {
-        MusePoint2D wh = new MusePoint2D(gridWidth + spacing, gridHeight + spacing);
-        MusePoint2D ul = new MusePoint2D(this.border.finalLeft(), this.border.finalTop());
+        MusePoint2D wh = new MusePoint2D(slotWidth + spacing, slotHeight + spacing);
+        MusePoint2D ul = new MusePoint2D(finalLeft(), finalTop());
         this.boxes.clear();;
         int i = 0;
 
+        this.slot_ulShift = getULShift();
+
         for(int row = 0; row < 3; ++row) {
             for(int col = 0; col < 5; ++col) {
-                MuseRelativeRect rect = new MuseRelativeRect(ul, ul.plus(wh));
                 if (col < 3) {
-                    this.boxes.add(new DrawableBoxHolder(rect, (col + row * 3 + 1)));
+                    // crafting slots
+                    this.boxes.add(new DrawableBoxHolder(ul, ul.plus(wh), backgroundColour, Colour.DARK_GREEN, (col + row * 3 + 1)));
+                    // result
                 } else if (col == 4 && row == 1) {
-                    this.boxes.add(new DrawableBoxHolder(rect, 0));
+                    this.boxes.add(new DrawableBoxHolder(ul, ul.plus(wh), backgroundColour, Colour.DARK_GREEN, 0));
+                    // arrow
                 } else if (col == 3 && row == 1) {
-                    this.boxes.add(new DrawableArrowHolder(rect));
+                    this.boxes.add(new DrawableArrowHolder(ul, ul.plus(wh), backgroundColour, Colour.DARK_GREEN));
+                    //
                 } else {
-                    this.boxes.add(new BoxHolder(rect));
+                    this.boxes.add(new BoxHolder(ul, ul.plus(wh), backgroundColour, Colour.DARK_GREEN));
                 }
 
                 if (i > 0) {
                     if (col > 0) {
-                        this.boxes.get(i).rect.setMeRightOf(this.boxes.get(i - 1).rect);
+                        this.boxes.get(i).setMeRightOf(this.boxes.get(i - 1));
                     }
 
                     if (row > 0) {
-                        this.boxes.get(i).rect.setMeBelow(this.boxes.get(i - 5).rect);
+                        this.boxes.get(i).setMeBelow(this.boxes.get(i - 5));
                     }
-                }
-
-                MusePoint2D position = rect.center().copy().minus(this.slot_ulShift);
-
-                // standard grid slot
-                if (col < 3) {
-                    Slot slot = this.container.getSlot((col + row * 3 + 1));
-                    if (slot instanceof UniversalSlot) {
-                        ((UniversalSlot)slot).setPosition(position);
-                    } else if (slot instanceof IHideableSlot) {
-                        ((IHideableSlot) slot).setPosition(position);
-                    } else {
-                        slot.xPos = (int) position.getX();
-                        slot.yPos = (int) position.getY();
-                    }
-
-                // result
-                } else if (row == 1 && col == 4) {
-                    // position here: x: 366.0, y: 48.0
-                    // actual position here: x: 387.0, y: 11.0
-                    Slot slot = container.getSlot(0);
-                    if (slot instanceof UniversalSlot) {
-                        ((UniversalSlot)slot).setPosition(position);
-                    } else if (slot instanceof IHideableSlot) {
-                        ((IHideableSlot) slot).setPosition(position);
-                    } else {
-                        slot.xPos = (int) position.getX();
-                        slot.yPos = (int) position.getY();
-                    }
-                    // spacer
                 }
                 ++i;
             }
@@ -126,10 +107,12 @@ public class SpecialCraftingGrid implements IGuiFrame {
         return false;
     }
 
+
+
     /** Note: returning false here even when handled here so slot handling code still runs */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.border.containsPoint(mouseX, mouseY)) {
+        if (this.containsPoint(mouseX, mouseY)) {
             for (BoxHolder holder : boxes) {
                 if (holder instanceof DrawableBoxHolder) {
                     if(((DrawableBoxHolder) holder).button.hitBox((float)mouseX, (float) mouseY)) {
@@ -145,7 +128,7 @@ public class SpecialCraftingGrid implements IGuiFrame {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (this.border.containsPoint(mouseX, mouseY)) {
+        if (this.containsPoint(mouseX, mouseY)) {
             for (BoxHolder holder : boxes) {
                 if (holder instanceof DrawableBoxHolder) {
                     if(((DrawableBoxHolder) holder).button.hitBox((float)mouseX, (float) mouseY)) {
@@ -158,18 +141,11 @@ public class SpecialCraftingGrid implements IGuiFrame {
         return false;
     }
 
-    public MusePoint2D getUlShift() {
-        return slot_ulShift;
-    }
-
-    public void setUlShift(MusePoint2D ulShift) {
-        this.slot_ulShift = ulShift;
-    }
-
     @Override
-    public void init(double left, double top, double right, double bottom) {
-        this.border.setTargetDimensions(left, top, left +  borderWH.getX(), top + borderWH.getY());
+    public RelativeRect init(double left, double top, double right, double bottom) {
+        super.init(left, top, left +  borderWH.getX(), top + borderWH.getY());
         loadSlots();
+        return this;
     }
 
     @Override
@@ -178,100 +154,54 @@ public class SpecialCraftingGrid implements IGuiFrame {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.border.draw(matrixStack, zLevel);
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float frameTime) {
+        super.render(matrixStack, mouseX, mouseY, frameTime);
         if (this.boxes != null && !this.boxes.isEmpty()) {
             for (BoxHolder boxHolder : boxes) {
-                boxHolder.render(matrixStack, mouseX, mouseY, partialTicks);
+                boxHolder.render(matrixStack, mouseX, mouseY, frameTime);
             }
         }
-
-        // SLOT NUMBER LABELS
-        IntStream.range(0, 11).forEach(i->
-            MuseRenderer.drawString(matrixStack,
-                    String.valueOf(i),
-                    container.getSlot(i).xPos + 5 + slot_ulShift.getX() - 8,
-                    container.getSlot(i).yPos + 4 + slot_ulShift.getY() - 8,
-                    Colour.WHITE));
     }
 
-
+    @Override
+    public float getZLevel() {
+        return 0;
+    }
 
     @Override
-    public void setTargetDimensions(double left, double top, double right, double bottom) {
-        border.setTargetDimensions(left, top, right, bottom);
+    public IDrawable setZLevel(float v) {
+        return this;
+    }
+
+    public void setTargetDimensions(MusePoint2D ul, MusePoint2D wh) {
+        super.init(ul.getX(), ul.getY(), ul.getX() + wh.getX(), ul.getY() + wh.getY());
         loadSlots();
     }
 
-    class BoxHolder {
-        MuseRelativeRect rect;
-        public BoxHolder(MuseRelativeRect rectIn) {
-            rect = rectIn;
-        }
-
-        public void render(MatrixStack matrixStackIn, int mouseX, int mouseY, float partialTicks) {
-
-        }
+    @Override
+    public void doThisOnChange() {
+        super.doThisOnChange();
+        loadSlots();
     }
 
-    class DrawableBoxHolder extends BoxHolder {
-        DrawableTile tile;
-        Button button;
-
-        public DrawableBoxHolder(MuseRelativeRect rectIn, int index) {
-            super(rectIn);
-            this.button = new Button(getButtonUL(), getButtonUL().plus(gridWidth + 10, gridHeight + 10), Colour.DARK_GREY, Colour.RED, Colour.BLACK, Colour.BLACK);
-            this.button.enableAndShow();
-            this.button.setOnPressed(onPressed-> {
-                Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, 1);
-                mparcGui.selectSlot(index);
-            });
-            this.button.setOnReleased(onReleased-> {
-                mparcGui.selectSlot(index);
-            });
-
-            this.tile = new DrawableTile(getTileUL(), getTileUL().plus(gridWidth, gridHeight)).setBackgroundColour(backgroundColour).setBottomBorderColour(gridColour);
-        }
-
-        MusePoint2D getTileUL () {
-            return rect.center().minus(gridWidth * 0.5F, gridHeight * 0.5F);
-        }
-
-        MusePoint2D getButtonUL() {
-            return rect.center().minus(gridWidth * 0.5F + 5, gridHeight * 0.5F + 5);
-        }
-
-        @Override
-        public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-            if (button.getPosition() != rect.center()) {
-                button.setPosition(rect.center());
-            }
-            button.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
-
-            if (tile.center() != rect.center()) {
-                tile.setPosition(rect.center());
-            }
-            tile.draw(matrixStack, zLevel);
-        }
+    @Override
+    public void setULGetter(IContainerULOffSet.ulGetter ulGetter) {
+        this.ulGetter = ulGetter;
     }
 
-    class DrawableArrowHolder extends BoxHolder {
-        ClickableArrow arrow;
+    /**
+     * returns the offset needed to compensate for the container GUI in the super class rendering the slots with an offset.
+     * Also compensates for slot render sizes larger than vanilla
+     * @return
+     */
+    @Override
+    public MusePoint2D getULShift() {
+        int offset = 16; // default vanilla slot size
 
-        public DrawableArrowHolder(MuseRelativeRect rectIn) {
-            super(rectIn);
-            MusePoint2D ul = rectIn.center().minus(gridWidth * 0.5F, gridHeight * 0.5F);
-            arrow = new ClickableArrow(ul, ul.plus(18, 18), backgroundColour, Colour.WHITE, gridColour);
+        if (ulGetter == null) {
+            return new MusePoint2D(0, 0).plus((offset - slotWidth) * 0.5, (offset - slotHeight) * 0.5);
         }
-
-        @Override
-        public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-            if (arrow.center() != rect.center()) {
-                arrow.setLeft(rect.centerx() - gridWidth * 0.5F);
-                arrow.setTop(rect.centery() - gridHeight * 0.5F);
-            }
-            arrow.draw(matrixStack,zLevel + 3);
-        }
+        return ulGetter.getULShift().plus((offset - slotWidth) * 0.5, (offset - slotHeight) * 0.5);
     }
 
     @Override
@@ -279,9 +209,10 @@ public class SpecialCraftingGrid implements IGuiFrame {
         return null;
     }
 
+    @Nonnull
     @Override
-    public IRect getBorder() {
-        return this.border;
+    public RelativeRect getRect() {
+        return this;
     }
 
     @Override
@@ -304,69 +235,96 @@ public class SpecialCraftingGrid implements IGuiFrame {
         return isVisible;
     }
 
-    @Override
-    public void setTargetDimensions(MusePoint2D ul, MusePoint2D wh) {
-        border.setTargetDimensions(ul, wh);
-        loadSlots();
+    /** ---------------------------------------------------------------------------------------- */
+    class BoxHolder extends DrawableRelativeRect {
+        public BoxHolder(MusePoint2D ul, MusePoint2D br, Colour backgroundColour, Colour borderColour) {
+            super(ul, br, backgroundColour, borderColour);
+        }
+
+        public void render(MatrixStack matrixStackIn, int mouseX, int mouseY, float frameTime) {
+            if (NuminaSettings.CLIENT_CONFIG.DRAW_GUI_SPACERS.get()) {
+                super.render(matrixStackIn, mouseX, mouseY, frameTime);
+            }
+        }
     }
 
-    @Override
-    public IRect setLeft(double value) {
-        setLeft(value);
-        loadSlots();
-        return this;
+    class DrawableBoxHolder extends BoxHolder {
+        DrawableTile tile;
+        Button button;
+        int index;
+
+        public DrawableBoxHolder(MusePoint2D ul, MusePoint2D br, Colour backgroundColour, Colour borderColour, int index) {
+            super(ul, br, backgroundColour, borderColour);
+            this.index = index;
+            this.button = new Button(getButtonUL(), getButtonUL().plus(slotWidth + 10, slotHeight + 10), Colour.DARK_GREY, Colour.RED, Colour.BLACK, Colour.BLACK);
+            this.button.enableAndShow();
+            this.button.setOnPressed(onPressed-> {
+                Musique.playClientSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, 1);
+                mparcGui.selectSlot(index);
+            });
+            this.button.setOnReleased(onReleased-> {
+                mparcGui.selectSlot(index);
+            });
+
+            this.tile = new DrawableTile(getTileUL(), getTileUL().plus(slotWidth, slotHeight)).setBackgroundColour(backgroundColour).setBottomBorderColour(gridColour);
+        }
+
+        MusePoint2D getTileUL () {
+            return center().minus(slotWidth * 0.5F, slotHeight * 0.5F);
+        }
+
+        MusePoint2D getButtonUL() {
+            return center().minus(slotWidth * 0.5F + 5, slotHeight * 0.5F + 5);
+        }
+
+        void  fixSlotPos() {
+            Slot slot = container.getSlot(index);
+            if (slot instanceof UniversalSlot) {
+                ((UniversalSlot)slot).setPosition(center().copy());
+            } else if (slot instanceof IHideableSlot) {
+                ((IHideableSlot) slot).setPosition(center().copy());
+            } else {
+                // Vanilla slots coordinates are UL rather than center
+                slot.x = (int) tile.getUL().getX();
+                slot.y = (int) tile.getUL().getY();
+            }
+        }
+
+        @Override
+        public void render(MatrixStack matrixStack, int mouseX, int mouseY, float frameTime) {
+            if (button.getPosition() != center()) {
+                button.setPosition(center().copy());
+            }
+            button.render(matrixStack, mouseX, mouseY, frameTime);
+
+            if (tile.center() != center()) {
+                tile.setPosition(center().copy());
+            }
+            tile.render(matrixStack, mouseX, mouseY, frameTime);
+            fixSlotPos();
+            MuseRenderer.drawShadowedStringCentered(matrixStack,
+                    String.valueOf(index),
+                    left() + 8,
+                    bottom() - 8,
+                    Colour.WHITE);
+        }
     }
 
-    @Override
-    public IRect setRight(double value) {
-        setRight(value);
-        loadSlots();
-        return this;
-    }
+    class DrawableArrowHolder extends BoxHolder {
+        ClickableArrow arrow;
 
-    @Override
-    public IRect setTop(double value) {
-        setTop(value);
-        loadSlots();
-        return this;
-    }
+        public DrawableArrowHolder(MusePoint2D ul, MusePoint2D br, Colour backgroundColour, Colour borderColour) {
+            super(ul, br, backgroundColour, borderColour);
+            arrow = new ClickableArrow(ul, ul.plus(18, 18), Colour.LIGHT_GREY, Colour.WHITE, backgroundColour);
+            arrow.setDrawBorer(false);
+        }
 
-    @Override
-    public IRect setBottom(double value) {
-        setBottom(value);
-        loadSlots();
-        return this;
-    }
-
-    @Override
-    public IRect setWidth(double value) {
-        border.setWidth(value);
-        loadSlots();
-        return this;
-    }
-
-    @Override
-    public IRect setHeight(double value) {
-        border.setHeight(value);
-        loadSlots();
-        return this;
-    }
-
-    @Override
-    public void move(MusePoint2D moveAmount) {
-        border.move(moveAmount);
-        loadSlots();
-    }
-
-    @Override
-    public void move(double x, double y) {
-        border.move(x, y);
-        loadSlots();
-    }
-
-    @Override
-    public void setPosition(MusePoint2D position) {
-        border.setPosition(position);
-        loadSlots();
+        @Override
+        public void render(MatrixStack matrixStack, int mouseX, int mouseY, float frameTime) {
+            if (arrow.center() != center()) {
+                arrow.setPosition(center().copy());
+            }
+            arrow.render(matrixStack,mouseX, mouseY, frameTime);
+        }
     }
 }

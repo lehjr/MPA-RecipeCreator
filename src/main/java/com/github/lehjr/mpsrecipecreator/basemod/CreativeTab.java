@@ -15,7 +15,7 @@ public class CreativeTab extends ItemGroup {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public ItemStack createIcon() {
+    public ItemStack makeIcon() {
         return new ItemStack(ModObjects.INSTANCE.recipeWorkBench);
     }
 }

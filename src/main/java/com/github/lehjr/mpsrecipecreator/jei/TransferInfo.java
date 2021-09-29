@@ -27,11 +27,11 @@ public class TransferInfo implements IRecipeTransferInfo<MPARCContainer> {
 
     @Override
     public List<Slot> getRecipeSlots(MPARCContainer mparcContainer) {
-        return mparcContainer.inventorySlots.subList(1, 10);
+        return mparcContainer.slots.subList(1, 10);
     }
 
     @Override
     public List<Slot> getInventorySlots(MPARCContainer mparcContainer) {
-        return mparcContainer.inventorySlots.subList(10, mparcContainer.inventorySlots.size() -1);
+        return mparcContainer.slots.subList(10, mparcContainer.slots.size() -1);
     }
 }

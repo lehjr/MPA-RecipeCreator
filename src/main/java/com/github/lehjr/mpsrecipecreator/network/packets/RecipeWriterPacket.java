@@ -28,16 +28,16 @@ public class RecipeWriterPacket {
     public static void encode(RecipeWriterPacket msg, PacketBuffer packetBuffer) {
         int recipeSize = msg.recipe.length() + 32;
         packetBuffer.writeInt(recipeSize);
-        packetBuffer.writeString(msg.recipe, recipeSize);
+        packetBuffer.writeUtf(msg.recipe, recipeSize);
 
         packetBuffer.writeInt(msg.fileName.length() + 32);
-        packetBuffer.writeString(msg.fileName);
+        packetBuffer.writeUtf(msg.fileName);
     }
 
     public static RecipeWriterPacket decode(PacketBuffer packetBuffer) {
         return new RecipeWriterPacket(
-                packetBuffer.readString(packetBuffer.readInt()),
-                packetBuffer.readString(packetBuffer.readInt()));
+                packetBuffer.readUtf(packetBuffer.readInt()),
+                packetBuffer.readUtf(packetBuffer.readInt()));
     }
 
     public static void handle(RecipeWriterPacket message, Supplier<NetworkEvent.Context> ctx) {
@@ -45,33 +45,33 @@ public class RecipeWriterPacket {
         ctx.get().enqueueWork(() -> {
             MinecraftServer server = player.getServer();
 
-            URI gameFolderURI = server.getDataDirectory().toURI().normalize();
+            URI gameFolderURI = server.getServerDirectory().toURI().normalize();
 
             Path datapackDir = null;
 
             // single player and player obviously owns the server
-            if (server.isSinglePlayer()) {
+            if (server.isSingleplayer()) {
                 //FIXME: game folder name would be better/more reliable
                 datapackDir = Paths.get(gameFolderURI)
                         .resolve("saves")
-                        .resolve(server.getServerConfiguration().getWorldName())
+                        .resolve(server.getWorldData().getLevelName())
                         .toAbsolutePath();
 
                 // multiplayer and player owns server or has permission to create recipes
-            } else if (server.isServerOwner(player.getGameProfile()) ||
+            } else if (server.isSingleplayerOwner(player.getGameProfile()) ||
                     (Config.allowOppedPlayersToCreateOnServer() &&
-                            server.getPermissionLevel(player.getGameProfile()) >= Config.getOpLevelNeeded())) {
+                            server.getProfilePermissions(player.getGameProfile()) >= Config.getOpLevelNeeded())) {
 
                 if (server.isDedicatedServer()) {
                     // Fixme?
                     datapackDir = Paths.get(gameFolderURI)
-                            .resolve(server.getServerConfiguration().getWorldName()).toAbsolutePath();
+                            .resolve(server.getWorldData().getLevelName()).toAbsolutePath();
                     System.out.println("dedicated server detected with datapackDir at: " + datapackDir.toString());
                 } else {
                     // Fixme?
                     datapackDir = Paths.get(gameFolderURI)
                             .resolve("saves")
-                            .resolve(server.getServerConfiguration().getWorldName())
+                            .resolve(server.getWorldData().getLevelName())
                             .toAbsolutePath();
                     System.out.println("multiplayer without dedicated server detected with datapackDir at: " + datapackDir.toString());
                 }
@@ -79,9 +79,9 @@ public class RecipeWriterPacket {
                 if (Config.allowOppedPlayersToCreateOnServer()) {
                     player.sendMessage(new StringTextComponent("You do not have permission to create recipes :P" +
                             "\nRequiredLevel: " + Config.getOpLevelNeeded() +
-                            "\nYourLevel: " + server.getPermissionLevel(player.getGameProfile())), player.getUniqueID());
+                            "\nYourLevel: " + server.getProfilePermissions(player.getGameProfile())), player.getUUID());
                 } else {
-                    player.sendMessage(new StringTextComponent("Serve admin has disabled creating recipes on this server :P"), player.getUniqueID());
+                    player.sendMessage(new StringTextComponent("Serve admin has disabled creating recipes on this server :P"), player.getUUID());
                 }
             }
 
@@ -102,8 +102,8 @@ public class RecipeWriterPacket {
                 DataPackWriter.INSTANCE.fileWriter(recipeFile, message.recipe, Config.overwriteRecipes());
 
                 if (recipeFile.exists()) {
-                    player.sendMessage(new StringTextComponent("Server reloading data :P"), player.getUniqueID());
-                    server.getCommandManager().handleCommand(player.getCommandSource(), "reload");
+                    player.sendMessage(new StringTextComponent("Server reloading data :P"), player.getUUID());
+                    server.getCommands().performCommand(player.createCommandSourceStack(), "reload");
                 }
             }
         });

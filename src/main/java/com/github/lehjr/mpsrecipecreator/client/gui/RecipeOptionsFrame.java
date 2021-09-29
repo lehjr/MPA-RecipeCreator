@@ -1,6 +1,5 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
-import com.github.lehjr.numina.util.client.gui.clickable.CheckBox;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.numina.util.client.gui.clickable.LabledButton;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
@@ -31,20 +30,29 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     ConditionsFrame conditionsFrame;
 
     public RecipeOptionsFrame(
-            MusePoint2D topleft,
-            MusePoint2D bottomright,
-            float zLevel,
             Colour backgroundColour,
             Colour borderColour,
             Colour conditionsBorder,
             MPARCGui mparcGui) {
-        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
+        super();
+        setBackgroundColour(backgroundColour);
 
-        MusePoint2D starterPoint = new MusePoint2D(getULFinal());
+        MusePoint2D starterPoint = MusePoint2D.ZERO;
         this.title = new ClickableLabel("Recipe Options", starterPoint);
+
+        System.out.println("startpoint: " + starterPoint);
+
         title.setMode(ClickableLabel.JustifyMode.LEFT);
 
-        shapeless = addCheckBox(new CheckBox(starterPoint, "Shapeless", false));//ID_SHAPELESS
+
+        CheckBox test =  new CheckBox(MusePoint2D.ZERO, "Shapeless", false);
+
+        System.out.println(test);
+
+
+        shapeless = addCheckBox(test
+//                new CheckBox(starterPoint, "Shapeless", false)
+        );//ID_SHAPELESS
         mirrored = addCheckBox(new CheckBox(starterPoint, "Mirrored", true));//ID_MIRRORED
         conditions = addCheckBox(new CheckBox(starterPoint, "Conditions", false));//ID_CONDITIONS // fixme... not tied to anything yet
 
@@ -67,10 +75,10 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         });
 
         conditionsFrame = new ConditionsFrame(
-                new MusePoint2D(0,0), new MusePoint2D(0, 0),
-                zLevel,
-                Colour.DARKBLUE,
-                conditionsBorder
+                MusePoint2D.ZERO, MusePoint2D.ZERO,
+                Colour.PINK,
+                conditionsBorder,
+                Colour.MAGENTA
         );
         conditionsFrame.disable();
         conditionsFrame.hide();
@@ -98,7 +106,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public ScrollableFrame init(double left, double top, double right, double bottom) {
         super.init(left, top, right, bottom);
 
         float nextLineRC = 0;
@@ -116,20 +124,21 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         );
         save.setPosition(new MusePoint2D(right, top).copy().plus(-(spacer + save.finalWidth() * 0.5F), spacer + save.finalHeight() * 0.5F));
         reset.setPosition(save.getPosition().plus(0, 24F));
+        return this;
     }
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (isVisible()) {
             super.render(matrixStack, mouseX, mouseY, partialTicks);
-            title.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+            title.render(matrixStack, mouseX, mouseY, partialTicks);
 
             for (CheckBox checkBox : checkBoxes) {
-                checkBox.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+                checkBox.render(matrixStack, mouseX, mouseY, partialTicks);
             }
 
             for (LabledButton button : buttons) {
-                button.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+                button.render(matrixStack, mouseX, mouseY, partialTicks);
             }
 
             conditionsFrame.render(matrixStack, mouseX, mouseY, partialTicks);

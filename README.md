@@ -10,13 +10,13 @@ Utility for creating recipes in Modular Power Armor (instead of doing everything
 
 CurseForge:
 
-https://www.curseforge.com/minecraft/mc-mods/mpa-lib
+https://www.curseforge.com/minecraft/mc-mods/numina
 
 #Issues
 
-Before posting to the issue tracker, make sure you meet the following criteria. 1.7.10 support has ended. It was a long run and we had a good time, but it's time to work on the future.
-- You're using the LATEST version of MPA and MPA-Lib from curseforge.
-- You've made sure the version of Forge you're using is the one MPA has been compiled for. (Newer is usually OK, but be careful!)
+Before posting to the issue tracker, make sure you meet the following criteria.
+- You're using the LATEST version of Modular Powersuits and Numina from curseforge.
+- You've made sure the version of Forge you're using is the one MPS has been compiled for. (Newer is usually OK, but be careful!)
 - You've gone through the effort to isolate MPA from other mods that aren't related to the issue.
 - You've gone through the effort to find what conditions are necessary to reproduce the issue.
 - You've made sure your 'issue' isn't intended behaviour by reading the [FAQ](http://machinemuse.net/faq.php) , the tooltips, and the changelog.

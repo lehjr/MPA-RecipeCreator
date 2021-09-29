@@ -28,35 +28,35 @@ public class RecipeWorkbench extends Block {
     }
 
     public RecipeWorkbench(ResourceLocation regName) {
-        super(Block.Properties.create(Material.WOOD)
-                .hardnessAndResistance(1.5F, 1000.0F)
+        super(Block.Properties.of(Material.WOOD)
+                .strength(1.5F, 1000.0F)
                 .sound(SoundType.METAL)
-                .variableOpacity()
-                .setLightLevel((state) -> 15));
+                .dynamicShape()
+                .lightLevel((state) -> 15));
         setRegistryName(regName);
-        setDefaultState(this.stateContainer.getBaseState());
+        registerDefaultState(this.stateDefinition.any());
     }
 
-    @Override
-    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
-        super.onBlockClicked(state, worldIn, pos, player);
-    }
+//    @Override
+//    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
+//        super.onBlockClicked(state, worldIn, pos, player);
+//    }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         player.playSound(SoundDictionary.SOUND_EVENT_GUI_SELECT, 1.0F, 1.0F);
-        if (worldIn.isRemote) {
+        if (worldIn.isClientSide) {
             return ActionResultType.SUCCESS;
         } else {
-            player.openContainer(state.getContainer(worldIn, pos));
+            player.openMenu(state.getMenuProvider(worldIn, pos));
 //            player.addStat(Stats.INTERACT_WITH_CRAFTING_TABLE);
             return ActionResultType.SUCCESS;
         }
     }
 
     private static final ITextComponent title = new TranslationTextComponent("container.crafting");
-    public INamedContainerProvider getContainer(BlockState state, World worldIn, BlockPos pos) {
+    public INamedContainerProvider getMenuProvider(BlockState state, World worldIn, BlockPos pos) {
         return new SimpleNamedContainerProvider((windowID, playerInventory, playerEntity) ->
-                new MPARCContainer(windowID, playerInventory, IWorldPosCallable.of(worldIn, pos)), title);
+                new MPARCContainer(windowID, playerInventory, IWorldPosCallable.create(worldIn, pos)), title);
     }
 }

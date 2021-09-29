@@ -11,8 +11,8 @@ public class RecipeDisplayFrame extends ScrollableFrame {
     String[] recipe = new String[0];
     String title;;
 
-    public RecipeDisplayFrame(MusePoint2D topleft, MusePoint2D bottomright, float zLevel, Colour backgroundColour, Colour borderColour) {
-        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
+    public RecipeDisplayFrame() {
+        super();
         reset();
     }
 
@@ -27,25 +27,25 @@ public class RecipeDisplayFrame extends ScrollableFrame {
     @Override
     public void update(double mouseX, double mouseY) {
         super.update(mouseX, mouseY);
-        this.totalsize = 25 + recipe.length * 12;
+        this.setTotalSize(25 + recipe.length * 12);
     }
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (this.isEnabled() && this.isVisible()) {
-            this.currentscrollpixels = Math.min(currentscrollpixels, getMaxScrollPixels());
+            setCurrentScrollPixels(Math.min(getCurrentScrollPixels(), getMaxScrollPixels()));
             super.preRender(matrixStack, mouseX, mouseY, partialTicks);
             RenderSystem.pushMatrix();
-            RenderSystem.translatef(0, -currentscrollpixels, 0);
-            MuseRenderer.drawLeftAlignedStringString(matrixStack, "FileName: " + title,
-                    this.getBorder().finalLeft() + 4,
-                    this.getBorder().finalTop() + 4);
+            RenderSystem.translatef(0, -getCurrentScrollPixels(), 0);
+            MuseRenderer.drawLeftAlignedShadowedString(matrixStack, "FileName: " + title,
+                    finalLeft() + 4,
+                    finalTop() + 4);
 
             if (recipe.length > 0) {
                 for (int index = 0; index < recipe.length; index ++) {
-                    MuseRenderer.drawLeftAlignedStringString(matrixStack, recipe[index],
-                            this.getBorder().finalLeft() + 4,
-                            this.getBorder().finalTop() + 15 + 12 * index);
+                    MuseRenderer.drawLeftAlignedShadowedString(matrixStack, recipe[index],
+                            finalLeft() + 4,
+                            finalTop() + 15 + 12 * index);
                 }
             }
             RenderSystem.popMatrix();

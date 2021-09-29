@@ -1,8 +1,8 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
-import com.github.lehjr.numina.util.client.gui.clickable.CheckBox;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
+import com.github.lehjr.numina.util.client.gui.gemoetry.RelativeRect;
 import com.github.lehjr.numina.util.math.Colour;
 import com.github.lehjr.mpsrecipecreator.basemod.ConditionsJsonLoader;
 import com.google.gson.JsonArray;
@@ -19,14 +19,15 @@ import java.util.Map;
 public class ConditionsFrame extends ScrollableFrame {
     Map<CheckBox, JsonObject> checkBoxList = new HashMap<>();
 
-    public ConditionsFrame(MusePoint2D topleft, MusePoint2D bottomright, float zLevel, Colour backgroundColour, Colour borderColour) {
-        super(topleft, bottomright, zLevel, backgroundColour, borderColour);
+    public ConditionsFrame(MusePoint2D topleft, MusePoint2D bottomright, Colour background, Colour topBorder, Colour bottomBorder) {
+        super(topleft, bottomright, background, topBorder, bottomBorder);
     }
 
     @Override
-    public void init(double left, double top, double right, double bottom) {
+    public RelativeRect init(double left, double top, double right, double bottom) {
         super.init(left, top, right, bottom);
         loadConditions();
+        return this;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class ConditionsFrame extends ScrollableFrame {
     }
 
     public void loadConditions() {
-        MusePoint2D starterPoint = this.getULFinal().copy().plus(8, 14);
+        MusePoint2D starterPoint = this.getUL().copy().plus(8, 14);
         if (checkBoxList.isEmpty()) {
             JsonArray jsonArray = ConditionsJsonLoader.getConditionsFromFile();
             if (jsonArray != null) {
@@ -61,7 +62,7 @@ public class ConditionsFrame extends ScrollableFrame {
                 i++;
             }
         }
-        this.totalsize = checkBoxList.size() * 12;
+        this.setTotalSize(checkBoxList.size() * 12);
     }
 
     /**
@@ -80,12 +81,12 @@ public class ConditionsFrame extends ScrollableFrame {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (this.isEnabled() && this.isVisible()) {
-            this.currentscrollpixels = Math.min(currentscrollpixels, getMaxScrollPixels());
+            this.setCurrentScrollPixels(Math.min(getCurrentScrollPixels(), getMaxScrollPixels()));
             super.preRender(matrixStack, mouseX, mouseY, partialTicks);
             RenderSystem.pushMatrix();
-            RenderSystem.translatef(0, -currentscrollpixels, 0);
+            RenderSystem.translatef(0, -getCurrentScrollPixels(), 0);
             for (CheckBox checkBox : checkBoxList.keySet()) {
-                checkBox.render(matrixStack, mouseX, mouseY, partialTicks, zLevel);
+                checkBox.render(matrixStack, mouseX, mouseY, partialTicks);
             }
             RenderSystem.popMatrix();
             super.postRender(mouseX, mouseY, partialTicks);
@@ -98,7 +99,7 @@ public class ConditionsFrame extends ScrollableFrame {
             super.mouseClicked(mouseX, mouseY, button);
 
             for (CheckBox checkBox : checkBoxList.keySet()) {
-                if (checkBox.mouseClicked(mouseX, mouseY + currentscrollpixels, button)) {
+                if (checkBox.mouseClicked(mouseX, mouseY + getCurrentScrollPixels(), button)) {
                     return true;
                 }
             }

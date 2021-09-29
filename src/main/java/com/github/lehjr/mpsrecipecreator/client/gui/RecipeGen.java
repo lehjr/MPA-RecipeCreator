@@ -43,7 +43,7 @@ public class RecipeGen {
      */
     @Nonnull
     ItemStack getStack(int slot) {
-        return container.getSlot(slot).getStack();
+        return container.getSlot(slot).getItem();
     }
 
     public int setOreDictIndexForward(int slot) {
@@ -68,7 +68,7 @@ public class RecipeGen {
         ItemStack stack = getStack(slot);
         if (!stack.isEmpty()) {
             Item item = stack.getItem();
-            final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
+            final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getAllTags().getMatchingTags(item));
             if (!ids.isEmpty()) {
                 if (!(index < ids.size()) || index < 0) {
                     index = 0;
@@ -125,7 +125,7 @@ public class RecipeGen {
 
         if (!stack.isEmpty()) {
             Item item = stack.getItem();
-            final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getCollection().getOwningTags(item));
+            final ArrayList<ResourceLocation> ids = new ArrayList<>(ItemTags.getAllTags().getMatchingTags(item));
             if (!ids.isEmpty()) {
                 int index = 0;
                 if (oreTagIndices.containsKey(slot)) {
@@ -172,7 +172,7 @@ public class RecipeGen {
         StringBuilder builder = new StringBuilder();
         if (usingOreDict) {
             Item item = stack.getItem();
-            List<ResourceLocation> ids = ItemTags.getCollection().getOwningTags(item).stream().collect(Collectors.toList());
+            List<ResourceLocation> ids = ItemTags.getAllTags().getMatchingTags(item).stream().collect(Collectors.toList());
             stackName = "tag: " + ids.get(oreTagIndices.getOrDefault(slot, 0));
         }
         builder.append(stackName);
@@ -235,7 +235,7 @@ public class RecipeGen {
 
             JsonArray ingredients = new JsonArray();
             for (int i = 1; i < 11; i++) {
-                if (!this.container.getSlot(i).getStack().isEmpty()) {
+                if (!this.container.getSlot(i).getItem().isEmpty()) {
                     JsonObject ingredient = getStackJson(i);
 
                     boolean match = false;
@@ -302,7 +302,7 @@ public class RecipeGen {
                 for (int col = 0; col < 3; col++) {
                     int i = row * 3 + col + 1;
 
-                    if (!this.container.getSlot(i).getStack().isEmpty()) {
+                    if (!this.container.getSlot(i).getItem().isEmpty()) {
                         JsonObject ingredient = getStackJson(i);
                         String ingredientString = "";
 
