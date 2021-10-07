@@ -11,9 +11,10 @@ public class RecipeDisplayFrame extends ScrollableFrame {
     String[] recipe = new String[0];
     String title;;
 
-    public RecipeDisplayFrame() {
+    public RecipeDisplayFrame(Colour backgroundColour) {
         super();
         reset();
+        setBackgroundColour(backgroundColour);
     }
 
     public void setFileName(String fileName) {
@@ -33,19 +34,21 @@ public class RecipeDisplayFrame extends ScrollableFrame {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (this.isEnabled() && this.isVisible()) {
+            this.drawBackground(matrixStack);
+            this.drawBorder(matrixStack, 0.0D);
             setCurrentScrollPixels(Math.min(getCurrentScrollPixels(), getMaxScrollPixels()));
             super.preRender(matrixStack, mouseX, mouseY, partialTicks);
             RenderSystem.pushMatrix();
             RenderSystem.translatef(0, -getCurrentScrollPixels(), 0);
             MuseRenderer.drawLeftAlignedShadowedString(matrixStack, "FileName: " + title,
                     finalLeft() + 4,
-                    finalTop() + 4);
+                    finalTop() + 12);
 
             if (recipe.length > 0) {
                 for (int index = 0; index < recipe.length; index ++) {
                     MuseRenderer.drawLeftAlignedShadowedString(matrixStack, recipe[index],
                             finalLeft() + 4,
-                            finalTop() + 15 + 12 * index);
+                            (finalTop() + 12) + (12 * index));
                 }
             }
             RenderSystem.popMatrix();

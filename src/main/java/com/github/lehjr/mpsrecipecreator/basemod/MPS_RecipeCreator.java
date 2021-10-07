@@ -2,7 +2,7 @@ package com.github.lehjr.mpsrecipecreator.basemod;
 
 import com.github.lehjr.mpsrecipecreator.basemod.config.Config;
 import com.github.lehjr.mpsrecipecreator.block.RecipeWorkbench;
-import com.github.lehjr.mpsrecipecreator.client.gui.MPARCContainer;
+import com.github.lehjr.mpsrecipecreator.container.MPARCContainer;
 import com.github.lehjr.mpsrecipecreator.client.gui.MPARCGui;
 import com.github.lehjr.mpsrecipecreator.network.NetHandler;
 import net.minecraft.block.Block;

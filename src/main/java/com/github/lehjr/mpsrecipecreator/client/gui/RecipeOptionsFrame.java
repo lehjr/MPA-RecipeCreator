@@ -1,13 +1,16 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
+import com.github.lehjr.numina.util.client.gui.clickable.CheckBox;
+import com.github.lehjr.numina.util.client.gui.clickable.ClickableButton;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableLabel;
-import com.github.lehjr.numina.util.client.gui.clickable.LabledButton;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
 import com.github.lehjr.numina.util.client.sound.Musique;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,21 +20,20 @@ import java.util.List;
  */
 public class RecipeOptionsFrame extends ScrollableFrame {
     protected List<CheckBox> checkBoxes = new ArrayList<>();
-    protected List<LabledButton> buttons = new ArrayList<>();
+    protected List<ClickableButton> buttons = new ArrayList<>();
 
     final int spacer = 4;
     private CheckBox
             shapeless,
             mirrored,
             conditions;
-    private LabledButton save;
-    private LabledButton reset;
+    private ClickableButton save;
+    private ClickableButton reset;
     private ClickableLabel title;
     ConditionsFrame conditionsFrame;
 
     public RecipeOptionsFrame(
             Colour backgroundColour,
-            Colour borderColour,
             Colour conditionsBorder,
             MPARCGui mparcGui) {
         super();
@@ -83,13 +85,13 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         conditionsFrame.disable();
         conditionsFrame.hide();
 
-        save = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARK_GREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Save"));
+        save = addButton(new TranslationTextComponent("mpsrc.gui.save"));
         save.setOnPressed(pressed->{
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK,1);
             mparcGui.save();
         });
 
-        reset = addButton(new LabledButton(starterPoint, starterPoint.plus(110, 20), Colour.DARK_GREY, Colour.RED, Colour.BLACK, Colour.BLACK,"Reset Recipe"));
+        reset = addButton(new TranslationTextComponent("mpsrc.gui.resetrecipe"));
         reset.setOnPressed(pressed-> {
             Musique.playClientSound(SoundEvents.UI_BUTTON_CLICK, 1);
             mparcGui.resetRecipes();
@@ -137,7 +139,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
                 checkBox.render(matrixStack, mouseX, mouseY, partialTicks);
             }
 
-            for (LabledButton button : buttons) {
+            for (ClickableButton button : buttons) {
                 button.render(matrixStack, mouseX, mouseY, partialTicks);
             }
 
@@ -164,7 +166,7 @@ public class RecipeOptionsFrame extends ScrollableFrame {
                 }
             }
 
-            for (LabledButton lbutton : buttons) {
+            for (ClickableButton lbutton : buttons) {
                 if (lbutton.mouseClicked(mouseX, mouseY, button)) {
                     return true;
                 }
@@ -193,7 +195,15 @@ public class RecipeOptionsFrame extends ScrollableFrame {
         return false;
     }
 
-    LabledButton addButton(LabledButton button) {
+    ClickableButton addButton(ITextComponent label) {
+        ClickableButton button = new ClickableButton(label, MusePoint2D.ZERO, true);
+        button.setBorderColour(Colour.BLACK);
+        button.setDisabledBackground(Colour.RED);
+        button.setEnabledBackground(Colour.DARK_GREY);
+        button.setWidth(110);
+        button.setHeight(20);
+
+
         this.buttons.add(button);
         return button;
     }

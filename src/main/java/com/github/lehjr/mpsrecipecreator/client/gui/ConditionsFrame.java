@@ -1,5 +1,6 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
+import com.github.lehjr.numina.util.client.gui.clickable.CheckBox;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
 import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
 import com.github.lehjr.numina.util.client.gui.gemoetry.RelativeRect;

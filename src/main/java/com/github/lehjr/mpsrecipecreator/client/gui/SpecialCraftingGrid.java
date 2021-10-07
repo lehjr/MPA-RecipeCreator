@@ -47,19 +47,17 @@ public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFra
                                float zLevel,
                                Colour backgroundColour,
                                Colour borderColour,
-                               Colour gridColourIn,
                                MPARCGui mparcGui,
                                IContainerULOffSet.ulGetter ulGetter) {
 
         // (MusePoint2D ul, MusePoint2D br, Colour backgroundColour, Colour borderColour)
-        super(topleft, topleft.plus(new MusePoint2D(160, 96)), backgroundColour, gridColourIn);
+        super(topleft, topleft.plus(new MusePoint2D(160, 96)), backgroundColour, borderColour);
 
 
         this.container = containerIn;
         this.zLevel = zLevel;
-//        this.border = new DrawableRelativeRect(topleft, topleft.copy().plus(borderWH), /*backgroundColour*/ Colour.DARKBLUE, borderColour);
         this.backgroundColour = backgroundColour;
-        this.gridColour = gridColourIn;
+        this.gridColour = borderColour;
         this.mparcGui = mparcGui;
         this.ulGetter=ulGetter;
     }
@@ -266,7 +264,7 @@ public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFra
                 mparcGui.selectSlot(index);
             });
 
-            this.tile = new DrawableTile(getTileUL(), getTileUL().plus(slotWidth, slotHeight)).setBackgroundColour(backgroundColour).setBottomBorderColour(gridColour);
+            this.tile = new DrawableTile(getTileUL(), getTileUL().plus(slotWidth, slotHeight)).setBackgroundColour(Colour.GREY).setBottomBorderColour(gridColour);
         }
 
         MusePoint2D getTileUL () {
@@ -278,6 +276,8 @@ public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFra
         }
 
         void  fixSlotPos() {
+            MusePoint2D position = new MusePoint2D(tile.finalLeft(), tile.finalTop()).minus(slot_ulShift);
+
             Slot slot = container.getSlot(index);
             if (slot instanceof UniversalSlot) {
                 ((UniversalSlot)slot).setPosition(center().copy());
@@ -285,8 +285,8 @@ public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFra
                 ((IHideableSlot) slot).setPosition(center().copy());
             } else {
                 // Vanilla slots coordinates are UL rather than center
-                slot.x = (int) tile.getUL().getX();
-                slot.y = (int) tile.getUL().getY();
+                slot.x = (int) position.getX();
+                slot.y = (int) position.getY();
             }
         }
 
@@ -305,7 +305,7 @@ public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFra
             MuseRenderer.drawShadowedStringCentered(matrixStack,
                     String.valueOf(index),
                     left() + 8,
-                    bottom() - 8,
+                    top() + 8,
                     Colour.WHITE);
         }
     }
@@ -315,7 +315,7 @@ public class SpecialCraftingGrid extends DrawableRelativeRect implements IGuiFra
 
         public DrawableArrowHolder(MusePoint2D ul, MusePoint2D br, Colour backgroundColour, Colour borderColour) {
             super(ul, br, backgroundColour, borderColour);
-            arrow = new ClickableArrow(ul, ul.plus(18, 18), Colour.LIGHT_GREY, Colour.WHITE, backgroundColour);
+            arrow = new ClickableArrow(ul, ul.plus(18, 18), Colour.GREY, Colour.WHITE, backgroundColour);
             arrow.setDrawBorer(false);
         }
 

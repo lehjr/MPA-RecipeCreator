@@ -1,5 +1,6 @@
 package com.github.lehjr.mpsrecipecreator.client.gui;
 
+import com.github.lehjr.numina.util.client.gui.clickable.CheckBox;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableArrow;
 import com.github.lehjr.numina.util.client.gui.clickable.ClickableLabel;
 import com.github.lehjr.numina.util.client.gui.frame.ScrollableFrame;
@@ -8,6 +9,7 @@ import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
 import com.github.lehjr.numina.util.client.gui.gemoetry.RelativeRect;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.github.lehjr.mpsrecipecreator.container.MPARCContainer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;

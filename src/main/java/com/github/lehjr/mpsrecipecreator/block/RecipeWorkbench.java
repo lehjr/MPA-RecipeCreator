@@ -1,6 +1,6 @@
 package com.github.lehjr.mpsrecipecreator.block;
 
-import com.github.lehjr.mpsrecipecreator.client.gui.MPARCContainer;
+import com.github.lehjr.mpsrecipecreator.container.MPARCContainer;
 import com.github.lehjr.numina.util.client.sound.SoundDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -36,11 +36,6 @@ public class RecipeWorkbench extends Block {
         setRegistryName(regName);
         registerDefaultState(this.stateDefinition.any());
     }
-
-//    @Override
-//    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
-//        super.onBlockClicked(state, worldIn, pos, player);
-//    }
 
     @Override
     public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {

@@ -2,6 +2,7 @@ package com.github.lehjr.mpsrecipecreator.client.gui;
 
 import com.github.lehjr.numina.util.nbt.NBT2Json;
 import com.google.gson.*;
+import com.github.lehjr.mpsrecipecreator.container.MPARCContainer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;

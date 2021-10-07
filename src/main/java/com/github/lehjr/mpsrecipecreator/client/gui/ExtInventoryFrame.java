@@ -35,15 +35,16 @@ public class ExtInventoryFrame extends ScrollableFrame {
             MusePoint2D bottomright,
             float zLevel,
             Container container,
+
             Colour backgroundColour,
-            Colour borderColour,
-            Colour gridBackGound,
-            Colour gridBorderColour,
-            Colour gridColour,
+            Colour topBorderColour,
+            Colour bottomBorderColour,
             MPARCGui mparcGui,
             IContainerULOffSet.ulGetter ulGetter
     ) {
-        super(topleft, bottomright, backgroundColour, borderColour, Colour.PINK);
+        super(topleft, bottomright, backgroundColour, topBorderColour, bottomBorderColour);
+
+
         this.ulGetter = ulGetter;
         this.container = container;
 
@@ -58,9 +59,10 @@ public class ExtInventoryFrame extends ScrollableFrame {
                 container,
                 new MusePoint2D(0, 0),
                 zLevel,
-                gridBackGound,
-                gridBorderColour,
-                gridColour,
+
+                backgroundColour,
+                topBorderColour,
+
                 mparcGui,
                 ulGetter
         );
@@ -123,6 +125,7 @@ public class ExtInventoryFrame extends ScrollableFrame {
             super.mouseClicked(mouseX, mouseY, button);
             for (IGuiFrame frame : frames) {
                 if (frame.mouseClicked(mouseX, mouseY, button)) {
+//                    return false;
                     return true;
                 }
             }

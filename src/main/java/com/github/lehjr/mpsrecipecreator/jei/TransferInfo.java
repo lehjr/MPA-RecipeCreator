@@ -1,6 +1,6 @@
 package com.github.lehjr.mpsrecipecreator.jei;
 
-import com.github.lehjr.mpsrecipecreator.client.gui.MPARCContainer;
+import com.github.lehjr.mpsrecipecreator.container.MPARCContainer;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;

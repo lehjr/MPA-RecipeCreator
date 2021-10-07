@@ -2,13 +2,12 @@ package com.github.lehjr.mpsrecipecreator.client.gui;
 
 import com.github.lehjr.mpsrecipecreator.basemod.DataPackWriter;
 import com.github.lehjr.numina.util.client.gui.ExtendedContainerScreen;
-import com.github.lehjr.numina.util.client.gui.gemoetry.DrawableRelativeRect;
 import com.github.lehjr.numina.util.client.gui.gemoetry.MusePoint2D;
 import com.github.lehjr.numina.util.client.render.MuseRenderer;
 import com.github.lehjr.numina.util.math.Colour;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
+import com.github.lehjr.mpsrecipecreator.container.MPARCContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.text.ITextComponent;
 
@@ -24,14 +23,20 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
     final int spacer = 4;
 
     private final ExtInventoryFrame inventoryFrame;
-//    private final RecipeOptionsFrame recipeOptions;
-//    private final RecipeDisplayFrame recipeDisplayFrame;
+    private final RecipeOptionsFrame recipeOptions;
+    private final RecipeDisplayFrame recipeDisplayFrame;
+    private final SlotOptionsFrame slotOptions;
 
     // text box
     public StackTextDisplayFrame tokenTxt;
 
     // separate frame for each slot
 //    private final SlotOptionsFrame slotOptions;
+
+    protected final Colour topBorderColour = new Colour(0.216F, 0.216F, 0.216F, 1.0F);
+    protected final Colour bottomBorderColour = Colour.WHITE.withAlpha(0.8F);
+    protected final Colour  backgroundColour = Colour.GREY_GUI_BACKGROUND; //new Colour(0.545F, 0.545F, 0.545F, 1.0F);
+
 
     protected final Colour gridColour = new Colour(0.1F, 0.3F, 0.4F, 0.7F);
     protected final Colour gridBorderColour = Colour.LIGHT_BLUE.withAlpha(0.8F);
@@ -48,45 +53,41 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
                 new MusePoint2D(0, 0),
                 zLevel,
                 container,
-                Colour.DARKBLUE,
-                gridBorderColour,
-                gridBackGound,
-                gridBorderColour,
-                gridColour,
+                backgroundColour,
+                topBorderColour,
+                bottomBorderColour,
                 this,
                 ulGetter());
         inventoryFrame.enableAndShow();
         addFrame(inventoryFrame);
-//
-//        recipeOptions = new RecipeOptionsFrame(
-//                Colour.DARKBLUE,
-//                gridBorderColour,
-//                gridBackGound,
-//                this
-//        );
-//        addFrame(recipeOptions);
-//        recipeGen = new RecipeGen(container, recipeOptions);
-//
-//        // display for stack string in slot
-//        tokenTxt = new StackTextDisplayFrame();
-//        addFrame(tokenTxt);
-//
-//        slotOptions = new SlotOptionsFrame(
-//                new MusePoint2D(0, 0),
-//                new MusePoint2D(0, 0),
-//                recipeGen,
-//                container,
-//                Colour.DARKBLUE,
-//                gridBorderColour,
-//                Colour.DARK_GREY,
-//                Colour.LIGHT_GREY,
-//                Colour.BLACK);
-//        addFrame(slotOptions);
-//
-//        recipeDisplayFrame = new RecipeDisplayFrame();
-//        addFrame(recipeDisplayFrame);
-    }
 
+        recipeOptions = new RecipeOptionsFrame(
+                Colour.DARKBLUE,
+                gridBackGound,
+                this
+        );
+        addFrame(recipeOptions);
+        recipeGen = new RecipeGen(container, recipeOptions);
+
+        // display for stack string in slot
+        tokenTxt = new StackTextDisplayFrame(Colour.DARKBLUE);
+        addFrame(tokenTxt);
+
+        slotOptions = new SlotOptionsFrame(
+                new MusePoint2D(0, 0),
+                new MusePoint2D(0, 0),
+                recipeGen,
+                container,
+                Colour.DARKBLUE,
+                gridBorderColour,
+                Colour.DARK_GREY,
+                Colour.LIGHT_GREY,
+                Colour.BLACK);
+        addFrame(slotOptions);
+
+        recipeDisplayFrame = new RecipeDisplayFrame(Colour.DARKBLUE);
+        addFrame(recipeDisplayFrame);
+    }
 
     @Override
     public void init() {
@@ -103,40 +104,40 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
                 backgroundRect.finalTop() + spacer,
                 backgroundRect.finalRight() - spacer,
                 backgroundRect.finalTop() + spacer + 188);
-//
-//        recipeOptions.init(
-//                backgroundRect.finalLeft() + spacer,
-//                backgroundRect.finalTop() + spacer,
-//                inventoryLeft - spacer * 2,
-//                backgroundRect.finalTop() + spacer + 150
-//        );
-//
-//        slotOptions.init(
-//                backgroundRect.finalLeft() + spacer,
-//                backgroundRect.finalTop() + spacer * 2 + 150,
-//                inventoryLeft - spacer * 2,
-//                backgroundRect.finalTop() + spacer + 188);
-//
-//        tokenTxt.init(
-//                backgroundRect.finalLeft() + spacer,
-//                backgroundRect.finalTop() + spacer * 2 + 188,
-//                backgroundRect.finalRight() - spacer,
-//                backgroundRect.finalTop() + spacer * 2 + 188 + 20
-//        );
-//        tokenTxt.setVisible(true);
-//
-//        recipeDisplayFrame.init(
-//                backgroundRect.finalLeft() + spacer,
-//                backgroundRect.finalTop() + spacer * 2 + 212,
-//                backgroundRect.finalRight() - spacer,
-//                backgroundRect.finalBottom() - spacer);
+
+        recipeOptions.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer,
+                inventoryLeft - spacer * 2,
+                backgroundRect.finalTop() + spacer + 150
+        );
+
+        slotOptions.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer * 2 + 150,
+                inventoryLeft - spacer * 2,
+                backgroundRect.finalTop() + spacer + 188);
+
+        tokenTxt.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer * 2 + 188,
+                backgroundRect.finalRight() - spacer,
+                backgroundRect.finalTop() + spacer * 2 + 188 + 20
+        );
+        tokenTxt.setVisible(true);
+
+        recipeDisplayFrame.init(
+                backgroundRect.finalLeft() + spacer,
+                backgroundRect.finalTop() + spacer * 2 + 212,
+                backgroundRect.finalRight() - spacer,
+                backgroundRect.finalBottom() - spacer);
     }
 
     public void resetRecipes() {
-//        slotOptions.reset();
-//        recipeGen.reset();
-//        getMenu().craftMatrix.clearContent();
-//        getMenu().craftResult.clearContent();
+        slotOptions.reset();
+        recipeGen.reset();
+        getMenu().craftMatrix.clearContent();
+        getMenu().craftResult.clearContent();
     }
 
 //    @Override
@@ -179,9 +180,9 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
     }
 
     public void save() {
-//        if(menu.getSlot(0).hasItem()) {
-//            DataPackWriter.writeRecipe(recipeGen.getRecipeJson(),recipeDisplayFrame.title + ".json");
-//        }
+        if(menu.getSlot(0).hasItem()) {
+            DataPackWriter.writeRecipe(recipeGen.getRecipeJson(),recipeDisplayFrame.title + ".json");
+        }
     }
 
 
@@ -200,24 +201,24 @@ public class MPARCGui extends ExtendedContainerScreen<MPARCContainer> {
             recipeGen.useOredict.put(slotChanged, false);
             recipeGen.setOreTagIndex(slotChanged,0);
             // no oredict for result
-//            if (slotChanged < 0) {
-//                slotOptions.useOreDictCheckbox[slotChanged - 1].setChecked(false);
-//            }
+            if (slotChanged < 0) {
+                slotOptions.useOreDictCheckbox[slotChanged - 1].setChecked(false);
+            }
         }
 
-//        int activeSlot = slotOptions.getActiveSlotID();
-//
-//        if (activeSlot >= 0) {
-//            tokenTxt.setLabel(recipeGen.getStackToken(activeSlot));
-//        }
-//
-//        recipeDisplayFrame.setFileName(recipeGen.getFileName());
-//        recipeDisplayFrame.setRecipe(recipeGen.getRecipeJson());
+        int activeSlot = slotOptions.getActiveSlotID();
+
+        if (activeSlot >= 0) {
+            tokenTxt.setLabel(recipeGen.getStackToken(activeSlot));
+        }
+
+        recipeDisplayFrame.setFileName(recipeGen.getFileName());
+        recipeDisplayFrame.setRecipe(recipeGen.getRecipeJson());
     }
 
     public void selectSlot(int index) {
-//        slotOptions.selectSlot(index);
-//        tokenTxt.setSlot(index);
+        slotOptions.selectSlot(index);
+        tokenTxt.setSlot(index);
     }
 
     @Override
